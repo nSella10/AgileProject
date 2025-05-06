@@ -1,0 +1,181 @@
+import React, { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../slices/authSlice";
+
+const Navbar = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { userInfo } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const toggleMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const logoutHandler = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
+  const navLinkClass = (path) =>
+    location.pathname === path
+      ? "text-blue-600 font-semibold border-b-2 border-blue-600"
+      : "hover:text-blue-600";
+
+  return (
+    <header className="bg-white shadow-md sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+        {/* Left side */}
+        <div className="flex items-center space-x-4">
+          <Link to="/" className="text-2xl font-bold text-blue-600">
+            Music!
+          </Link>
+
+          {userInfo && (
+            <span className="md:hidden text-blue-600 font-medium text-sm">
+              Hi, {userInfo.firstName}
+            </span>
+          )}
+
+          <button className="hidden md:flex bg-blue-600 text-white text-sm px-3 py-1 rounded-full">
+            News{" "}
+            <span className="ml-1 text-xs bg-red-500 px-2 py-0.5 rounded-full">
+              3
+            </span>
+          </button>
+        </div>
+
+        {/* Hamburger button (mobile only) */}
+        <div className="md:hidden">
+          <button
+            onClick={toggleMenu}
+            className="text-gray-600 focus:outline-none"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {isMobileMenuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Right side (desktop) */}
+        <div className="hidden md:flex items-center space-x-4 text-sm font-medium text-gray-700">
+          <nav className="flex space-x-4">
+            <Link to="/" className={navLinkClass("/")}>
+              Home
+            </Link>
+            <Link to="/dashboard" className={navLinkClass("/dashboard")}>
+              Play
+            </Link>
+            <Link to="/create" className={navLinkClass("/create")}>
+              Create
+            </Link>
+            <Link to="/mygames" className={navLinkClass("/mygames")}>
+              My Games
+            </Link>
+          </nav>
+
+          <button className="border border-blue-600 text-blue-600 px-3 py-1 rounded hover:bg-blue-50">
+            Contact sales
+          </button>
+
+          {userInfo ? (
+            <>
+              <span className="text-blue-600 font-semibold">
+                Hi, {userInfo.firstName}
+              </span>
+              <button
+                onClick={logoutHandler}
+                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/register">
+                <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+                  Sign up FREE
+                </button>
+              </Link>
+              <Link to="/login">Log in</Link>
+            </>
+          )}
+
+          <button className="border px-2 py-1 rounded-full">🌐 EN</button>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden px-4 pb-4 space-y-2 text-sm font-medium text-gray-700">
+          <nav className="flex flex-col space-y-1">
+            <Link to="/" className={navLinkClass("/")}>
+              Home
+            </Link>
+            <Link to="/dashboard" className={navLinkClass("/dashboard")}>
+              Play
+            </Link>
+            <Link to="/create" className={navLinkClass("/create")}>
+              Create
+            </Link>
+            <Link to="/mygames" className={navLinkClass("/mygames")}>
+              My Games
+            </Link>
+          </nav>
+
+          <button className="w-full border border-blue-600 text-blue-600 px-3 py-1 rounded hover:bg-blue-50">
+            Contact sales
+          </button>
+
+          {userInfo ? (
+            <>
+              <button
+                onClick={logoutHandler}
+                className="w-full bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/register">
+                <button className="w-full bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+                  Sign up FREE
+                </button>
+              </Link>
+              <Link to="/login">Log in</Link>
+            </>
+          )}
+
+          <button className="w-full border px-2 py-1 rounded-full">
+            🌐 EN
+          </button>
+        </div>
+      )}
+    </header>
+  );
+};
+
+export default Navbar;

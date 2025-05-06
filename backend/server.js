@@ -26,7 +26,8 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 8000;
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: ["http://10.0.0.8:3000"],
+  methods: ["GET", "POST"],
   credentials: true,
 };
 
@@ -54,7 +55,7 @@ app.use(errorHandler);
 // Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // חשוב להתאים ל-frontend
+    origin: ["http://10.0.0.8:3000"],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -63,6 +64,6 @@ const io = new Server(server, {
 socketManager(io);
 
 // Start Server
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

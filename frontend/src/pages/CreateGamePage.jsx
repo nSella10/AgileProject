@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import PageLayout from "../components/PageLayout";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useCreateGameMutation, gamesApiSlice } from "../slices/gamesApiSlice"; // חשוב לייבא גם את הסלייס עצמו
+import { useCreateGameMutation, gamesApiSlice } from "../slices/gamesApiSlice";
+import { FaMusic, FaPlus, FaTrashAlt, FaUpload } from "react-icons/fa";
 
 const CreateGamePage = () => {
   const [title, setTitle] = useState("");
@@ -35,7 +36,7 @@ const CreateGamePage = () => {
     e.preventDefault();
     setError("");
 
-    if (!title || songs.length === 0 || songs.some((s) => !s.name || !s.file)) {
+    if (!title || songs.some((s) => !s.name || !s.file)) {
       setError("Please fill in all required fields and upload all songs.");
       return;
     }
@@ -52,9 +53,7 @@ const CreateGamePage = () => {
 
     try {
       await createGame(formData).unwrap();
-
       dispatch(gamesApiSlice.util.invalidateTags(["Game"]));
-
       navigate("/mygames");
     } catch (err) {
       setError(err?.data?.message || "Failed to create game.");
@@ -63,88 +62,104 @@ const CreateGamePage = () => {
 
   return (
     <PageLayout>
-      <div className="max-w-xl mx-auto py-8">
-        <h2 className="text-2xl font-bold mb-6 text-blue-600">
-          Create a New Game
+      <div className="max-w-4xl mx-auto py-10 px-6">
+        <h2 className="text-4xl font-bold text-center text-indigo-600 mb-10">
+          🎵 Create Your Music Game
         </h2>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && <p className="text-red-500 mb-6 text-center">{error}</p>}
 
-        <form className="space-y-4" onSubmit={submitHandler}>
-          <div>
-            <label className="block mb-1 font-medium">Title</label>
-            <input
-              type="text"
-              className="w-full border px-3 py-2 rounded"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
+        <form className="space-y-8" onSubmit={submitHandler}>
+          <input
+            type="text"
+            placeholder="Enter Game Title"
+            className="w-full px-6 py-4 border-2 rounded-xl text-xl text-center shadow"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
 
-          <div>
-            <label className="block mb-1 font-medium">Description</label>
-            <textarea
-              className="w-full border px-3 py-2 rounded"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
-          </div>
+          <textarea
+            placeholder="Enter Description (Optional)"
+            className="w-full px-6 py-4 border-2 rounded-xl shadow resize-none"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+          ></textarea>
 
-          <div>
-            <label className="block mb-1 font-medium">Songs</label>
+          <div className="bg-gray-100 p-6 rounded-xl shadow">
             {songs.map((song, index) => (
-              <div key={index} className="flex flex-col sm:flex-row gap-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="Song Name"
-                  className="flex-1 border px-2 py-1 rounded"
-                  value={song.name}
-                  onChange={(e) =>
-                    handleSongChange(index, "name", e.target.value)
-                  }
-                />
-                <input
-                  type="file"
-                  accept="audio/mp3"
-                  className="flex-1 border px-2 py-1 rounded"
-                  onChange={(e) =>
-                    handleSongChange(index, "file", e.target.files[0])
-                  }
-                />
-                {songs.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeSong(index)}
-                    className="text-red-500"
-                  >
-                    ✕
-                  </button>
-                )}
+              <div
+                key={index}
+                className="border rounded-lg p-4 mb-4 shadow-md bg-white"
+              >
+                <div className="mb-2">
+                  <input
+                    type="text"
+                    placeholder="Enter song name"
+                    value={song.name}
+                    onChange={(e) =>
+                      handleSongChange(index, "name", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-blue-600 cursor-pointer">
+                    <span className="font-semibold">🎵 Upload MP3</span>
+                    <input
+                      type="file"
+                      accept="audio/mp3"
+                      onChange={(e) =>
+                        handleSongChange(index, "file", e.target.files[0])
+                      }
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* שם הקובץ אם הועלה */}
+                  {song.file && (
+                    <span className="text-sm text-gray-600">
+                      📁 {song.file.name}
+                    </span>
+                  )}
+
+                  {songs.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeSong(index)}
+                      className="ml-auto text-red-500 text-sm"
+                    >
+                      ❌ Remove
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
+
             <button
               type="button"
               onClick={addSong}
-              className="text-blue-600 hover:underline mt-1"
+              className="flex gap-2 items-center text-indigo-600 hover:text-indigo-800 mt-4"
             >
-              + Add Another Song
+              <FaPlus /> Add Another Song
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex justify-center items-center gap-2">
             <input
               type="checkbox"
               checked={isPublic}
               onChange={(e) => setIsPublic(e.target.checked)}
             />
-            <label>Make game public</label>
+            <span>Make game public</span>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-indigo-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-indigo-700 transition-all shadow-lg block mx-auto"
           >
             {isLoading ? "Creating..." : "Create Game"}
           </button>

@@ -10,14 +10,14 @@ export const gamesApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Game"], // ✅ רק כאן נכון להשתמש בזה
     }),
     myGames: builder.query({
       query: () => ({
         url: `${GAMES_URL}/mine`,
         method: "GET",
       }),
-      providesTags: ["Game"],
-      invalidatesTags: ["Game"],
+      providesTags: ["Game"], // ✅ מאפשר לזה להתעדכן כשנוצרים משחקים חדשים
     }),
   }),
 });

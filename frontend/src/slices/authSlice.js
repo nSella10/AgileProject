@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-
+import { disconnectSocket } from "../socket";
 // בודק אם יש כבר משתמש שמור ב־localStorage ומטען אותו כ־state התחלתי
 const initialState = {
   userInfo: localStorage.getItem("userInfo")
@@ -18,6 +18,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.userInfo = null;
       localStorage.removeItem("userInfo");
+      disconnectSocket();
     },
   },
 });

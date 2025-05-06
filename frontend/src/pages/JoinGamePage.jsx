@@ -1,6 +1,7 @@
-// src/pages/JoinGamePage.jsx
 import React, { useState, useEffect } from "react";
-import socket from "../socket";
+import { useSelector } from "react-redux";
+import { initializeSocket, getSocket } from "../socket";
+import { toast } from "react-toastify";
 
 const JoinGamePage = () => {
   const [roomCode, setRoomCode] = useState("");
@@ -10,14 +11,28 @@ const JoinGamePage = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [guess, setGuess] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
+  const [socketReady, setSocketReady] = useState(false);
+
+  const { userInfo } = useSelector((state) => state.auth);
 
   useEffect(() => {
+    if (userInfo?._id) {
+      initializeSocket(userInfo._id);
+      setSocketReady(true);
+    }
+  }, [userInfo]);
+
+  useEffect(() => {
+    if (!socketReady) return;
+    const socket = getSocket();
+
     socket.on("roomJoined", () => {
       setJoined(true);
     });
 
     socket.on("roomJoinError", (message) => {
       setError(message);
+      toast.error(message);
     });
 
     socket.on("gameStarting", () => {
@@ -50,7 +65,7 @@ const JoinGamePage = () => {
       socket.off("roundFailed");
       socket.off("gameOver");
     };
-  }, []);
+  }, [socketReady]);
 
   const handleJoin = () => {
     if (!roomCode || !username) {
@@ -58,12 +73,14 @@ const JoinGamePage = () => {
       return;
     }
 
+    const socket = getSocket();
     socket.emit("joinRoom", { roomCode, username });
   };
 
   const handleSubmitGuess = () => {
     if (!guess) return;
 
+    const socket = getSocket();
     socket.emit("submitAnswer", {
       roomId: roomCode,
       username,
@@ -74,17 +91,17 @@ const JoinGamePage = () => {
 
   if (!joined) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-purple-800 text-white">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-purple-800 text-white px-4">
         <h1 className="text-4xl font-bold mb-6">Join a Game</h1>
         <input
-          className="mb-3 p-2 rounded text-black"
+          className="mb-3 p-2 rounded text-black w-full max-w-sm"
           type="text"
           placeholder="Enter game code"
           value={roomCode}
           onChange={(e) => setRoomCode(e.target.value)}
         />
         <input
-          className="mb-3 p-2 rounded text-black"
+          className="mb-3 p-2 rounded text-black w-full max-w-sm"
           type="text"
           placeholder="Enter your nickname"
           value={username}
@@ -103,7 +120,7 @@ const JoinGamePage = () => {
 
   if (!gameStarted) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-purple-800 text-white">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-purple-800 text-white px-4">
         <h2 className="text-3xl font-bold mb-4">
           Waiting for game to start...
         </h2>
@@ -118,11 +135,11 @@ const JoinGamePage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-100 text-black">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-100 text-black px-4">
       <h2 className="text-3xl font-bold mb-4">🎧 Guess the Song!</h2>
       <p className="mb-2">{statusMsg}</p>
       <input
-        className="mt-4 p-2 border rounded"
+        className="mt-4 p-2 border rounded w-full max-w-sm"
         type="text"
         value={guess}
         onChange={(e) => setGuess(e.target.value)}

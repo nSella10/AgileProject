@@ -1,7 +1,10 @@
+// src/components/Navbar.jsx
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../slices/authSlice";
+import { useLogoutMutation } from "../slices/usersApiSlice";
+import { apiSlice } from "../slices/apiSlice";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -10,13 +13,21 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [logoutApiCall] = useLogoutMutation();
+
   const toggleMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const logoutHandler = () => {
-    dispatch(logout());
-    navigate("/login");
+  const logoutHandler = async () => {
+    try {
+      await logoutApiCall().unwrap(); // שולח בקשה לשרת למחיקת ה־cookie
+      dispatch(logout()); // מנקה את ה־redux וה־localStorage
+      dispatch(apiSlice.util.resetApiState()); // מנקה את ה־redux state של ה־api
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   const navLinkClass = (path) =>

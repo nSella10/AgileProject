@@ -30,7 +30,7 @@ const DashboardPage = () => {
         </Link>
 
         <Link
-          to="/my-games"
+          to="/mygames"
           className="bg-white rounded-lg p-6 shadow hover:shadow-lg transition flex flex-col items-start"
         >
           <FaGamepad className="text-purple-600 text-2xl mb-3" />

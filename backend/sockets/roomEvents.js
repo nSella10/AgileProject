@@ -12,6 +12,9 @@ const handleRoomEvents = (io, socket) => {
       }
 
       const userId = socket.handshake.auth.userId;
+      console.log(`User ID from socket: ${userId}`);
+      console.log(`Game created by: ${game.createdBy}`);
+
       if (!userId || userId !== game.createdBy.toString()) {
         socket.emit("roomJoinError", "Unauthorized to launch this game");
         return;

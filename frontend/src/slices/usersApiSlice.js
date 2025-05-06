@@ -20,13 +20,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
     }),
     logout: builder.mutation({
       query: () => ({
-        url: `${USERS_URL}/users/logout`,
+        url: `${USERS_URL}/logout`,
         method: "POST",
       }),
     }),
     profile: builder.query({
       query: () => ({
-        url: `${USERS_URL}/users/profile`,
+        url: `${USERS_URL}/profile`,
         method: "GET",
       }),
     }),

@@ -1,76 +1,24 @@
-# 🎵 Guessify
+# 🎵 Guessify - Music Guessing Game
 
-**Guessify** is a real-time multiplayer music quiz game built with React, Node.js, and WebSockets. Inspired by Kahoot, this app allows a host to create a custom quiz using short MP3 clips. Players join with a room code and try to guess the song as fast as possible.
+Guessify is a real-time multiplayer music quiz web application, inspired by Kahoot, where a host can create custom games based on song snippets. Players join via mobile and try to guess the song being played.
 
----
+## 🧠 Features
 
-## 🚀 Features
-
-- 🎧 Create your own music quiz with uploaded MP3s  
-- 🔗 Real-time gameplay using WebSockets  
-- 👥 Host-player structure with unique room codes  
-- 🎮 Multi-round song guessing & live score updates  
-- ✅ Secure authentication with JWT in HTTP-only cookies  
-- 📦 File upload (MP3s) via `multipart/form-data`  
-- ⚙️ State management with Redux Toolkit + RTK Query  
-- 📱 Fully responsive design for desktop and mobile
-
----
-
-## 🔧 Tech Stack
-
-### Frontend
-- React
-- React Router
-- Redux Toolkit
-- Redux Toolkit Query (RTK Query)
-- Tailwind CSS
-
-### Backend
-- Node.js
-- Express
-- MongoDB + Mongoose
-- Socket.io
-- JWT Authentication
-- Multer (file uploads)
-
----
-
-## 🧠 Architecture Highlights
-
-- Authentication via JWT stored in HTTP-only cookies
-- WebSocket handshake includes user ID for authorization context
-- REST APIs for CRUD operations (e.g., creating & fetching games)
-- WebSocket for real-time game events and updates
-
----
-
-## 📡 Real-Time Events
-
-| Event             | Description                          |
-|------------------|--------------------------------------|
-| `createRoom`     | Host creates a game room             |
-| `joinRoom`       | Player joins a room by code          |
-| `startGame`      | Host starts the game                 |
-| `nextRound`      | Server plays the next song round     |
-| `submitAnswer`   | Player submits a guess               |
-| `correctAnswer`  | Server broadcasts correct answer     |
-| `roundFailed`    | No correct answer – next round       |
-| `gameOver`       | End of game                          |
-
----
+- 🎧 Custom game creation with MP3 uploads  
+- 📲 Players join via mobile and guess songs in real-time  
+- 🕹️ Host controls the game and sees live updates  
+- 🔒 JWT-based authentication & protected routes  
+- 🔊 WebSocket communication for synchronization  
 
 ## 📂 Folder Structure
 
 ```
-/client        → React frontend  
-/server        → Node/Express backend  
-/models        → MongoDB schemas  
-/uploads       → MP3 song uploads  
-/sockets       → WebSocket logic  
+/frontend        → React frontend  
+/backend         → Node/Express backend  
+/backend/models  → MongoDB schemas  
+/backend/uploads → MP3 song uploads  
+/backend/sockets → WebSocket logic  
 ```
-
----
 
 ## 🛠 Getting Started
 
@@ -80,46 +28,57 @@
    cd guessify
    ```
 
-2. Setup `.env` files in both `client` and `server` folders.
+2. Setup `.env` files in both `frontend` and `backend` folders.
+
+   **In `backend/.env`:**
+   ```
+   PORT=your_port
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   NODE_ENV=development
+   ```
+
+   _Example:_
+   ```
+   PORT=8000
+   MONGO_URI=mongodb+srv://your-username:your-password@your-cluster.mongodb.net/musicapp?retryWrites=true&w=majority
+   JWT_SECRET=my_secret_key
+   NODE_ENV=development
+   ```
 
 3. Install dependencies:
+
    ```bash
-   npm install           # in both /client and /server
+   # in /frontend
+   cd frontend
+   npm install
+
+   # in /backend
+   cd ../backend
+   npm install
    ```
 
-4. Start the dev environment:
+4. Start the development environment from the project root:
+
    ```bash
-   npm run dev           # Runs backend + frontend concurrently
+   npm run dev
    ```
 
----
+   > This runs both backend and frontend concurrently using `concurrently`.
 
-## 🧪 API Overview
+## 🧪 Tech Stack
 
-| Method | Endpoint           | Description               |
-|--------|--------------------|---------------------------|
-| POST   | `/api/users/login` | Log in user               |
-| POST   | `/api/users/logout`| Log out user              |
-| POST   | `/api/games`       | Create a new game         |
-| GET    | `/api/games/mine`  | Get games created by user |
+- **Frontend:** React, Redux Toolkit, TailwindCSS  
+- **Backend:** Node.js, Express, MongoDB, Mongoose  
+- **Auth:** JWT (stored in HTTP-only cookies)  
+- **Real-time:** WebSocket via socket.io  
 
----
+## 📌 Notes
 
-## 🧩 Future Ideas
-
-- 🏆 Public leaderboard
+- Songs are uploaded in MP3 format and stored on the server.  
+- Host and player sync is done in real-time using WebSocket events.  
+- Authentication is required to create or launch a game.  
 
 ---
 
-## 👨‍💻 Developed By
-
-- Omri Peer  
-- Robert Yefrayimov  
-- Uri Katz  
-- Noam Sela  
-
----
-
-## 📄 License
-
-MIT
+Feel free to contribute or fork this project for your own music games!

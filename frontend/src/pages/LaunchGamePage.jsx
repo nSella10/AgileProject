@@ -2,30 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { initializeSocket, getSocket } from "../socket";
+import { getSocket, disconnectSocket } from "../socket";
 
 const LaunchGamePage = () => {
   const { gameId } = useParams();
   const navigate = useNavigate();
-
   const { userInfo } = useSelector((state) => state.auth);
 
   const [roomCode, setRoomCode] = useState("");
   const [players, setPlayers] = useState([]);
   const [statusMsg, setStatusMsg] = useState("");
   const [round, setRound] = useState(0);
-  const [socketReady, setSocketReady] = useState(false);
 
   useEffect(() => {
-    if (userInfo?._id) {
-      initializeSocket(userInfo._id);
-      setSocketReady(true);
-    }
-  }, [userInfo]);
-
-  useEffect(() => {
-    if (!socketReady) return;
-    const socket = getSocket();
+    const socket = getSocket({ userId: userInfo._id });
 
     socket.emit("createRoom", { gameId });
 
@@ -51,7 +41,7 @@ const LaunchGamePage = () => {
       setStatusMsg(
         `🎵 Playing song for ${duration / 1000} seconds (Round ${roundNumber})`
       );
-      const audio = new Audio(`http://10.0.0.8:8000${audioUrl}`);
+      const audio = new Audio(`http://localhost:8000${audioUrl}`);
       audio.play().catch((err) => {
         console.error("Audio play failed:", err);
       });
@@ -78,8 +68,9 @@ const LaunchGamePage = () => {
       socket.off("correctAnswer");
       socket.off("roundFailed");
       socket.off("gameOver");
+      disconnectSocket();
     };
-  }, [socketReady, gameId, navigate]);
+  }, [gameId, navigate, userInfo]);
 
   const handleStartGame = () => {
     const socket = getSocket();

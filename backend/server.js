@@ -26,7 +26,7 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 8000;
 
 const corsOptions = {
-  origin: ["http://10.0.0.8:3000"],
+  origin: ["http://localhost:3000"],
   methods: ["GET", "POST"],
   credentials: true,
 };
@@ -55,7 +55,7 @@ app.use(errorHandler);
 // Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: ["http://10.0.0.8:3000"],
+    origin: ["http://localhost:3000"],
     methods: ["GET", "POST"],
     credentials: true,
   },

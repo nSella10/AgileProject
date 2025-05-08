@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { initializeSocket, getSocket } from "../socket";
 import { toast } from "react-toastify";
+import { getSocket, disconnectSocket } from "../socket";
 
 const JoinGamePage = () => {
   const [roomCode, setRoomCode] = useState("");
@@ -11,19 +10,8 @@ const JoinGamePage = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [guess, setGuess] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
-  const [socketReady, setSocketReady] = useState(false);
-
-  const { userInfo } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (userInfo?._id) {
-      initializeSocket(userInfo._id);
-      setSocketReady(true);
-    }
-  }, [userInfo]);
-
-  useEffect(() => {
-    if (!socketReady) return;
     const socket = getSocket();
 
     socket.on("roomJoined", () => {
@@ -64,22 +52,21 @@ const JoinGamePage = () => {
       socket.off("correctAnswer");
       socket.off("roundFailed");
       socket.off("gameOver");
+      disconnectSocket();
     };
-  }, [socketReady]);
+  }, []);
 
   const handleJoin = () => {
     if (!roomCode || !username) {
       setError("Please enter both a room code and a nickname.");
       return;
     }
-
     const socket = getSocket();
     socket.emit("joinRoom", { roomCode, username });
   };
 
   const handleSubmitGuess = () => {
     if (!guess) return;
-
     const socket = getSocket();
     socket.emit("submitAnswer", {
       roomId: roomCode,

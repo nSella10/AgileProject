@@ -21,9 +21,9 @@ const Navbar = () => {
 
   const logoutHandler = async () => {
     try {
-      await logoutApiCall().unwrap(); // שולח בקשה לשרת למחיקת ה־cookie
-      dispatch(logout()); // מנקה את ה־redux וה־localStorage
-      dispatch(apiSlice.util.resetApiState()); // מנקה את ה־redux state של ה־api
+      await logoutApiCall().unwrap();
+      dispatch(logout());
+      dispatch(apiSlice.util.resetApiState());
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
@@ -41,7 +41,7 @@ const Navbar = () => {
         {/* Left side */}
         <div className="flex items-center space-x-4">
           <Link to="/" className="text-2xl font-bold text-blue-600">
-            Music!
+            Guessify!
           </Link>
 
           {userInfo && (
@@ -96,9 +96,11 @@ const Navbar = () => {
             <Link to="/" className={navLinkClass("/")}>
               Home
             </Link>
-            <Link to="/dashboard" className={navLinkClass("/dashboard")}>
-              Play
-            </Link>
+            {userInfo && (
+              <Link to="/dashboard" className={navLinkClass("/dashboard")}>
+                Dashboard
+              </Link>
+            )}
             <Link to="/create" className={navLinkClass("/create")}>
               Create
             </Link>
@@ -107,9 +109,11 @@ const Navbar = () => {
             </Link>
           </nav>
 
-          <button className="border border-blue-600 text-blue-600 px-3 py-1 rounded hover:bg-blue-50">
-            Contact sales
-          </button>
+          <Link to="/join">
+            <button className="border border-blue-600 text-blue-600 px-3 py-1 rounded hover:bg-blue-50">
+              Join a game
+            </button>
+          </Link>
 
           {userInfo ? (
             <>
@@ -145,9 +149,11 @@ const Navbar = () => {
             <Link to="/" className={navLinkClass("/")}>
               Home
             </Link>
-            <Link to="/dashboard" className={navLinkClass("/dashboard")}>
-              Play
-            </Link>
+            {userInfo && (
+              <Link to="/dashboard" className={navLinkClass("/dashboard")}>
+                Dashboard
+              </Link>
+            )}
             <Link to="/create" className={navLinkClass("/create")}>
               Create
             </Link>
@@ -156,19 +162,19 @@ const Navbar = () => {
             </Link>
           </nav>
 
-          <button className="w-full border border-blue-600 text-blue-600 px-3 py-1 rounded hover:bg-blue-50">
-            Contact sales
-          </button>
+          <Link to="/join">
+            <button className="w-full border border-blue-600 text-blue-600 px-3 py-1 rounded hover:bg-blue-50">
+              Join a game
+            </button>
+          </Link>
 
           {userInfo ? (
-            <>
-              <button
-                onClick={logoutHandler}
-                className="w-full bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-              >
-                Logout
-              </button>
-            </>
+            <button
+              onClick={logoutHandler}
+              className="w-full bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+            >
+              Logout
+            </button>
           ) : (
             <>
               <Link to="/register">

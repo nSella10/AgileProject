@@ -3,7 +3,7 @@ import PageLayout from "../components/PageLayout";
 import { useLoginMutation } from "../slices/usersApiSlice";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../slices/authSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -12,6 +12,9 @@ const LoginPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromCreate = location.state?.fromCreate; // נבדוק אם הופנינו מ־/create
+
   const [login, { isLoading }] = useLoginMutation();
 
   const submitHandler = async (e) => {
@@ -21,7 +24,7 @@ const LoginPage = () => {
     try {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials(res));
-      navigate("/dashboard");
+      fromCreate ? navigate("/create") : navigate("/dashboard");
     } catch (err) {
       setErrorMessage(err?.data?.message || "Login failed");
     }
@@ -31,9 +34,15 @@ const LoginPage = () => {
     <PageLayout>
       <div className="flex justify-center items-center min-h-[80vh] bg-gray-100 px-4">
         <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
+          <h2 className="text-2xl font-bold mb-2 text-center text-blue-600">
             Log in to Music!
           </h2>
+
+          {fromCreate && (
+            <p className="text-sm text-center text-gray-600 mb-4">
+              You must be logged in to create a game.
+            </p>
+          )}
 
           {errorMessage && (
             <div className="mb-4 text-red-600 text-sm text-center">

@@ -134,7 +134,7 @@ Guessify is a real-time multiplayer music quiz web application, inspired by Kaho
 
 ![Guess Screen](./screenshots/guessScreen.png)
 
-### Player Guessed
+### Right Guess
 
 ![Player Guessed](./screenshots/PlayerGuessed.png)
 

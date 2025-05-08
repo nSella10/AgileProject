@@ -69,6 +69,13 @@ Guessify is a real-time multiplayer music quiz web application, inspired by Kaho
 
    > This runs both backend and frontend concurrently using `concurrently`.
 
+## 🧪 Tech Stack
+
+- **Frontend:** React, Redux Toolkit, TailwindCSS
+- **Backend:** Node.js, Express, MongoDB, Mongoose
+- **Auth:** JWT (stored in HTTP-only cookies)
+- **Real-time:** WebSocket via socket.io
+
 ## 📸 Screenshots
 
 ### System Architecture
@@ -79,17 +86,13 @@ Guessify is a real-time multiplayer music quiz web application, inspired by Kaho
 
 ![Homepage](./screenshots/homepage.png)
 
-### Join Game Page
+### Register Page
 
-![Join](./screenshots/join.png)
+![Register](./screenshots/register.png)
 
 ### Login Page
 
 ![Login](./screenshots/login.png)
-
-### Register Page
-
-![Register](./screenshots/register.png)
 
 ### Dashboard
 
@@ -103,30 +106,44 @@ Guessify is a real-time multiplayer music quiz web application, inspired by Kaho
 
 ![My Games](./screenshots/mygames.png)
 
+### Trello Board
+
+![Trello](./screenshots/trello.png)
+
+### Join Game Page
+
+![Join](./screenshots/join.png)
+
 ### Waiting for Players
 
 ![Waiting For Players](./screenshots/waitingForPlayers.png)
-
-### Waiting Screen
-
-![Waiting Screen](./screenshots/waitingscreen.png)
 
 ### Both Waiting Views
 
 ![Both Waitings](./screenshots/bothwaitings.png)
 
+### Waiting Screen
+
+![Waiting Screen](./screenshots/waitingscreen.png)
+
 ### Players Joined
 
 ![Players Joined](./screenshots/playersJoined.png)
-
-### Player Guessed
-
-![Player Guessed](./screenshots/PlayerGuessed.png)
 
 ### Guess Screen
 
 ![Guess Screen](./screenshots/guessScreen.png)
 
-### Trello Board
+### Right Guess
 
-![Trello](./screenshots/trello.png)
+![Player Guessed](./screenshots/PlayerGuessed.png)
+
+## 📌 Notes
+
+- Songs are uploaded in MP3 format and stored on the server.
+- Host and player sync is done in real-time using WebSocket events.
+- Authentication is required to create or launch a game.
+
+---
+
+Feel free to contribute or fork this project for your own music games!

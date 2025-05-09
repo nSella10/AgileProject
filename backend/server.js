@@ -46,11 +46,11 @@ app.get("/", (req, res) => {
 });
 
 if (process.env.NODE_ENV === "production") {
-  const frontendPath = path.resolve(__dirname, "../../frontend/build");
-  app.use(express.static(frontendPath));
+  const frontendPath = path.resolve(__dirname, "frontend");
+  app.use(express.static(path.join(frontendPath, "build")));
 
   app.get("*", (req, res) =>
-    res.sendFile(path.resolve(frontendPath, "index.html"))
+    res.sendFile(path.join(frontendPath, "build", "index.html"))
   );
 } else {
   app.get("/", (req, res) => {

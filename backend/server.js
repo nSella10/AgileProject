@@ -48,6 +48,20 @@ app.get("/", (req, res) => {
 // Static Files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+if (process.env.NODE_ENV === "production") {
+  // Set the frontend build folder as static, setting it static means that we can load the files inside the folder directly without having to create a route for it. Otherwise, we would have to create a route for it and then load the file in the route.
+  app.use(express.static(path.join(__dirname, "/frontend/build")));
+
+  // If the user goes to any route that is not defined, hw wil be sent to the index.html file in the frontend build folder, there he will be served the frontend.
+  app.get("*", (req, res) =>
+    res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"))
+  );
+} else {
+  app.get("/", (req, res) => {
+    res.send("API is running...");
+  });
+}
+
 // Error Handling
 app.use(notFound);
 app.use(errorHandler);

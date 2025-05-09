@@ -17,7 +17,8 @@ import { fileURLToPath } from "url";
 dotenv.config();
 connectDB();
 
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
@@ -45,12 +46,11 @@ app.get("/", (req, res) => {
 });
 
 if (process.env.NODE_ENV === "production") {
-  // Set the frontend build folder as static, setting it static means that we can load the files inside the folder directly without having to create a route for it. Otherwise, we would have to create a route for it and then load the file in the route.
-  app.use(express.static(path.join(__dirname, "/frontend/build")));
+  const frontendPath = path.resolve(__dirname, "../../frontend/build");
+  app.use(express.static(frontendPath));
 
-  // If the user goes to any route that is not defined, hw wil be sent to the index.html file in the frontend build folder, there he will be served the frontend.
   app.get("*", (req, res) =>
-    res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"))
+    res.sendFile(path.resolve(frontendPath, "index.html"))
   );
 } else {
   app.get("/", (req, res) => {

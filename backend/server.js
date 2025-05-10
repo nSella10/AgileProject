@@ -28,7 +28,7 @@ const PORT = process.env.PORT || 8000;
 // 🌐 CORS לפי סביבה
 const allowedOrigins =
   process.env.NODE_ENV === "production"
-    ? ["https://guessify-da1u.onrender.com"]
+    ? ["https://guessify-da1u.onrender.com", "https://www.guessifyapp.com"]
     : ["http://localhost:3000"];
 
 const corsOptions = {

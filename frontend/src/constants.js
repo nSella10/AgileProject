@@ -5,7 +5,7 @@
 export const BASE_URL =
   process.env.NODE_ENV === "development"
     ? "http://localhost:8000"
-    : "https://www.guessifyapp.com";
+    : "https://guessifyapp.com";
 
 export const USERS_URL = `${BASE_URL}/api/users`;
 

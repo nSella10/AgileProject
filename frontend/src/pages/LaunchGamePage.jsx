@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { getSocket, disconnectSocket } from "../socket";
+import { BASE_URL } from "../constants";
 
 const LaunchGamePage = () => {
   const { gameId } = useParams();
@@ -41,7 +42,7 @@ const LaunchGamePage = () => {
       setStatusMsg(
         `🎵 Playing song for ${duration / 1000} seconds (Round ${roundNumber})`
       );
-      const audio = new Audio(`http://localhost:8000${audioUrl}`);
+      const audio = new Audio(`${BASE_URL}${audioUrl}`);
       audio.play().catch((err) => {
         console.error("Audio play failed:", err);
       });

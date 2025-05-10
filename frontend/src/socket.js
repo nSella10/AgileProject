@@ -1,11 +1,12 @@
 // src/getSocket.js
 import { io } from "socket.io-client";
+import { BASE_URL } from "./constants";
 
 let socket = null;
 
 export const getSocket = ({ userId } = {}) => {
   if (!socket) {
-    socket = io("http://localhost:8000", {
+    socket = io(BASE_URL, {
       withCredentials: true,
       auth: userId ? { userId } : undefined,
     });

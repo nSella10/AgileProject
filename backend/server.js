@@ -13,6 +13,7 @@ import socketManager from "./sockets/index.js";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 // 🛠 הגדרה נכונה של __dirname עבור ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -37,6 +38,10 @@ app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// ✅ בדיקה של הראוטים
+console.log("✅ typeof userRoutes:", typeof userRoutes); // צריך להיות 'function'
+console.log("✅ typeof gameRoutes:", typeof gameRoutes); // צריך להיות 'function'
+
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/games", gameRoutes);
@@ -46,13 +51,21 @@ app.get("/", (req, res) => {
   res.send("🎵 Music Game API is running");
 });
 
+// Serve frontend in production
 if (process.env.NODE_ENV === "production") {
-  // 🧭 תיקון הנתיב: עלייה רמה אחת מתיקיית backend
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  const staticPath = path.join(__dirname, "../frontend/build");
 
-  app.get("*", (req, res) =>
-    res.sendFile(path.resolve(__dirname, "../frontend", "build", "index.html"))
-  );
+  if (fs.existsSync(staticPath)) {
+    console.log("✅ Static build folder found at:", staticPath);
+    app.use(express.static(staticPath));
+    app.get("*", (req, res) =>
+      res.sendFile(path.resolve(staticPath, "index.html"))
+    );
+  } else {
+    console.warn(
+      "⚠️ Static build folder not found — skipping frontend serving."
+    );
+  }
 } else {
   app.get("/", (req, res) => {
     res.send("API is running...");

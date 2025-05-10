@@ -42,6 +42,9 @@ app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// 🟢 Static route for /uploads
+app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
+
 // 🧭 Routes
 app.use("/api/users", userRoutes);
 app.use("/api/games", gameRoutes);

@@ -46,11 +46,6 @@ console.log("✅ typeof gameRoutes:", typeof gameRoutes); // צריך להיות
 app.use("/api/users", userRoutes);
 app.use("/api/games", gameRoutes);
 
-// Test Route
-app.get("/", (req, res) => {
-  res.send("🎵 Music Game API is running");
-});
-
 // Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   const staticPath = path.join(__dirname, "../frontend/build");

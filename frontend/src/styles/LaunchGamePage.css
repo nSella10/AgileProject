@@ -1,0 +1,100 @@
+.launch-game-container {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.start-button {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background-color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.start-button:hover {
+  background-color: #f1f1f1;
+}
+
+.info-box {
+  background-color: white;
+  padding: 20px 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  display: inline-block;
+  margin-top: 60px;
+}
+
+.pin-section h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.pin-number {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.players-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.player-box {
+  background-color: #6b21a8;
+  color: white;
+  border-radius: 12px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+  animation: fadeIn 0.4s ease-in-out;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.player-icon {
+  background: white;
+  color: #6b21a8;
+  border-radius: 50%;
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-msg {
+  color: #7c3aed;
+  font-weight: 600;
+  font-size: 18px;
+  margin-top: 8px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

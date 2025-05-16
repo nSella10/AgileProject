@@ -4,6 +4,8 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { getSocket, disconnectSocket } from "../socket";
 import { BASE_URL } from "../constants";
+import classroomBg from "../assets/classroom-bg.png"; // ודא שהתמונה קיימת
+import "../styles/LaunchGamePage.css"; // ודא שהקובץ קיים
 
 const LaunchGamePage = () => {
   const { gameId } = useParams();
@@ -78,37 +80,44 @@ const LaunchGamePage = () => {
     socket.emit("startGame", { roomId: roomCode });
   };
 
+  const avatars = ["🐶", "🦊", "🐼", "🐵", "🐱", "🦁", "🐸", "🐻", "🦄", "🐯"];
+
   return (
-    <div className="text-center py-10">
-      <h1 className="text-3xl font-bold text-blue-700 mb-4">
-        Waiting for players to join...
-      </h1>
-      <p className="text-lg mb-4">
-        <strong>Game Code:</strong> {roomCode}
-      </p>
+    <div
+      className="launch-game-container"
+      style={{
+        backgroundImage: `url(${classroomBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <button className="start-button" onClick={handleStartGame}>
+        Start
+      </button>
 
-      {players.length > 0 && (
-        <>
-          <h2 className="text-xl font-semibold mb-2">Players Joined:</h2>
-          <ul className="mb-4">
-            {players.map((player, idx) => (
-              <li key={idx}>{player}</li>
-            ))}
-          </ul>
-          <button
-            onClick={handleStartGame}
-            className="bg-green-600 text-white px-4 py-2 rounded font-bold"
-          >
-            Start Game
-          </button>
-        </>
-      )}
-
-      {statusMsg && (
-        <div className="mt-6 text-xl font-semibold text-purple-700">
-          {statusMsg}
+      <div className="info-box">
+        <div className="pin-section">
+          <h2>Game PIN</h2>
+          <p className="pin-number">{roomCode || "------"}</p>
         </div>
-      )}
+
+        {players.length > 0 && (
+          <div className="players-row">
+            {players.map((player, idx) => (
+              <div className="player-box fade-in" key={idx}>
+                <div className="player-icon">
+                  {avatars[idx % avatars.length]}
+                </div>
+                <span className="player-name">{player}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="status-msg">
+          {statusMsg || "Waiting for participants"}
+        </div>
+      </div>
     </div>
   );
 };

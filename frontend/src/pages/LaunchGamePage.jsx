@@ -32,7 +32,7 @@ const LaunchGamePage = () => {
     });
 
     socket.on("updatePlayerList", ({ players }) => {
-      setPlayers(players);
+      setPlayers(players); // players = [{ username, emoji }]
     });
 
     socket.on("gameStarting", () => {
@@ -80,8 +80,6 @@ const LaunchGamePage = () => {
     socket.emit("startGame", { roomId: roomCode });
   };
 
-  const avatars = ["🐶", "🦊", "🐼", "🐵", "🐱", "🦁", "🐸", "🐻", "🦄", "🐯"];
-
   return (
     <div
       className="launch-game-container"
@@ -105,10 +103,8 @@ const LaunchGamePage = () => {
           <div className="players-row">
             {players.map((player, idx) => (
               <div className="player-box fade-in" key={idx}>
-                <div className="player-icon">
-                  {avatars[idx % avatars.length]}
-                </div>
-                <span className="player-name">{player}</span>
+                <div className="player-icon">{player.emoji}</div>
+                <span className="player-name">{player.username}</span>
               </div>
             ))}
           </div>

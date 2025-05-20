@@ -17,7 +17,9 @@ function App() {
     <Router>
       <Routes>
         {/* Public */}
-        <Route path="/" element={<HomePage />} />
+        <Route element={<RedirectIfLoggedIn />}>
+          <Route path="/" element={<HomePage />} />
+        </Route>
         <Route path="/join" element={<JoinGamePage />} />
         <Route element={<RedirectIfLoggedIn />}>
           <Route path="/login" element={<LoginPage />} />

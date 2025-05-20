@@ -93,9 +93,11 @@ const Navbar = () => {
         {/* Right side (desktop) */}
         <div className="hidden md:flex items-center space-x-4 text-sm font-medium text-gray-700">
           <nav className="flex space-x-4">
-            <Link to="/" className={navLinkClass("/")}>
-              Home
-            </Link>
+            {!userInfo && (
+              <Link to="/" className={navLinkClass("/")}>
+                Home
+              </Link>
+            )}
             {userInfo && (
               <Link to="/dashboard" className={navLinkClass("/dashboard")}>
                 Dashboard
@@ -146,9 +148,11 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2 text-sm font-medium text-gray-700">
           <nav className="flex flex-col space-y-1">
-            <Link to="/" className={navLinkClass("/")}>
-              Home
-            </Link>
+            {!userInfo && (
+              <Link to="/" className={navLinkClass("/")}>
+                Home
+              </Link>
+            )}
             {userInfo && (
               <Link to="/dashboard" className={navLinkClass("/dashboard")}>
                 Dashboard
@@ -194,5 +198,4 @@ const Navbar = () => {
     </header>
   );
 };
-
 export default Navbar;

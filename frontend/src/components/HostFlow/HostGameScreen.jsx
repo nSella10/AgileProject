@@ -21,7 +21,7 @@ const HostGameScreen = ({
         </div>
 
         {countdown !== null && (
-          <div className="text-white text-center text-xl font-bold mt-2 animate-pulse">
+          <div className="text-black text-center text-xl font-bold mt-2 animate-pulse">
             ⏱️ Time left: {countdown}s
           </div>
         )}

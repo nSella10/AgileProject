@@ -26,6 +26,9 @@ const handleRoomEvents = (io, socket) => {
         hostSocketId: socket.id,
         gameId,
         players: [],
+        currentSongIndex: 0,
+        currentAudioDuration: 1000, // 1 שנייה בהתחלה
+        scores: {}, // username -> score
       });
 
       socket.join(roomCode);

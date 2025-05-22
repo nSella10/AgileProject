@@ -5,8 +5,8 @@ const FinalLeaderboardScreen = ({ leaderboard }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="launch-game-container">
-      <div className="mt-10 bg-white text-purple-800 p-6 rounded-xl shadow-xl max-w-md mx-auto text-center">
+    <div className="flex flex-col items-center justify-center min-h-full py-12 px-4">
+      <div className="bg-white/90 backdrop-blur-lg text-purple-800 p-6 rounded-2xl shadow-2xl max-w-md w-full text-center border border-purple-300">
         <h3 className="text-3xl font-bold mb-6 animate-bounce">
           🏁 Game Over!
         </h3>

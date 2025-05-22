@@ -1,15 +1,15 @@
-import { rooms } from "./roomEvents.js";
+import rooms from "./roomStore.js"; // נייבא את ה-map של החדרים
 import Game from "../models/Game.js";
 
-const ROUND_DURATIONS = [1000, 3000, 5000]; // מילישניות – השמעת שיר בסבבים
+const ROUND_DURATIONS = [1000, 3000, 5000, 7000, 9000];
 
 export function handleGameEvents(io, socket) {
-  socket.on("startGame", async ({ roomId }) => {
-    const room = rooms.get(roomId);
+  socket.on("startGame", async ({ roomCode }) => {
+    const room = rooms.get(roomCode);
     if (!room) return;
 
-    console.log(`🚀 Game started in room ${roomId}`);
-    io.to(roomId).emit("gameStarting");
+    console.log(`🚀 Game started in room ${roomCode}`);
+    io.to(roomCode).emit("gameStarting");
 
     try {
       const game = await Game.findById(room.gameId);
@@ -18,62 +18,63 @@ export function handleGameEvents(io, socket) {
       room.currentSongIndex = 0;
       room.currentRound = 0;
       room.songs = game.songs;
-      room.answeredCorrectly = false;
-      room.scores = {}; // username -> score
+      room.scores = {};
       room.currentTimeout = null;
 
-      startRound(io, roomId);
+      startRound(io, roomCode);
     } catch (error) {
       console.error("❌ Error starting game:", error);
     }
   });
 
-  socket.on("submitAnswer", ({ roomId, answer, username }) => {
-    const room = rooms.get(roomId);
+  socket.on("submitAnswer", ({ roomCode, answer, username }) => {
+    const room = rooms.get(roomCode);
     if (!room) return;
 
     const currentSong = room.songs[room.currentSongIndex];
-    if (room.answeredCorrectly) return; // כבר ענו נכון
+    if (room.guessedUsers.has(username)) return;
 
-    if (
+    room.guessedUsers.add(username);
+
+    const correct =
       currentSong.correctAnswer.trim().toLowerCase() ===
-      answer.trim().toLowerCase()
-    ) {
-      room.answeredCorrectly = true;
+      answer.trim().toLowerCase();
 
-      // ניקוד: תן 100 נק' נכונה
+    if (correct) {
+      room.correctUsers.add(username);
+
       if (!room.scores[username]) {
         room.scores[username] = 0;
       }
       room.scores[username] += 100;
 
-      // בטל טיימר אם היה פעיל
-      if (room.currentTimeout) {
-        clearTimeout(room.currentTimeout);
-      }
-
-      // שלח לכולם את התשובה הנכונה
-      io.to(roomId).emit("correctAnswer", {
-        username,
-        answer,
-        scores: room.scores,
+      io.to(socket.id).emit("answerFeedback", {
+        correct: true,
       });
 
-      // ❌ אין מעבר אוטומטי לסבב הבא כאן
+      io.to(roomCode).emit("correctAnswer", {
+        scores: room.scores,
+      });
+    } else {
+      io.to(socket.id).emit("answerFeedback", {
+        correct: false,
+      });
+    }
+
+    if (room.guessedUsers.size === room.players.length) {
+      finishRound(io, roomCode);
     }
   });
 
-  // ✅ מעבר יוזם לסבב הבא לפי בקשת המארגן בלבד
-  socket.on("nextRound", ({ roomId }) => {
-    const room = rooms.get(roomId);
+  socket.on("nextRound", ({ roomCode }) => {
+    const room = rooms.get(roomCode);
     if (!room) return;
 
     room.currentSongIndex++;
     room.currentRound = 0;
-    room.answeredCorrectly = false;
 
     if (room.currentSongIndex < room.songs.length) {
-      startRound(io, roomId);
+      startRound(io, roomCode);
     } else {
       const topScores = Object.entries(room.scores)
         .sort((a, b) => b[1] - a[1])
@@ -84,51 +85,73 @@ export function handleGameEvents(io, socket) {
           score,
         }));
 
-      io.to(roomId).emit("gameOver", {
+      io.to(roomCode).emit("gameOver", {
         leaderboard: topScores,
       });
 
-      rooms.delete(roomId);
+      rooms.delete(roomCode);
     }
+  });
+
+  socket.on("replayLonger", ({ roomCode }) => {
+    const room = rooms.get(roomCode);
+    if (!room) return;
+
+    startRound(io, roomCode);
   });
 }
 
-function startRound(io, roomId) {
-  const room = rooms.get(roomId);
+function startRound(io, roomCode) {
+  const room = rooms.get(roomCode);
   if (!room) return;
 
   const currentSong = room.songs[room.currentSongIndex];
   const round = room.currentRound;
 
   if (round >= ROUND_DURATIONS.length) {
-    // כל הסבבים נכשלו
-    io.to(roomId).emit("roundFailed");
-
-    // ❌ לא עוברים אוטומטית – מחכים להוראת nextRound מהמארגן
+    io.to(roomCode).emit("roundFailed", {
+      songNumber: room.currentSongIndex + 1,
+      totalSongs: room.songs.length,
+      allRoundsUsed: true,
+      songTitle: currentSong.correctAnswer, // 🆕 שליחת שם השיר
+    });
     return;
   }
 
   const duration = ROUND_DURATIONS[round];
-  const roundDeadline = Date.now() + 15000; // זמן מוגדר אחיד לכולם
+  const roundDeadline = Date.now() + 15000;
 
-  // שדר לכולם את הסיבוב הבא + זמן הסיום למענה
-  io.to(roomId).emit("nextRound", {
+  room.currentRound++;
+  room.correctUsers = new Set();
+  room.guessedUsers = new Set();
+  room.currentTimeout && clearTimeout(room.currentTimeout);
+
+  io.to(roomCode).emit("nextRound", {
     audioUrl: currentSong.audioUrl,
     duration,
     roundNumber: round + 1,
-    roundDeadline, // ⬅️ תוספת קריטית לסנכרון בצד הלקוח
+    roundDeadline,
+    songNumber: room.currentSongIndex + 1,
+    totalSongs: room.songs.length,
   });
 
-  room.currentRound++;
-
-  // 🕒 טיימר של 15 שניות למענה – לסיבוב הבא אם לא ניחשו נכון
-  if (room.currentTimeout) {
-    clearTimeout(room.currentTimeout);
-  }
-
   room.currentTimeout = setTimeout(() => {
-    if (!room.answeredCorrectly) {
-      startRound(io, roomId); // סיבוב הבא (אותו שיר, זמן ארוך יותר)
-    }
+    finishRound(io, roomCode);
   }, 15000);
+}
+
+function finishRound(io, roomCode) {
+  const room = rooms.get(roomCode);
+  if (!room) return;
+
+  const currentSong = room.songs[room.currentSongIndex]; // 🟣 הוסף שורה זו
+
+  if (room.correctUsers.size === 0) {
+    io.to(roomCode).emit("roundFailed", {
+      songNumber: room.currentSongIndex + 1,
+      totalSongs: room.songs.length,
+      allRoundsUsed: room.currentRound >= ROUND_DURATIONS.length,
+      songTitle: currentSong.correctAnswer, // 🟢 הוסף את זה
+    });
+  }
 }

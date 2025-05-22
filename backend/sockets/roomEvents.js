@@ -1,6 +1,6 @@
 import { generateRoomCode } from "../utils/generateRoomCode.js";
-import Game from "../models/Game.js"; // ודא שקיים הקובץ הזה
-const rooms = new Map(); // key: roomCode, value: { hostSocketId, gameId, players: [] }
+import Game from "../models/Game.js";
+import rooms from "./roomStore.js"; // ✅ שימוש במפה גלובלית משותפת
 
 const handleRoomEvents = (io, socket) => {
   socket.on("createRoom", async ({ gameId }) => {
@@ -44,4 +44,3 @@ const handleRoomEvents = (io, socket) => {
 };
 
 export default handleRoomEvents;
-export { rooms }; // נייצא כדי שנוכל לגשת לרשימת החדרים בעתיד

@@ -1,4 +1,4 @@
-import { rooms } from "./roomEvents.js";
+import rooms from "./roomStore.js"; // נייבא את ה-map של החדרים
 
 const availableEmojis = [
   "🐶",
@@ -15,6 +15,9 @@ const availableEmojis = [
 
 export const handlePlayerEvents = (io, socket) => {
   socket.on("joinRoom", ({ roomCode, username }) => {
+    console.log(`➡️ joinRoom from ${username}, code: ${roomCode}`);
+    console.log("📋 All active rooms:", [...rooms.keys()]);
+
     const room = rooms.get(roomCode);
 
     if (!room) {

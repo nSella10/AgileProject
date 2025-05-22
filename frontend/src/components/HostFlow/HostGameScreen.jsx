@@ -2,69 +2,48 @@ import React from "react";
 
 const HostGameScreen = ({
   statusMsg,
-  scores,
   waitingForNext,
   onNextRound,
+  onReplayLonger,
   roundFailed,
   roundSucceeded,
   countdown,
 }) => {
-  const sorted = Object.entries(scores)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-
   return (
-    <div className="launch-game-container">
-      <div className="info-box">
-        <div className="status-msg mt-4 text-lg font-semibold text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
+      <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-xl border border-purple-300 text-center">
+        <h2 className="text-3xl font-extrabold text-purple-800 mb-6">
           {statusMsg}
-        </div>
+        </h2>
 
         {countdown !== null && (
-          <div className="text-black text-center text-xl font-bold mt-2 animate-pulse">
+          <p className="text-purple-700 font-semibold text-xl animate-pulse mb-4">
             ⏱️ Time left: {countdown}s
-          </div>
+          </p>
         )}
 
-        <div className="mt-6 bg-black/30 text-white p-4 rounded-lg max-w-md mx-auto">
-          <h3 className="text-xl font-semibold mb-2 text-center">
-            🏆 Live Leaderboard
-          </h3>
-          {sorted.length === 0 ? (
-            <p className="text-center text-sm text-gray-300">No scores yet.</p>
-          ) : (
-            <ul className="text-left">
-              {sorted.map(([username, score], index) => (
-                <li key={username}>
-                  {index + 1}. {username} – {score} pts
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
         {waitingForNext && (
-          <div className="text-center mt-6">
+          <div className="mt-6">
             {roundFailed ? (
               <>
-                <p className="text-red-200 font-medium mb-2">
-                  😕 No one guessed it. Want to play it longer?
+                <p className="text-red-600 font-medium text-lg mb-4">
+                  😕 No one guessed it. Want to replay it longer?
                 </p>
                 <button
-                  onClick={onNextRound}
-                  className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg"
+                  onClick={onReplayLonger}
+                  className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-xl text-lg"
                 >
                   🔁 Replay with longer snippet
                 </button>
               </>
             ) : roundSucceeded ? (
               <>
-                <p className="text-green-200 font-medium mb-2">
+                <p className="text-green-700 font-medium text-lg mb-4">
                   🎉 Someone got it! Continue to next song?
                 </p>
                 <button
                   onClick={onNextRound}
-                  className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl text-lg"
                 >
                   ▶️ Next Song
                 </button>
@@ -72,7 +51,7 @@ const HostGameScreen = ({
             ) : (
               <button
                 onClick={onNextRound}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl text-lg"
               >
                 ▶️ Next Song
               </button>

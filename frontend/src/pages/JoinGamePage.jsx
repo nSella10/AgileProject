@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { getSocket, disconnectSocket } from "../socket";
 import JoinForm from "../components/GameFlow/JoinForm";
@@ -17,7 +17,16 @@ const JoinGamePage = () => {
   const [hasGuessedThisRound, setHasGuessedThisRound] = useState(false);
   const [isWaitingBetweenRounds, setIsWaitingBetweenRounds] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
-  const timeoutRef = React.useRef(null);
+  const [songNumber, setSongNumber] = useState(1);
+  const [totalSongs, setTotalSongs] = useState(1);
+  const [submitted, setSubmitted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [roundFailedForUser, setRoundFailedForUser] = useState(false);
+  const [currentPlayerName, setCurrentPlayerName] = useState("");
+  const [guessResult, setGuessResult] = useState(null); // "correct", "wrong", or null
+
+  const timeoutRef = useRef(null);
+  const timerInterval = useRef(null);
 
   useEffect(() => {
     const socket = getSocket();
@@ -36,36 +45,51 @@ const JoinGamePage = () => {
       setStatusMsg("🎬 Game is starting!");
     });
 
-    socket.on("nextRound", ({ roundNumber, roundDeadline }) => {
-      setStatusMsg(`🕵️ Round ${roundNumber} - Listen and guess!`);
-      setHasGuessedThisRound(false);
-      setIsWaitingBetweenRounds(false);
+    socket.on(
+      "nextRound",
+      ({ roundNumber, roundDeadline, songNumber, totalSongs }) => {
+        setStatusMsg(`🕵️ Round ${roundNumber} - Listen and guess!`);
+        setHasGuessedThisRound(false);
+        setIsWaitingBetweenRounds(false);
+        setRoundFailedForUser(false);
+        setSongNumber(songNumber);
+        setTotalSongs(totalSongs);
+        setSubmitted(false);
+        setGuessResult(null);
 
-      // ננקה טיימר קודם אם קיים
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (timerInterval.current) clearInterval(timerInterval.current);
 
-      const now = Date.now();
-      const msLeft = roundDeadline - now;
+        const now = Date.now();
+        const msLeft = roundDeadline - now;
+        const seconds = Math.ceil(msLeft / 1000);
+        setTimeLeft(seconds);
 
-      if (msLeft > 0) {
+        timerInterval.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev === 1) {
+              clearInterval(timerInterval.current);
+              return null;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
         timeoutRef.current = setTimeout(() => {
           setIsWaitingBetweenRounds(true);
         }, msLeft);
-      } else {
-        setIsWaitingBetweenRounds(true);
       }
-    });
+    );
 
-    socket.on("correctAnswer", ({ username, answer }) => {
-      setStatusMsg(`🎉 ${username} guessed it right: ${answer}`);
+    socket.on("answerFeedback", ({ correct }) => {
+      setGuessResult(correct ? "correct" : "wrong");
     });
 
     socket.on("roundFailed", () => {
-      setStatusMsg("❌ No one guessed it. Next round...");
-      setHasGuessedThisRound(true); // כדי למנוע שליחת ניחוש נוסף
+      setStatusMsg("❌ No one guessed it. Waiting for host...");
+      setHasGuessedThisRound(true);
       setIsWaitingBetweenRounds(true);
+      setRoundFailedForUser(true);
     });
 
     socket.on("gameOver", () => {
@@ -82,15 +106,14 @@ const JoinGamePage = () => {
       socket.off("roomJoinError");
       socket.off("gameStarting");
       socket.off("nextRound");
-      socket.off("correctAnswer");
+      socket.off("answerFeedback");
       socket.off("roundFailed");
       socket.off("gameOver");
       socket.off("playerAssignedEmoji");
       disconnectSocket();
 
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (timerInterval.current) clearInterval(timerInterval.current);
     };
   }, []);
 
@@ -100,6 +123,7 @@ const JoinGamePage = () => {
       return;
     }
     const socket = getSocket();
+    setCurrentPlayerName(username);
     socket.emit("joinRoom", { roomCode, username });
   };
 
@@ -107,12 +131,13 @@ const JoinGamePage = () => {
     if (!guess || hasGuessedThisRound) return;
     const socket = getSocket();
     socket.emit("submitAnswer", {
-      roomId: roomCode,
+      roomCode,
       username,
       answer: guess,
     });
     setGuess("");
     setHasGuessedThisRound(true);
+    setSubmitted(true);
   };
 
   const handleGuessChange = (value) => {
@@ -142,9 +167,15 @@ const JoinGamePage = () => {
       statusMsg={statusMsg}
       onGuessChange={handleGuessChange}
       onSubmitGuess={handleSubmitGuess}
-      hasGuessed={hasGuessedThisRound || isGameOver} // ✅ הסתרת טופס אם המשחק נגמר
+      hasGuessed={hasGuessedThisRound || isGameOver}
       isWaiting={isWaitingBetweenRounds}
       isGameOver={isGameOver}
+      songNumber={songNumber}
+      totalSongs={totalSongs}
+      submitted={submitted}
+      timeLeft={timeLeft}
+      roundFailedForUser={roundFailedForUser}
+      guessResult={guessResult}
     />
   );
 };

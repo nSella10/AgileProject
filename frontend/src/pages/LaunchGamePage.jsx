@@ -5,11 +5,11 @@ import { toast } from "react-toastify";
 import { getSocket, disconnectSocket } from "../socket";
 import { BASE_URL } from "../constants";
 import classroomBg from "../assets/classroom-bg.png";
-import "../styles/LaunchGamePage.css";
 
 import HostWaitingScreen from "../components/HostFlow/HostWaitingScreen";
 import HostGameScreen from "../components/HostFlow/HostGameScreen";
-import FinalLeaderboardScreen from "../components/HostFlow/FinalLeaderboardScreen";
+import InterimLeaderboardScreen from "../components/HostFlow/InterimLeaderboardScreen";
+import RoundRevealAnswerScreen from "../components/HostFlow/RoundRevealAnswerScreen";
 
 const LaunchGamePage = () => {
   const { gameId } = useParams();
@@ -25,14 +25,18 @@ const LaunchGamePage = () => {
   const [waitingForNext, setWaitingForNext] = useState(false);
   const [roundFailed, setRoundFailed] = useState(false);
   const [roundSucceeded, setRoundSucceeded] = useState(false);
+  const [showInterimLeaderboard, setShowInterimLeaderboard] = useState(false);
+  const [showAnswerReveal, setShowAnswerReveal] = useState(false);
+  const [revealedSongTitle, setRevealedSongTitle] = useState("");
   const [countdown, setCountdown] = useState(null);
+  const [songNumber, setSongNumber] = useState(1);
+  const [totalSongs, setTotalSongs] = useState(1);
 
+  const audioRef = useRef(null);
   const countdownRef = useRef(null);
-  const audioRef = useRef(null); // ✅ חדש – ניהול אודיו
 
   useEffect(() => {
     const socket = getSocket({ userId: userInfo._id });
-
     socket.emit("createRoom", { gameId });
 
     socket.on("roomCreated", ({ roomCode }) => {
@@ -53,150 +57,158 @@ const LaunchGamePage = () => {
       setStatusMsg("🎬 Game is starting!");
     });
 
-    socket.on("nextRound", ({ audioUrl, duration, roundNumber }) => {
-      setStatusMsg(
-        `🎵 Playing snippet for ${duration / 1000}s – Round ${roundNumber}`
-      );
-      setRoundFailed(false);
-      setRoundSucceeded(false);
-      setWaitingForNext(false);
+    socket.on(
+      "nextRound",
+      ({
+        audioUrl,
+        duration,
+        roundNumber,
+        roundDeadline,
+        songNumber,
+        totalSongs,
+      }) => {
+        setStatusMsg(
+          `🎵 Playing song for ${
+            duration / 1000
+          } seconds (Round ${roundNumber})`
+        );
+        setRoundFailed(false);
+        setRoundSucceeded(false);
+        setWaitingForNext(false);
+        setShowAnswerReveal(false);
+        setShowInterimLeaderboard(false);
+        setSongNumber(songNumber);
+        setTotalSongs(totalSongs);
 
-      // ✅ עצירת שיר קודם אם היה
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+
+        const newAudio = new Audio(`${BASE_URL}${audioUrl}`);
+        newAudio.play().catch(console.error);
+        audioRef.current = newAudio;
+
+        setTimeout(() => {
+          newAudio.pause();
+          newAudio.currentTime = 0;
+        }, duration);
+
+        setCountdown(15);
+        if (countdownRef.current) clearInterval(countdownRef.current);
+
+        countdownRef.current = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev === 1) {
+              clearInterval(countdownRef.current);
+              setCountdown(null);
+              setWaitingForNext(true);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
       }
+    );
 
-      // 🎵 הפעלת שיר חדש
-      const newAudio = new Audio(`${BASE_URL}${audioUrl}`);
-      audioRef.current = newAudio;
-
-      newAudio.play().catch((err) => {
-        console.error("Audio play failed:", err);
-      });
-
-      // ⏱️ עצירת השיר בדיוק אחרי כמה שצריך
-      setTimeout(() => {
-        newAudio.pause();
-        newAudio.currentTime = 0;
-      }, duration);
-
-      // ⏱️ טיימר מענה של 15 שניות (בלתי תלוי באורך השיר)
-      setCountdown(15);
-      if (countdownRef.current) {
-        clearInterval(countdownRef.current);
-      }
-
-      countdownRef.current = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev === 1) {
-            clearInterval(countdownRef.current);
-            setCountdown(null);
-            setWaitingForNext(true);
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    });
-
-    socket.on("correctAnswer", ({ username, answer, scores }) => {
-      setStatusMsg(`✅ ${username} guessed it right! (${answer})`);
+    socket.on("correctAnswer", ({ scores }) => {
       setScores(scores);
-      setWaitingForNext(true);
+      setShowInterimLeaderboard(true);
       setRoundSucceeded(true);
-
+      setWaitingForNext(true);
       setCountdown(null);
       clearInterval(countdownRef.current);
-
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
     });
 
-    socket.on("roundFailed", () => {
-      setStatusMsg("❌ No one guessed it. You can replay longer.");
+    socket.on("roundFailed", ({ allRoundsUsed, songTitle }) => {
       setWaitingForNext(true);
       setRoundFailed(true);
+      setRoundSucceeded(false);
       setCountdown(null);
       clearInterval(countdownRef.current);
+      setShowInterimLeaderboard(false);
+
+      if (allRoundsUsed) {
+        setShowAnswerReveal(true);
+        setRevealedSongTitle(songTitle);
+      } else {
+        setStatusMsg("❌ No one guessed it. You can replay the song longer.");
+      }
     });
 
     socket.on("gameOver", ({ leaderboard }) => {
       setFinalLeaderboard(leaderboard);
-      setStatusMsg("🏁 Game over! Final results below:");
-
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-
-      setCountdown(null);
-      clearInterval(countdownRef.current);
+      navigate("/final-leaderboard", { state: { leaderboard } });
     });
 
     return () => {
-      socket.off("roomCreated");
-      socket.off("roomJoinError");
-      socket.off("updatePlayerList");
-      socket.off("gameStarting");
-      socket.off("nextRound");
-      socket.off("correctAnswer");
-      socket.off("roundFailed");
-      socket.off("gameOver");
-      disconnectSocket();
-
-      if (countdownRef.current) {
-        clearInterval(countdownRef.current);
-      }
-
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
+      socket.disconnect();
     };
   }, [gameId, navigate, userInfo]);
 
   const handleStartGame = () => {
     const socket = getSocket();
-    socket.emit("startGame", { roomId: roomCode });
+    socket.emit("startGame", { roomCode });
   };
 
   const handleNextRound = () => {
     const socket = getSocket();
-
-    // ✅ עצור שיר קודם לפני מעבר סבב
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-
-    socket.emit("nextRound", { roomId: roomCode });
+    socket.emit("nextRound", { roomCode });
     setWaitingForNext(false);
     setRoundFailed(false);
     setRoundSucceeded(false);
+    setShowInterimLeaderboard(false);
+    setShowAnswerReveal(false);
     setCountdown(null);
     clearInterval(countdownRef.current);
   };
 
-  const backgroundStyle = {
-    backgroundImage: `url(${classroomBg})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    minHeight: "100vh",
-    width: "100%",
+  const handleReplayLonger = () => {
+    const socket = getSocket();
+    socket.emit("replayLonger", { roomCode });
+    setWaitingForNext(false);
+    setRoundFailed(false);
+    setCountdown(null);
+    clearInterval(countdownRef.current);
   };
 
   return (
-    <div style={backgroundStyle}>
-      {finalLeaderboard ? (
-        <FinalLeaderboardScreen leaderboard={finalLeaderboard} />
-      ) : gameStarted ? (
+    <div
+      style={{
+        backgroundImage: `url(${classroomBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        width: "100%",
+      }}
+    >
+      {showAnswerReveal ? (
+        <div
+          style={{
+            backgroundImage: `url(${classroomBg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            minHeight: "100vh",
+            width: "100%",
+          }}
+        >
+          <RoundRevealAnswerScreen
+            songTitle={revealedSongTitle}
+            onNext={handleNextRound}
+          />
+        </div>
+      ) : showInterimLeaderboard ? (
+        <InterimLeaderboardScreen
+          scores={scores}
+          onNextRound={handleNextRound}
+        />
+      ) : finalLeaderboard ? null : gameStarted ? (
         <HostGameScreen
           statusMsg={statusMsg}
           scores={scores}
           waitingForNext={waitingForNext}
           onNextRound={handleNextRound}
+          onReplayLonger={handleReplayLonger}
           roundFailed={roundFailed}
           roundSucceeded={roundSucceeded}
           countdown={countdown}

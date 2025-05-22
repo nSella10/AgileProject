@@ -7,6 +7,8 @@ import DashboardPage from "./pages/DashboardPage";
 import CreateGamePage from "./pages/CreateGamePage";
 import MyGamesPage from "./pages/MyGamesPage";
 import LaunchGamePage from "./pages/LaunchGamePage";
+import FinalLeaderboardPage from "./pages/FinalLeaderboardPage"; // ✅ חדש
+
 import PrivateRoute from "./components/PrivateRoute";
 import RedirectIfLoggedIn from "./components/RedirectIfLoggedIn";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -32,6 +34,11 @@ function App() {
           <Route path="/create" element={<CreateGamePage />} />
           <Route path="/mygames" element={<MyGamesPage />} />
           <Route path="/launch/:gameId" element={<LaunchGamePage />} />
+          <Route
+            path="/final-leaderboard"
+            element={<FinalLeaderboardPage />}
+          />{" "}
+          {/* ✅ חדש */}
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

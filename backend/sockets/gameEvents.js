@@ -144,14 +144,19 @@ function finishRound(io, roomCode) {
   const room = rooms.get(roomCode);
   if (!room) return;
 
-  const currentSong = room.songs[room.currentSongIndex]; // 🟣 הוסף שורה זו
+  const currentSong = room.songs[room.currentSongIndex];
 
   if (room.correctUsers.size === 0) {
     io.to(roomCode).emit("roundFailed", {
       songNumber: room.currentSongIndex + 1,
       totalSongs: room.songs.length,
       allRoundsUsed: room.currentRound >= ROUND_DURATIONS.length,
-      songTitle: currentSong.correctAnswer, // 🟢 הוסף את זה
+      songTitle: currentSong.correctAnswer,
+    });
+  } else {
+    // ✅ לפחות שחקן אחד צדק
+    io.to(roomCode).emit("roundSucceeded", {
+      scores: room.scores,
     });
   }
 }

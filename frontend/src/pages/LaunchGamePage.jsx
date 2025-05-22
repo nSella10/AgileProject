@@ -111,7 +111,7 @@ const LaunchGamePage = () => {
       }
     );
 
-    socket.on("correctAnswer", ({ scores }) => {
+    socket.on("roundSucceeded", ({ scores }) => {
       setScores(scores);
       setShowInterimLeaderboard(true);
       setRoundSucceeded(true);

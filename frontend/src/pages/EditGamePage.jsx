@@ -1,38 +1,67 @@
-// src/pages/CreateGamePage.jsx
-import React, { useState } from "react";
+// src/pages/EditGamePage.jsx
+import React, { useState, useEffect } from "react";
 import PageLayout from "../components/PageLayout";
-import { useNavigate } from "react-router-dom";
-import { useCreateGameWithState } from "../hooks/useGames";
+import { useNavigate, useParams } from "react-router-dom";
+import { useGameWithState, useUpdateGameWithState } from "../hooks/useGames";
 import SongSearchInput from "../components/SongSearchInput";
+import { toast } from "react-toastify";
 import {
   FaMusic,
   FaUsers,
   FaLock,
   FaGlobe,
   FaArrowLeft,
-  FaRocket,
+  FaSave,
   FaStar,
   FaHeadphones,
 } from "react-icons/fa";
-import { toast } from "react-toastify";
 
-const CreateGamePage = () => {
+const EditGamePage = () => {
+  const { gameId } = useParams();
+  const navigate = useNavigate();
+
+  const {
+    game,
+    isLoading: gameLoading,
+    error: gameError,
+  } = useGameWithState(gameId);
+  const { updateGame, isLoading: updateLoading } = useUpdateGameWithState();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedSongs, setSelectedSongs] = useState([]);
   const [isPublic, setIsPublic] = useState(true);
   const [error, setError] = useState("");
 
-  const navigate = useNavigate();
-  const { createGame, isLoading } = useCreateGameWithState();
+  // Populate form when game data is loaded
+  useEffect(() => {
+    if (game) {
+      setTitle(game.title || "");
+      setDescription(game.description || "");
+      setIsPublic(game.isPublic || false);
 
-  // טיפול בבחירת שירים
+      // Convert game songs to the format expected by SongSearchInput
+      const formattedSongs =
+        game.songs?.map((song) => ({
+          title: song.title,
+          artist: song.artist,
+          correctAnswer: song.correctAnswer || song.title,
+          previewUrl: song.previewUrl,
+          artworkUrl: song.artworkUrl,
+          trackId: song.trackId,
+        })) || [];
+
+      setSelectedSongs(formattedSongs);
+    }
+  }, [game]);
+
+  // Handle song selection
   const handleSongSelect = (songData, isRemoval = false) => {
     if (isRemoval) {
-      // אם זה מחיקה, songData הוא המערך החדש
+      // If it's removal, songData is the new array
       setSelectedSongs(songData);
     } else {
-      // אם זה הוספה, songData הוא השיר החדש
+      // If it's addition, songData is the new song
       setSelectedSongs((prev) => [...prev, songData]);
     }
   };
@@ -47,13 +76,14 @@ const CreateGamePage = () => {
     }
 
     const gameData = {
+      gameId,
       title,
       description,
       isPublic,
       songs: selectedSongs.map((song) => ({
         title: song.title,
         artist: song.artist,
-        correctAnswer: song.title,
+        correctAnswer: song.correctAnswer || song.title,
         previewUrl: song.previewUrl,
         artworkUrl: song.artworkUrl,
         trackId: song.trackId,
@@ -61,14 +91,48 @@ const CreateGamePage = () => {
     };
 
     try {
-      await createGame(gameData);
-      toast.success("🎉 Game created successfully!");
+      await updateGame(gameData);
+      toast.success("Game updated successfully!");
       navigate("/mygames");
     } catch (err) {
-      setError(err?.message || "Failed to create game.");
-      toast.error("Failed to create game. Please try again.");
+      setError(err?.message || "Failed to update game.");
+      toast.error("Failed to update game.");
     }
   };
+
+  // Loading state
+  if (gameLoading) {
+    return (
+      <PageLayout>
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading game...</p>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Error state
+  if (gameError) {
+    return (
+      <PageLayout>
+        <div className="max-w-4xl mx-auto py-10 px-6">
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
+            <div className="text-4xl mb-4">❌</div>
+            <p className="text-red-600 text-lg font-semibold mb-4">
+              {gameError?.data?.message || "Failed to load game."}
+            </p>
+            <button
+              onClick={() => navigate("/mygames")}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300"
+            >
+              Back to My Games
+            </button>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -78,22 +142,22 @@ const CreateGamePage = () => {
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="relative max-w-7xl mx-auto px-4">
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/mygames")}
               className="flex items-center gap-2 text-purple-100 hover:text-white mb-6 transition-colors"
             >
               <FaArrowLeft />
-              <span>Back to Dashboard</span>
+              <span>Back to My Games</span>
             </button>
             <div className="text-center">
               <div className="mb-4">
-                <span className="text-5xl">🎵</span>
+                <span className="text-5xl">✏️</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
-                Create Your Music Game
+                Edit Your Music Game
               </h1>
               <p className="text-xl text-purple-100 max-w-2xl mx-auto">
-                Design an amazing music quiz experience that will challenge and
-                entertain your players
+                Update your game details, modify songs, and perfect your music
+                quiz experience
               </p>
             </div>
           </div>
@@ -118,7 +182,7 @@ const CreateGamePage = () => {
                   2
                 </div>
                 <span className="ml-3 text-purple-600 font-semibold">
-                  Add Songs
+                  Update Songs
                 </span>
               </div>
               <div className="w-16 h-1 bg-purple-200 rounded"></div>
@@ -127,7 +191,7 @@ const CreateGamePage = () => {
                   3
                 </div>
                 <span className="ml-3 text-purple-600 font-semibold">
-                  Launch
+                  Save Changes
                 </span>
               </div>
             </div>
@@ -233,7 +297,9 @@ const CreateGamePage = () => {
                 <div className="bg-blue-100 p-3 rounded-2xl">
                   <FaHeadphones className="text-blue-600 text-xl" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Add Songs</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Update Songs
+                </h2>
                 {selectedSongs.length > 0 && (
                   <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                     {selectedSongs.length} song
@@ -250,10 +316,8 @@ const CreateGamePage = () => {
               {selectedSongs.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   <FaMusic className="text-4xl mx-auto mb-4 opacity-50" />
-                  <p className="text-lg">No songs selected yet</p>
-                  <p className="text-sm">
-                    Search and add songs to create your game
-                  </p>
+                  <p className="text-lg">No songs selected</p>
+                  <p className="text-sm">Add songs to update your game</p>
                 </div>
               )}
             </div>
@@ -262,25 +326,25 @@ const CreateGamePage = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 type="button"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/mygames")}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={isLoading || !title || selectedSongs.length === 0}
+                disabled={updateLoading || !title || selectedSongs.length === 0}
                 className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 disabled:cursor-not-allowed"
               >
-                {isLoading ? (
+                {updateLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Creating...
+                    Updating...
                   </>
                 ) : (
                   <>
-                    <FaRocket />
-                    Create Game
+                    <FaSave />
+                    Update Game
                   </>
                 )}
               </button>
@@ -310,4 +374,4 @@ const CreateGamePage = () => {
   );
 };
 
-export default CreateGamePage;
+export default EditGamePage;

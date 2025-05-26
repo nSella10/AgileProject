@@ -126,9 +126,16 @@ function startRound(io, roomCode) {
   room.guessedUsers = new Set();
   room.currentTimeout && clearTimeout(room.currentTimeout);
 
+  // שליחת URL ישיר של השיר
+  let audioUrl = currentSong.previewUrl || currentSong.audioUrl;
+
+  // בכל סיבוב נתחיל מההתחלה, אבל נתנגן יותר זמן
+  const startTime = 0; // תמיד מתחילים מההתחלה
+
   io.to(roomCode).emit("nextRound", {
-    audioUrl: currentSong.audioUrl,
+    audioUrl,
     duration,
+    startTime,
     roundNumber: round + 1,
     roundDeadline,
     songNumber: room.currentSongIndex + 1,

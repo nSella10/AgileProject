@@ -17,6 +17,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.userInfo = null;
       localStorage.clear();
+      // Note: Games cache will be cleared by the logout action listener
     },
   },
 });

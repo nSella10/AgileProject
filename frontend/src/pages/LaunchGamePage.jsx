@@ -62,6 +62,7 @@ const LaunchGamePage = () => {
       ({
         audioUrl,
         duration,
+        startTime,
         roundNumber,
         roundDeadline,
         songNumber,
@@ -83,15 +84,41 @@ const LaunchGamePage = () => {
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
+          audioRef.current = null; // נקה את הרפרנס לאודיו הקודם
         }
 
-        const newAudio = new Audio(`${BASE_URL}${audioUrl}`);
-        newAudio.play().catch(console.error);
+        // בדיקה אם זה URL מלא או יחסי
+        const fullAudioUrl = audioUrl.startsWith("http")
+          ? audioUrl
+          : `${BASE_URL}${audioUrl}`;
+
+        const newAudio = new Audio(fullAudioUrl);
+        newAudio.crossOrigin = "anonymous";
+
+        // הגדרת זמן התחלה אחרי שהאודיו נטען
+        newAudio.addEventListener("loadeddata", () => {
+          // תמיד מתחילים מההתחלה (0 שניות)
+          newAudio.currentTime = 0;
+        });
+
+        // ניסיון השמעה עם טיפול בשגיאות
+        const playPromise = newAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.error("Error playing audio:", error);
+            console.log("Audio URL:", fullAudioUrl);
+            console.log("Start time:", startTime);
+            // אם השמעה אוטומטית נכשלת, נציג הודעה למשתמש
+            setStatusMsg("🔊 Click to enable audio and start the round");
+          });
+        }
         audioRef.current = newAudio;
 
         setTimeout(() => {
-          newAudio.pause();
-          newAudio.currentTime = 0;
+          if (newAudio) {
+            newAudio.pause();
+            newAudio.currentTime = 0;
+          }
         }, duration);
 
         setCountdown(15);
@@ -172,6 +199,21 @@ const LaunchGamePage = () => {
     clearInterval(countdownRef.current);
   };
 
+  const handleEnableAudio = () => {
+    if (audioRef.current) {
+      // נוודא שהאודיו מתחיל מהזמן הנכון
+      audioRef.current
+        .play()
+        .then(() => {
+          setStatusMsg("🎵 Audio playing - listen and guess!");
+        })
+        .catch((error) => {
+          console.error("Failed to play audio:", error);
+          setStatusMsg("❌ Failed to play audio. Try refreshing the page.");
+        });
+    }
+  };
+
   return (
     <div
       style={{
@@ -212,6 +254,7 @@ const LaunchGamePage = () => {
           roundFailed={roundFailed}
           roundSucceeded={roundSucceeded}
           countdown={countdown}
+          onEnableAudio={handleEnableAudio}
         />
       ) : (
         <HostWaitingScreen

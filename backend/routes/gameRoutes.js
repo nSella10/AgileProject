@@ -1,19 +1,52 @@
 import express from "express";
-import { createGame } from "../controllers/gameController.js";
+import {
+  createGame,
+  getMyGames,
+  deleteGame,
+  searchSongs,
+  getGameById,
+  updateGame,
+  getAnalytics,
+} from "../controllers/gameController.js";
 import { protect } from "../middlewares/authMiddleware.js";
-import upload from "../middlewares/uploadMiddleware.js";
-import { getMyGames } from "../controllers/gameController.js";
 
 const router = express.Router();
 
-// @desc    Create a new game (with files)
+// @desc    Create a new game (with song data)
 // @route   POST /api/games
 // @access  Private
-router.post("/", protect, upload.array("songs"), createGame);
+router.post("/", protect, createGame);
 
 // @desc    Get all games created by the logged-in user
 // @route   GET /api/games/mine
 // @access  Private
 router.get("/mine", protect, getMyGames);
+
+// @desc    Search songs using iTunes API
+// @route   GET /api/games/search-songs
+// @access  Private
+router.get("/search-songs", protect, searchSongs);
+
+// @desc    Get analytics data
+// @route   GET /api/games/analytics
+// @access  Private
+router.get("/analytics", protect, getAnalytics);
+
+// @desc    Get a single game by ID
+// @route   GET /api/games/:id
+// @access  Private
+router.get("/:id", protect, getGameById);
+
+// @desc    Update a game
+// @route   PUT /api/games/:id
+// @access  Private
+router.put("/:id", protect, updateGame);
+
+// @desc    Delete a game
+// @route   DELETE /api/games/:id
+// @access  Private
+router.delete("/:id", protect, deleteGame);
+
+// הסרנו את ה-proxy - לא נדרש יותר
 
 export default router;

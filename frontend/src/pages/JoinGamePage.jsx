@@ -22,6 +22,7 @@ const JoinGamePage = () => {
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(null);
   const [roundFailedForUser, setRoundFailedForUser] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [currentPlayerName, setCurrentPlayerName] = useState("");
   const [guessResult, setGuessResult] = useState(null); // "correct", "wrong", or null
 
@@ -32,10 +33,12 @@ const JoinGamePage = () => {
     const socket = getSocket();
 
     socket.on("roomJoined", () => {
+      console.log("Successfully joined room!");
       setJoined(true);
     });
 
     socket.on("roomJoinError", (message) => {
+      console.log("Room join error:", message);
       setError(message);
       toast.error(message);
     });
@@ -122,6 +125,12 @@ const JoinGamePage = () => {
       setError("Please enter both a room code and a nickname.");
       return;
     }
+    console.log(
+      "Attempting to join room:",
+      roomCode,
+      "with username:",
+      username
+    );
     const socket = getSocket();
     setCurrentPlayerName(username);
     socket.emit("joinRoom", { roomCode, username });

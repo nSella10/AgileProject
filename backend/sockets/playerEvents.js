@@ -44,6 +44,7 @@ export const handlePlayerEvents = (io, socket) => {
     room.players.push(newPlayer);
 
     socket.join(roomCode);
+    console.log(`✅ Player ${username} joined room ${roomCode}`);
     socket.emit("roomJoined");
 
     // 🔥 שליחת אימוג'י לשחקן

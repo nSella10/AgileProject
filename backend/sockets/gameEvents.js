@@ -1,7 +1,7 @@
 import rooms from "./roomStore.js"; // נייבא את ה-map של החדרים
 import Game from "../models/Game.js";
 
-const ROUND_DURATIONS = [1000, 3000, 5000, 7000, 9000];
+const ROUND_DURATIONS = [1000, 2000, 3000, 4000, 5000]; // 1s, 2s, 3s, 4s, 5s - יותר מאתגר!
 
 export function handleGameEvents(io, socket) {
   socket.on("startGame", async ({ roomCode }) => {

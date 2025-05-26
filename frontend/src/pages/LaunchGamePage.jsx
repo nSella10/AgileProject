@@ -132,17 +132,23 @@ const LaunchGamePage = () => {
           }
         };
 
-        // התחלת ניסיונות השמעה
-        attemptPlay();
+        // שמירת הרפרנס לאודיו לפני התחלת השמעה
         audioRef.current = newAudio;
 
-        // עצירת השמע אחרי הזמן שנקבע
-        setTimeout(() => {
-          if (newAudio) {
-            newAudio.pause();
-            newAudio.currentTime = 0;
+        // התחלת ניסיונות השמעה
+        attemptPlay();
+
+        // עצירת השמע אחרי הזמן שנקבע - חשוב לעצור בזמן!
+        const stopTimer = setTimeout(() => {
+          if (audioRef.current) {
+            console.log(`🛑 Stopping audio after ${duration}ms`);
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
           }
         }, duration);
+
+        // שמירת הטיימר כדי שנוכל לבטל אותו במקרה הצורך
+        audioRef.current.stopTimer = stopTimer;
 
         // התחלת קאונטדאון של 15 שניות (ללא תלות בשמע)
         setCountdown(15);
@@ -169,6 +175,15 @@ const LaunchGamePage = () => {
       setWaitingForNext(true);
       setCountdown(null);
       clearInterval(countdownRef.current);
+
+      // עצירת השמע כשהסיבוב מצליח
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        if (audioRef.current.stopTimer) {
+          clearTimeout(audioRef.current.stopTimer);
+        }
+      }
     });
 
     socket.on("roundFailed", ({ allRoundsUsed, songTitle }) => {
@@ -178,6 +193,15 @@ const LaunchGamePage = () => {
       setCountdown(null);
       clearInterval(countdownRef.current);
       setShowInterimLeaderboard(false);
+
+      // עצירת השמע כשהסיבוב נכשל
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        if (audioRef.current.stopTimer) {
+          clearTimeout(audioRef.current.stopTimer);
+        }
+      }
 
       if (allRoundsUsed) {
         setShowAnswerReveal(true);
@@ -212,6 +236,15 @@ const LaunchGamePage = () => {
     setShowAnswerReveal(false);
     setCountdown(null);
     clearInterval(countdownRef.current);
+
+    // עצירת השמע והטיימר הנוכחיים
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      if (audioRef.current.stopTimer) {
+        clearTimeout(audioRef.current.stopTimer);
+      }
+    }
   };
 
   const handleReplayLonger = () => {
@@ -221,6 +254,15 @@ const LaunchGamePage = () => {
     setRoundFailed(false);
     setCountdown(null);
     clearInterval(countdownRef.current);
+
+    // עצירת השמע והטיימר הנוכחיים
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      if (audioRef.current.stopTimer) {
+        clearTimeout(audioRef.current.stopTimer);
+      }
+    }
   };
 
   // הסרנו את handleEnableAudio - השמעה תמיד אוטומטית

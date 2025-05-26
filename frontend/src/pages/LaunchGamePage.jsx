@@ -94,6 +94,7 @@ const LaunchGamePage = () => {
 
         const newAudio = new Audio(fullAudioUrl);
         newAudio.crossOrigin = "anonymous";
+        newAudio.preload = "auto";
 
         // הגדרת זמן התחלה אחרי שהאודיו נטען
         newAudio.addEventListener("loadeddata", () => {
@@ -101,19 +102,41 @@ const LaunchGamePage = () => {
           newAudio.currentTime = 0;
         });
 
-        // ניסיון השמעה עם טיפול בשגיאות
-        const playPromise = newAudio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            console.error("Error playing audio:", error);
-            console.log("Audio URL:", fullAudioUrl);
-            console.log("Start time:", startTime);
-            // אם השמעה אוטומטית נכשלת, נציג הודעה למשתמש
-            setStatusMsg("🔊 Click to enable audio and start the round");
-          });
-        }
+        // פונקציה לניסיון השמעה עם מספר ניסיונות
+        const attemptPlay = (attempt = 1) => {
+          const playPromise = newAudio.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                // השמעה הצליחה
+                console.log(
+                  `🎵 Audio playing successfully (attempt ${attempt})`
+                );
+              })
+              .catch((error) => {
+                console.error(`Audio play attempt ${attempt} failed:`, error);
+
+                // אם זה הניסיון הראשון, ננסה שוב אחרי השהיה קצרה
+                if (attempt === 1) {
+                  setTimeout(() => attemptPlay(2), 300);
+                } else if (attempt === 2) {
+                  // ניסיון שלישי עם אינטראקציה של משתמש
+                  setTimeout(() => attemptPlay(3), 500);
+                } else {
+                  // אחרי 3 ניסיונות, נמשיך בלי שמע
+                  console.log(
+                    "All audio play attempts failed, continuing without audio"
+                  );
+                }
+              });
+          }
+        };
+
+        // התחלת ניסיונות השמעה
+        attemptPlay();
         audioRef.current = newAudio;
 
+        // עצירת השמע אחרי הזמן שנקבע
         setTimeout(() => {
           if (newAudio) {
             newAudio.pause();
@@ -121,6 +144,7 @@ const LaunchGamePage = () => {
           }
         }, duration);
 
+        // התחלת קאונטדאון של 15 שניות (ללא תלות בשמע)
         setCountdown(15);
         if (countdownRef.current) clearInterval(countdownRef.current);
 
@@ -199,20 +223,7 @@ const LaunchGamePage = () => {
     clearInterval(countdownRef.current);
   };
 
-  const handleEnableAudio = () => {
-    if (audioRef.current) {
-      // נוודא שהאודיו מתחיל מהזמן הנכון
-      audioRef.current
-        .play()
-        .then(() => {
-          setStatusMsg("🎵 Audio playing - listen and guess!");
-        })
-        .catch((error) => {
-          console.error("Failed to play audio:", error);
-          setStatusMsg("❌ Failed to play audio. Try refreshing the page.");
-        });
-    }
-  };
+  // הסרנו את handleEnableAudio - השמעה תמיד אוטומטית
 
   return (
     <div
@@ -254,7 +265,6 @@ const LaunchGamePage = () => {
           roundFailed={roundFailed}
           roundSucceeded={roundSucceeded}
           countdown={countdown}
-          onEnableAudio={handleEnableAudio}
         />
       ) : (
         <HostWaitingScreen

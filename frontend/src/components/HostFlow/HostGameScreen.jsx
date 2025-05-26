@@ -8,7 +8,6 @@ const HostGameScreen = ({
   roundFailed,
   roundSucceeded,
   countdown,
-  onEnableAudio,
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center px-4 relative overflow-hidden">
@@ -63,19 +62,7 @@ const HostGameScreen = ({
             </div>
           )}
 
-          {/* Enable Audio Button */}
-          {statusMsg.includes("Click to enable audio") && onEnableAudio && (
-            <div className="mb-6">
-              <button
-                onClick={onEnableAudio}
-                className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto"
-              >
-                <span className="text-2xl">🔊</span>
-                Enable Audio & Play
-                <span className="text-2xl">🎵</span>
-              </button>
-            </div>
-          )}
+          {/* הסרנו את הכפתור הכתום - השמעה תמיד אוטומטית */}
 
           {/* Action Buttons */}
           {waitingForNext && (

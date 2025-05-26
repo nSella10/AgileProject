@@ -20,6 +20,7 @@ import {
   FaTachometerAlt,
   FaEnvelope,
   FaInfoCircle,
+  FaList,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -65,7 +66,8 @@ const Navbar = () => {
   const authenticatedNavItems = [
     { path: "/dashboard", label: "Dashboard", icon: FaTachometerAlt },
     { path: "/create", label: "Create", icon: FaPlus },
-    { path: "/mygames", label: "My Games", icon: FaGamepad },
+    { path: "/join", label: "Join Game", icon: FaGamepad },
+    { path: "/mygames", label: "My Games", icon: FaList },
     { path: "/analytics", label: "Analytics", icon: FaChartLine },
   ];
 

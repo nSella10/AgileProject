@@ -100,7 +100,7 @@ const Homepage = () => {
         <div className="relative w-full px-6 py-20 text-center">
           <div className="max-w-6xl mx-auto">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight">
-              Make Music Learning
+              Make Music Games
               <span className="bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
                 {" "}
                 Magical

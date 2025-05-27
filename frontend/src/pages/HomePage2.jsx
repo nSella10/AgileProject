@@ -13,9 +13,6 @@ import {
   FaPlay,
   FaUserFriends,
   FaGift,
-  FaGraduationCap,
-  FaMicrophone,
-  FaGamepad,
 } from "react-icons/fa";
 
 const HomePage2 = () => {
@@ -110,86 +107,6 @@ const HomePage2 = () => {
                   className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300"
                 >
                   Join a Game
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* New Features Section */}
-        <div className="py-20 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                🎵 New: Music Education with AI
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Experience our revolutionary dual-purpose platform: Fun games +
-                Professional music education with AI vocal analysis
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              {/* Games Gallery */}
-              <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                <div className="bg-gradient-to-r from-blue-500 to-cyan-500 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                  <FaGamepad className="text-2xl text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Games Gallery
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Browse and play from our collection of music guessing games
-                  with friends and family.
-                </p>
-                <button
-                  onClick={() => navigate("/games")}
-                  className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 flex items-center space-x-2"
-                >
-                  <span>Explore Games</span>
-                  <FaArrowRight />
-                </button>
-              </div>
-
-              {/* Teacher Dashboard */}
-              <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                  <FaGraduationCap className="text-2xl text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  For Teachers
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Create vocal lessons, track student progress, and use AI
-                  analysis for professional music education.
-                </p>
-                <button
-                  onClick={() => navigate("/teacher-dashboard")}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 flex items-center space-x-2"
-                >
-                  <span>Start Teaching</span>
-                  <FaArrowRight />
-                </button>
-              </div>
-
-              {/* Student Dashboard */}
-              <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-500 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                  <FaMicrophone className="text-2xl text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  For Students
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Learn vocal techniques, track your progress, and get AI
-                  feedback on your singing performance.
-                </p>
-                <button
-                  onClick={() => navigate("/student-dashboard")}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-bold hover:from-green-600 hover:to-emerald-600 transition-all duration-300 flex items-center space-x-2"
-                >
-                  <span>Start Learning</span>
-                  <FaArrowRight />
                 </button>
               </div>
             </div>

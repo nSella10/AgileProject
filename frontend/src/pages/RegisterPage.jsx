@@ -9,6 +9,7 @@ const RegisterPage = () => {
   const [confirmEmail, setConfirmEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isMusicTeacher, setIsMusicTeacher] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -30,7 +31,13 @@ const RegisterPage = () => {
     }
 
     try {
-      await register({ firstName, lastName, email, password }).unwrap();
+      await register({
+        firstName,
+        lastName,
+        email,
+        password,
+        isMusicTeacher,
+      }).unwrap();
       setSuccessMessage("Registration successful! You can now log in.");
 
       setFirstName("");
@@ -39,6 +46,7 @@ const RegisterPage = () => {
       setConfirmEmail("");
       setPassword("");
       setConfirmPassword("");
+      setIsMusicTeacher(false);
     } catch (err) {
       setErrorMessage(
         err?.data?.message || err?.error || "Registration failed"
@@ -253,6 +261,32 @@ const RegisterPage = () => {
                         placeholder="Confirm your password"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
+                    </div>
+                  </div>
+
+                  {/* Music Teacher Checkbox */}
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4">
+                    <div className="flex items-start space-x-3">
+                      <input
+                        id="isMusicTeacher"
+                        type="checkbox"
+                        checked={isMusicTeacher}
+                        onChange={(e) => setIsMusicTeacher(e.target.checked)}
+                        className="mt-1 w-5 h-5 text-purple-600 border-purple-300 rounded focus:ring-purple-500 focus:ring-2"
+                      />
+                      <div className="flex-1">
+                        <label
+                          htmlFor="isMusicTeacher"
+                          className="block text-gray-700 font-medium cursor-pointer"
+                        >
+                          🎼 I am a music teacher
+                        </label>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Check this box to access advanced teaching features
+                          including lesson creation, student progress tracking,
+                          and AI vocal analysis tools.
+                        </p>
+                      </div>
                     </div>
                   </div>
 

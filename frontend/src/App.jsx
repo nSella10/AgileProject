@@ -30,6 +30,7 @@ import StudentDashboardPage from "./pages/StudentDashboardPage";
 import LiveSessionPage from "./pages/LiveSessionPage";
 
 import PrivateRoute from "./components/PrivateRoute";
+import TeacherRoute from "./components/TeacherRoute";
 import RedirectIfLoggedIn from "./components/RedirectIfLoggedIn";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -59,10 +60,33 @@ function App() {
         <Route path="/home" element={<HomePage2 />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/games" element={<GamesPage />} />
-        <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
-        <Route path="/create-lesson" element={<CreateLessonPage />} />
         <Route path="/student-dashboard" element={<StudentDashboardPage />} />
-        <Route path="/live-session" element={<LiveSessionPage />} />
+
+        {/* Protected Teacher Routes */}
+        <Route
+          path="/teacher-dashboard"
+          element={
+            <TeacherRoute>
+              <TeacherDashboardPage />
+            </TeacherRoute>
+          }
+        />
+        <Route
+          path="/create-lesson"
+          element={
+            <TeacherRoute>
+              <CreateLessonPage />
+            </TeacherRoute>
+          }
+        />
+        <Route
+          path="/live-session"
+          element={
+            <TeacherRoute>
+              <LiveSessionPage />
+            </TeacherRoute>
+          }
+        />
         <Route element={<RedirectIfLoggedIn />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

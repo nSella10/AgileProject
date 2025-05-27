@@ -69,24 +69,21 @@ const Navbar = () => {
   const authenticatedNavItems = [
     { path: "/dashboard", label: "Dashboard", icon: FaTachometerAlt },
     { path: "/games", label: "Games", icon: FaMusic },
-    { path: "/teacher-dashboard", label: "Teach", icon: FaGraduationCap },
-    { path: "/student-dashboard", label: "Learn", icon: FaMicrophone },
     { path: "/create", label: "Create", icon: FaPlus },
     { path: "/join", label: "Join Game", icon: FaGamepad },
     { path: "/mygames", label: "My Games", icon: FaList },
     { path: "/analytics", label: "Analytics", icon: FaChartLine },
   ];
 
+  // Additional navigation items for music teachers
+  const teacherNavItems = userInfo?.isMusicTeacher
+    ? [{ path: "/teacher-dashboard", label: "Teaching", icon: FaGraduationCap }]
+    : [];
+
   // Navigation items for non-authenticated users
   const publicNavItems = [
     { path: "/", label: "Home", icon: FaHome },
     { path: "/games", label: "Games", icon: FaMusic },
-    {
-      path: "/teacher-dashboard",
-      label: "For Teachers",
-      icon: FaGraduationCap,
-    },
-    { path: "/student-dashboard", label: "For Students", icon: FaMicrophone },
     { path: "/about", label: "About", icon: FaInfoCircle },
     { path: "/contact", label: "Contact", icon: FaEnvelope },
     { path: "/join", label: "Join Game", icon: FaGamepad },
@@ -117,7 +114,10 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-1">
-            {(userInfo ? authenticatedNavItems : publicNavItems).map((item) => {
+            {(userInfo
+              ? [...authenticatedNavItems, ...teacherNavItems]
+              : publicNavItems
+            ).map((item) => {
               const Icon = item.icon;
               const isActive = isActivePath(item.path);
               return (
@@ -235,30 +235,31 @@ const Navbar = () => {
 
             {/* Navigation Links - Mobile */}
             <nav className="space-y-2 mb-6">
-              {(userInfo ? authenticatedNavItems : publicNavItems).map(
-                (item) => {
-                  const Icon = item.icon;
-                  const isActive = isActivePath(item.path);
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className={`flex items-center space-x-3 py-3 px-4 rounded-xl font-medium transition-all duration-300 ${
-                        isActive
-                          ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
-                          : "text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700"
+              {(userInfo
+                ? [...authenticatedNavItems, ...teacherNavItems]
+                : publicNavItems
+              ).map((item) => {
+                const Icon = item.icon;
+                const isActive = isActivePath(item.path);
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center space-x-3 py-3 px-4 rounded-xl font-medium transition-all duration-300 ${
+                      isActive
+                        ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                        : "text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700"
+                    }`}
+                  >
+                    <Icon
+                      className={`${
+                        isActive ? "text-white" : "text-purple-600"
                       }`}
-                    >
-                      <Icon
-                        className={`${
-                          isActive ? "text-white" : "text-purple-600"
-                        }`}
-                      />
-                      <span>{item.label}</span>
-                    </Link>
-                  );
-                }
-              )}
+                    />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Action Buttons - Mobile */}

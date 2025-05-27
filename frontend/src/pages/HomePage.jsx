@@ -9,12 +9,16 @@ const Homepage = () => {
   const handleCardButtonClick = (buttonText) => {
     switch (buttonText) {
       case "Try now":
-      case "Join now":
-        navigate("/register");
+        navigate("/games"); // Fun & Games area
         break;
-      case "Create game":
-      case "Start creating":
-        navigate("/create");
+      case "Teach now":
+        navigate("/teacher-dashboard"); // Music Teachers area
+        break;
+      case "Learn now":
+        navigate("/student-dashboard"); // Students area
+        break;
+      case "Create now":
+        navigate("/create"); // Creators area
         break;
       default:
         break;
@@ -85,7 +89,7 @@ const Homepage = () => {
         <div className="relative w-full px-6 py-20 text-center">
           <div className="max-w-6xl mx-auto">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight">
-              Make Music Games
+              Make Music Learning
               <span className="bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
                 {" "}
                 Magical
@@ -145,36 +149,36 @@ const Homepage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                title: "For Friends & Family",
+                title: "For Fun & Games",
                 color: "from-emerald-500 to-teal-600",
-                icon: "👨‍👩‍👧‍👦",
+                icon: "🎮",
                 description:
-                  "Create memorable moments with loved ones through interactive music games",
+                  "Create memorable moments with friends and family through interactive music games",
                 btn: "Try now",
+              },
+              {
+                title: "For Music Teachers",
+                color: "from-purple-500 to-indigo-600",
+                icon: "🎼",
+                description:
+                  "Advanced vocal analysis tools for professional music education",
+                btn: "Teach now",
               },
               {
                 title: "For Students",
                 color: "from-orange-500 to-red-500",
                 icon: "🎓",
                 description:
-                  "Make learning music theory fun and engaging in the classroom",
-                btn: "Join now",
-              },
-              {
-                title: "For Teachers",
-                color: "from-red-500 to-pink-600",
-                icon: "👩‍🏫",
-                description:
-                  "Transform your music lessons with interactive quiz games",
-                btn: "Create game",
+                  "Learn and practice music with AI-powered feedback and analysis",
+                btn: "Learn now",
               },
               {
                 title: "For Creators",
-                color: "from-blue-500 to-indigo-600",
+                color: "from-blue-500 to-cyan-600",
                 icon: "🎨",
                 description:
                   "Build custom music experiences and share them with the world",
-                btn: "Start creating",
+                btn: "Create now",
               },
             ].map((card) => (
               <div

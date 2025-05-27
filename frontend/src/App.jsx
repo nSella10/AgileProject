@@ -23,6 +23,11 @@ import SchoolPage from "./pages/SchoolPage";
 import WorkPage from "./pages/WorkPage";
 import HomePage2 from "./pages/HomePage2";
 import CommunityPage from "./pages/CommunityPage";
+import GamesPage from "./pages/GamesPage";
+import TeacherDashboardPage from "./pages/TeacherDashboardPage";
+import CreateLessonPage from "./pages/CreateLessonPage";
+import StudentDashboardPage from "./pages/StudentDashboardPage";
+import LiveSessionPage from "./pages/LiveSessionPage";
 
 import PrivateRoute from "./components/PrivateRoute";
 import RedirectIfLoggedIn from "./components/RedirectIfLoggedIn";
@@ -53,6 +58,11 @@ function App() {
         <Route path="/work" element={<WorkPage />} />
         <Route path="/home" element={<HomePage2 />} />
         <Route path="/community" element={<CommunityPage />} />
+        <Route path="/games" element={<GamesPage />} />
+        <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
+        <Route path="/create-lesson" element={<CreateLessonPage />} />
+        <Route path="/student-dashboard" element={<StudentDashboardPage />} />
+        <Route path="/live-session" element={<LiveSessionPage />} />
         <Route element={<RedirectIfLoggedIn />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

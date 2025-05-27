@@ -53,6 +53,14 @@ const Navbar = () => {
     }
   }, [profileData, userInfo, dispatch]);
 
+  // Force refresh profile when component mounts
+  useEffect(() => {
+    if (userInfo && refetchProfile) {
+      console.log("Force refreshing profile for user:", userInfo.email);
+      refetchProfile();
+    }
+  }, [userInfo?.email, refetchProfile]);
+
   // Debug: Log current user info
   useEffect(() => {
     console.log("Current userInfo in Navbar:", userInfo);
@@ -176,7 +184,8 @@ const Navbar = () => {
                       </span>
                     )}
                     {!userInfo.isMusicTeacher &&
-                      userInfo.email === "omripeer12@gmail.com" && (
+                      (userInfo.email === "omripeer12@gmail.com" ||
+                        userInfo.email === "nharell@email.com") && (
                         <span className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-blue-500 text-white px-2 py-1 rounded-full">
                           ⚠️ Logout & Login to see teacher status
                         </span>
@@ -189,6 +198,21 @@ const Navbar = () => {
                   >
                     🔄
                   </button>
+                  {!userInfo.isMusicTeacher &&
+                    (userInfo.email === "omripeer12@gmail.com" ||
+                      userInfo.email === "nharell@email.com") && (
+                      <button
+                        onClick={() => {
+                          alert(
+                            "Please logout and login again to see teacher features!"
+                          );
+                        }}
+                        className="ml-2 text-xs bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded"
+                        title="Fix teacher status"
+                      >
+                        ⚡ Fix
+                      </button>
+                    )}
                 </div>
 
                 {/* Logout Button */}

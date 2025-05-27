@@ -21,6 +21,9 @@ import {
   FaEnvelope,
   FaInfoCircle,
   FaList,
+  FaGraduationCap,
+  FaMusic,
+  FaMicrophone,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -65,6 +68,9 @@ const Navbar = () => {
   // Navigation items for authenticated users
   const authenticatedNavItems = [
     { path: "/dashboard", label: "Dashboard", icon: FaTachometerAlt },
+    { path: "/games", label: "Games", icon: FaMusic },
+    { path: "/teacher-dashboard", label: "Teach", icon: FaGraduationCap },
+    { path: "/student-dashboard", label: "Learn", icon: FaMicrophone },
     { path: "/create", label: "Create", icon: FaPlus },
     { path: "/join", label: "Join Game", icon: FaGamepad },
     { path: "/mygames", label: "My Games", icon: FaList },
@@ -74,6 +80,13 @@ const Navbar = () => {
   // Navigation items for non-authenticated users
   const publicNavItems = [
     { path: "/", label: "Home", icon: FaHome },
+    { path: "/games", label: "Games", icon: FaMusic },
+    {
+      path: "/teacher-dashboard",
+      label: "For Teachers",
+      icon: FaGraduationCap,
+    },
+    { path: "/student-dashboard", label: "For Students", icon: FaMicrophone },
     { path: "/about", label: "About", icon: FaInfoCircle },
     { path: "/contact", label: "Contact", icon: FaEnvelope },
     { path: "/join", label: "Join Game", icon: FaGamepad },

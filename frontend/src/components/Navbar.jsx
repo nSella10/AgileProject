@@ -47,9 +47,18 @@ const Navbar = () => {
   // Update user info when profile data changes
   useEffect(() => {
     if (profileData && userInfo) {
+      console.log("Profile data received:", profileData);
+      console.log("Current userInfo:", userInfo);
       dispatch(setCredentials(profileData));
     }
   }, [profileData, userInfo, dispatch]);
+
+  // Debug: Log current user info
+  useEffect(() => {
+    console.log("Current userInfo in Navbar:", userInfo);
+    console.log("Is music teacher?", userInfo?.isMusicTeacher);
+    console.log("Profile data:", profileData);
+  }, [userInfo, profileData]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -166,7 +175,20 @@ const Navbar = () => {
                         🎼 Teacher
                       </span>
                     )}
+                    {!userInfo.isMusicTeacher &&
+                      userInfo.email === "omripeer12@gmail.com" && (
+                        <span className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-blue-500 text-white px-2 py-1 rounded-full">
+                          ⚠️ Logout & Login to see teacher status
+                        </span>
+                      )}
                   </span>
+                  <button
+                    onClick={() => refetchProfile()}
+                    className="ml-2 text-xs text-purple-600 hover:text-purple-800"
+                    title="Refresh profile"
+                  >
+                    🔄
+                  </button>
                 </div>
 
                 {/* Logout Button */}

@@ -22,21 +22,11 @@ const Homepage = () => {
   };
 
   const handleEducationClick = () => {
-    // Scroll to top before navigating
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    // Small delay to ensure smooth scroll starts before navigation
-    setTimeout(() => {
-      navigate("/pricing");
-    }, 100);
+    navigate("/pricing");
   };
 
   const handleEnterpriseClick = () => {
-    // Scroll to top before navigating
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    // Small delay to ensure smooth scroll starts before navigation
-    setTimeout(() => {
-      navigate("/about");
-    }, 100);
+    navigate("/about");
   };
 
   const handleFooterClick = (section, item) => {
@@ -73,12 +63,7 @@ const Homepage = () => {
 
     const route = routes[section]?.[item];
     if (route) {
-      // Scroll to top before navigating
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      // Small delay to ensure smooth scroll starts before navigation
-      setTimeout(() => {
-        navigate(route);
-      }, 100);
+      navigate(route);
     }
   };
 
@@ -354,10 +339,7 @@ const Homepage = () => {
                     };
                     const route = routes[item.title];
                     if (route) {
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                      setTimeout(() => {
-                        navigate(route);
-                      }, 100);
+                      navigate(route);
                     }
                   }}
                 >

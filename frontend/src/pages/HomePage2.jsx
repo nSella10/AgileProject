@@ -242,13 +242,19 @@ const HomePage2 = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => navigate("/register")}
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  navigate("/register");
+                }}
                 className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105"
               >
                 Get Started Free
               </button>
               <button
-                onClick={() => navigate("/join")}
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  navigate("/join");
+                }}
                 className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300"
               >
                 Join a Game Now

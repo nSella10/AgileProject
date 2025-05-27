@@ -26,12 +26,14 @@ import CommunityPage from "./pages/CommunityPage";
 
 import PrivateRoute from "./components/PrivateRoute";
 import RedirectIfLoggedIn from "./components/RedirectIfLoggedIn";
+import ScrollToTop from "./components/ScrollToTop";
 import NotFoundPage from "./pages/NotFoundPage";
 import JoinGamePage from "./pages/JoinGamePage";
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Public */}
         <Route element={<RedirectIfLoggedIn />}>

@@ -4,7 +4,9 @@ import {
   registerUser,
   authUser,
   logoutUser,
+  getUserProfile,
 } from "../controllers/userController.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -17,6 +19,11 @@ router.post("/register", registerUser);
 // @route POST /api/users/login
 // @access Public
 router.post("/login", authUser);
+
+// @desc Get user profile
+// @route GET /api/users/profile
+// @access Private
+router.get("/profile", protect, getUserProfile);
 
 // @desc Logout a user
 // @route POST /api/users/logout

@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../slices/authSlice";
-import { useLogoutMutation } from "../slices/usersApiSlice";
+import { logout, setCredentials } from "../slices/authSlice";
+import { useLogoutMutation, useProfileQuery } from "../slices/usersApiSlice";
 import { apiSlice } from "../slices/apiSlice";
 import {
   FaBars,
@@ -35,6 +35,21 @@ const Navbar = () => {
   const location = useLocation();
 
   const [logoutApiCall] = useLogoutMutation();
+
+  // Fetch user profile to get updated info including isMusicTeacher
+  const { data: profileData, refetch: refetchProfile } = useProfileQuery(
+    undefined,
+    {
+      skip: !userInfo, // Skip if user is not logged in
+    }
+  );
+
+  // Update user info when profile data changes
+  useEffect(() => {
+    if (profileData && userInfo) {
+      dispatch(setCredentials(profileData));
+    }
+  }, [profileData, userInfo, dispatch]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -70,9 +85,7 @@ const Navbar = () => {
     { path: "/dashboard", label: "Dashboard", icon: FaTachometerAlt },
     { path: "/games", label: "Games", icon: FaMusic },
     { path: "/create", label: "Create", icon: FaPlus },
-    { path: "/join", label: "Join Game", icon: FaGamepad },
     { path: "/mygames", label: "My Games", icon: FaList },
-    { path: "/analytics", label: "Analytics", icon: FaChartLine },
   ];
 
   // Additional navigation items for music teachers
@@ -84,8 +97,6 @@ const Navbar = () => {
   const publicNavItems = [
     { path: "/", label: "Home", icon: FaHome },
     { path: "/games", label: "Games", icon: FaMusic },
-    { path: "/about", label: "About", icon: FaInfoCircle },
-    { path: "/contact", label: "Contact", icon: FaEnvelope },
     { path: "/join", label: "Join Game", icon: FaGamepad },
   ];
 
@@ -141,19 +152,6 @@ const Navbar = () => {
             })}
           </nav>
 
-          {/* News Button - Desktop */}
-          <div className="hidden lg:flex items-center space-x-4">
-            <Link to="/blog">
-              <button className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105">
-                <FaNewspaper className="text-sm" />
-                <span className="text-sm">News</span>
-                <span className="bg-red-500 text-xs px-2 py-1 rounded-full animate-pulse">
-                  3
-                </span>
-              </button>
-            </Link>
-          </div>
-
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-3">
             {userInfo ? (
@@ -163,6 +161,11 @@ const Navbar = () => {
                   <FaUser className="text-purple-600 text-sm" />
                   <span className="text-purple-700 font-medium text-sm">
                     Hi, {userInfo.firstName}
+                    {userInfo.isMusicTeacher && (
+                      <span className="ml-2 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full">
+                        🎼 Teacher
+                      </span>
+                    )}
                   </span>
                 </div>
 
@@ -215,23 +218,19 @@ const Navbar = () => {
               <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
                 <div className="flex items-center space-x-3">
                   <FaUser className="text-purple-600" />
-                  <span className="text-purple-700 font-medium">
-                    Hi, {userInfo.firstName}!
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-purple-700 font-medium">
+                      Hi, {userInfo.firstName}!
+                    </span>
+                    {userInfo.isMusicTeacher && (
+                      <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full mt-1 self-start">
+                        🎼 Music Teacher
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
-
-            {/* News Button - Mobile */}
-            <Link to="/blog" className="block mb-4">
-              <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-3 px-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg">
-                <FaNewspaper />
-                <span>News</span>
-                <span className="bg-red-500 text-xs px-2 py-1 rounded-full animate-pulse">
-                  3
-                </span>
-              </button>
-            </Link>
 
             {/* Navigation Links - Mobile */}
             <nav className="space-y-2 mb-6">

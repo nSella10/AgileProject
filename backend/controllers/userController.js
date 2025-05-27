@@ -52,6 +52,24 @@ export const authUser = asyncHandler(async (req, res) => {
   }
 });
 
+// Get user profile
+export const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    res.json({
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      isMusicTeacher: user.isMusicTeacher,
+    });
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});
+
 // Logout user
 export const logoutUser = asyncHandler(async (req, res) => {
   res.cookie("jwt", "", {

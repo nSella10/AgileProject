@@ -19,12 +19,13 @@ const ImprovedHostGameScreen = ({
   });
 
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [tensionMusicEnabled, setTensionMusicEnabled] = useState(true);
+  const [tensionMusicEnabled, setTensionMusicEnabled] = useState(false);
   const correctSoundRef = useRef(null);
   const wrongSoundRef = useRef(null);
   const tensionMusicRef = useRef(null);
   const [isTensionMusicPlaying, setIsTensionMusicPlaying] = useState(false);
   const [tensionMusicReady, setTensionMusicReady] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     // יצירת צלילים עם Web Audio API
@@ -81,64 +82,141 @@ const ImprovedHostGameScreen = ({
     correctSoundRef.current = () => createSound(523, 0.3, "correct");
     wrongSoundRef.current = () => createSound(400, 0.2, "wrong");
 
-    // יצירת מוזיקת מתח פשוטה עם Web Audio API
+    // יצירת מוזיקת מתח עדינה בסגנון תוכנית חידונים עם Web Audio API
     const createTensionMusic = () => {
-      console.log("🎵 Creating tension music object");
+      console.log("🎵 Creating game show tension music object");
 
       let isPlaying = false;
       let intervalId = null;
+      let beatCount = 0;
+      let audioContext = null;
 
-      const playBeep = () => {
+      const createGameShowTensionLoop = () => {
         try {
-          // יצירת צליל פשוט עם Web Audio API
-          const audioContext = new (window.AudioContext ||
+          audioContext = new (window.AudioContext ||
             window.webkitAudioContext)();
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
 
-          oscillator.frequency.setValueAtTime(150, audioContext.currentTime); // תדר נמוך
-          oscillator.type = "sine";
+          // יצירת צליל עדין של שעון מתקתק
+          const createSubtleTick = (time) => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
 
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(
-            0.03,
-            audioContext.currentTime + 0.1
-          );
-          gainNode.gain.linearRampToValueAtTime(
-            0,
-            audioContext.currentTime + 0.5
-          );
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(1200, time);
 
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.03, time + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
 
-          oscillator.start(audioContext.currentTime);
-          oscillator.stop(audioContext.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
 
-          console.log("🎵 Tension beep played");
+            osc.start(time);
+            osc.stop(time + 0.1);
+          };
+
+          // יצירת צליל אקורד עדין ברקע
+          const createBackgroundChord = (time, duration) => {
+            // אקורד C מינור - יוצר תחושת מתח עדינה
+            const frequencies = [261.63, 311.13, 392.0]; // C, Eb, G
+
+            frequencies.forEach((freq, index) => {
+              const osc = audioContext.createOscillator();
+              const gain = audioContext.createGain();
+              const filter = audioContext.createBiquadFilter();
+
+              osc.type = "sine";
+              osc.frequency.setValueAtTime(freq, time);
+
+              filter.type = "lowpass";
+              filter.frequency.setValueAtTime(800, time);
+
+              gain.gain.setValueAtTime(0, time);
+              gain.gain.linearRampToValueAtTime(0.02, time + 0.2);
+              gain.gain.linearRampToValueAtTime(0.015, time + duration * 0.8);
+              gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+              osc.connect(filter);
+              filter.connect(gain);
+              gain.connect(audioContext.destination);
+
+              osc.start(time + index * 0.1);
+              osc.stop(time + duration);
+            });
+          };
+
+          // יצירת צליל מתח עדין שעולה
+          const createGentleRise = (time) => {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(220, time);
+            osc.frequency.linearRampToValueAtTime(330, time + 2.0);
+
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(600, time);
+            filter.frequency.linearRampToValueAtTime(900, time + 2.0);
+
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.04, time + 0.3);
+            gain.gain.linearRampToValueAtTime(0.06, time + 1.5);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 2.0);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.start(time);
+            osc.stop(time + 2.0);
+          };
+
+          const now = audioContext.currentTime;
+
+          // טיק-טוק עדין של שעון כל שנייה
+          createSubtleTick(now);
+          createSubtleTick(now + 1.0);
+
+          // אקורד רקע עדין
+          createBackgroundChord(now, 2.0);
+
+          // אפקט עלייה עדינה כל 3 לופים
+          if (beatCount % 3 === 0) {
+            createGentleRise(now + 0.2);
+          }
+
+          beatCount++;
+          console.log("🎵 Game show tension loop played:", beatCount);
         } catch (error) {
-          console.log("🔇 Audio beep failed:", error.message);
+          console.log("🔇 Game show tension music failed:", error.message);
         }
       };
 
       return {
         play: () => {
-          console.log("🎵 Tension music - PLAY called");
+          console.log("🎵 Game show tension music - PLAY called");
           if (!isPlaying) {
             isPlaying = true;
-            playBeep(); // ביפ ראשון מיד
-            intervalId = setInterval(playBeep, 4000); // ביפ כל 4 שניות
+            beatCount = 0;
+            createGameShowTensionLoop(); // לופ ראשון מיד
+            intervalId = setInterval(createGameShowTensionLoop, 2000); // לופ כל 2 שניות
           }
         },
         pause: () => {
-          console.log("🛑 Tension music - PAUSE called");
+          console.log("🛑 Game show tension music - PAUSE called");
           isPlaying = false;
+          beatCount = 0;
           if (intervalId) {
             clearInterval(intervalId);
             intervalId = null;
           }
+          if (audioContext) {
+            audioContext.close();
+            audioContext = null;
+          }
         },
-        volume: 0.03,
+        volume: 0.06,
       };
     };
 
@@ -300,31 +378,6 @@ const ImprovedHostGameScreen = ({
               >
                 {soundEnabled ? "🔊 Sound ON" : "🔇 Sound OFF"}
               </button>
-
-              {/* Tension Music Toggle */}
-              <button
-                onClick={() => setTensionMusicEnabled(!tensionMusicEnabled)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  tensionMusicEnabled
-                    ? "bg-purple-500 text-white"
-                    : "bg-gray-500 text-gray-200"
-                }`}
-                title={
-                  tensionMusicEnabled
-                    ? "Disable tension music"
-                    : "Enable tension music"
-                }
-              >
-                {tensionMusicEnabled ? "🎵 Music ON" : "🎵 Music OFF"}
-              </button>
-
-              {/* Tension music status indicator */}
-              {isTensionMusicPlaying && (
-                <div className="flex items-center space-x-2 bg-purple-600 bg-opacity-50 px-3 py-2 rounded-full">
-                  <div className="w-2 h-2 bg-purple-300 rounded-full animate-pulse"></div>
-                  <span className="text-purple-200 text-xs">Playing</span>
-                </div>
-              )}
             </div>
           </div>
 
@@ -465,24 +518,56 @@ const ImprovedHostGameScreen = ({
                     Continue to next song?
                   </p>
                   <button
-                    onClick={onNextRound}
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto"
+                    onClick={() => {
+                      setIsTransitioning(true);
+                      // הפוגה קצרה לפני מעבר לשיר הבא
+                      setTimeout(() => {
+                        setIsTransitioning(false);
+                        onNextRound();
+                      }, 1500); // הפוגה של 1.5 שניות
+                    }}
+                    disabled={isTransitioning}
+                    className={`font-bold px-8 py-4 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto ${
+                      isTransitioning
+                        ? "bg-gradient-to-r from-yellow-500 to-orange-500 cursor-not-allowed"
+                        : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                    } text-white`}
                   >
-                    <span className="text-2xl">▶️</span>
-                    Next Song
-                    <span className="text-2xl">🎵</span>
+                    <span className="text-2xl">
+                      {isTransitioning ? "⏳" : "▶️"}
+                    </span>
+                    {isTransitioning ? "Preparing Next Song..." : "Next Song"}
+                    <span className="text-2xl">
+                      {isTransitioning ? "⏳" : "🎵"}
+                    </span>
                   </button>
                 </div>
               ) : (
                 <div className="bg-blue-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-blue-400 border-opacity-30">
                   <div className="text-5xl mb-4">🎵</div>
                   <button
-                    onClick={onNextRound}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto"
+                    onClick={() => {
+                      setIsTransitioning(true);
+                      // הפוגה קצרה לפני מעבר לשיר הבא
+                      setTimeout(() => {
+                        setIsTransitioning(false);
+                        onNextRound();
+                      }, 1500); // הפוגה של 1.5 שניות
+                    }}
+                    disabled={isTransitioning}
+                    className={`font-bold px-8 py-4 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto ${
+                      isTransitioning
+                        ? "bg-gradient-to-r from-yellow-500 to-orange-500 cursor-not-allowed"
+                        : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    } text-white`}
                   >
-                    <span className="text-2xl">▶️</span>
-                    Next Song
-                    <span className="text-2xl">🎵</span>
+                    <span className="text-2xl">
+                      {isTransitioning ? "⏳" : "▶️"}
+                    </span>
+                    {isTransitioning ? "Preparing Next Song..." : "Next Song"}
+                    <span className="text-2xl">
+                      {isTransitioning ? "⏳" : "🎵"}
+                    </span>
                   </button>
                 </div>
               )}

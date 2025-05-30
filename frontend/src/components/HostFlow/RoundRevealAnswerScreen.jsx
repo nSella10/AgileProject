@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const RoundRevealAnswerScreen = ({
   songTitle,
@@ -9,6 +9,7 @@ const RoundRevealAnswerScreen = ({
 }) => {
   console.log(songTitle);
   const audioRef = useRef(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     // השמעת הפזמון ברקע כשמגלים את התשובה
@@ -44,12 +45,17 @@ const RoundRevealAnswerScreen = ({
   }, [songPreviewUrl]);
 
   const handleNext = () => {
+    setIsTransitioning(true);
     // עצירת המוזיקה לפני מעבר לשיר הבא
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
     }
-    onNext();
+    // הפוגה קצרה לפני מעבר לשיר הבא
+    setTimeout(() => {
+      setIsTransitioning(false);
+      onNext();
+    }, 1500); // הפוגה של 1.5 שניות
   };
 
   return (
@@ -158,12 +164,19 @@ const RoundRevealAnswerScreen = ({
         <div className="flex flex-col items-center gap-6">
           <button
             onClick={handleNext}
-            className="group bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-12 py-5 rounded-3xl font-bold text-2xl transition-all duration-300 shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden"
+            disabled={isTransitioning}
+            className={`group px-12 py-5 rounded-3xl font-bold text-2xl transition-all duration-300 shadow-2xl transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden ${
+              isTransitioning
+                ? "bg-gradient-to-r from-yellow-500 to-orange-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 hover:shadow-purple-500/25"
+            } text-white`}
           >
             <span className="relative z-10 flex items-center gap-3">
-              <span className="text-3xl">🚀</span>
-              Continue to Next Song
-              <span className="text-3xl">🎵</span>
+              <span className="text-3xl">{isTransitioning ? "⏳" : "🚀"}</span>
+              {isTransitioning
+                ? "Preparing Next Song..."
+                : "Continue to Next Song"}
+              <span className="text-3xl">{isTransitioning ? "⏳" : "🎵"}</span>
             </span>
             {/* Animated background */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-pink-400/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>

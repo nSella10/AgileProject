@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const InterimLeaderboardScreen = ({
   scores,
@@ -10,6 +10,7 @@ const InterimLeaderboardScreen = ({
   playerEmojis = {},
 }) => {
   const audioRef = useRef(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     // השמעת הפזמון ברקע כשמישהו מצליח לנחש
@@ -45,12 +46,17 @@ const InterimLeaderboardScreen = ({
   }, [songPreviewUrl]);
 
   const handleNext = () => {
+    setIsTransitioning(true);
     // עצירת המוזיקה לפני מעבר לשיר הבא
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
     }
-    onNextRound();
+    // הפוגה קצרה לפני מעבר לשיר הבא
+    setTimeout(() => {
+      setIsTransitioning(false);
+      onNextRound();
+    }, 1500); // הפוגה של 1.5 שניות
   };
   // יצירת רשימה מלאה של כל השחקנים כולל אלה עם 0 נקודות
   const allPlayers = Object.entries(scores || {});
@@ -224,12 +230,17 @@ const InterimLeaderboardScreen = ({
         {/* Action button */}
         <button
           onClick={handleNext}
-          className="group bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 text-white px-12 py-5 rounded-3xl font-bold text-2xl transition-all duration-300 shadow-2xl hover:shadow-green-500/25 transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden"
+          disabled={isTransitioning}
+          className={`group px-12 py-5 rounded-3xl font-bold text-2xl transition-all duration-300 shadow-2xl transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden ${
+            isTransitioning
+              ? "bg-gradient-to-r from-yellow-500 to-orange-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 hover:shadow-green-500/25"
+          } text-white`}
         >
           <span className="relative z-10 flex items-center gap-3">
-            <span className="text-3xl">🎵</span>
-            Next Song
-            <span className="text-3xl">🚀</span>
+            <span className="text-3xl">{isTransitioning ? "⏳" : "🎵"}</span>
+            {isTransitioning ? "Preparing Next Song..." : "Next Song"}
+            <span className="text-3xl">{isTransitioning ? "⏳" : "🚀"}</span>
           </span>
           {/* Animated background */}
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-green-400/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>

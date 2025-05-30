@@ -40,9 +40,15 @@ const JoinForm = ({
               <input
                 className="w-full p-4 rounded-2xl bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 text-white placeholder-purple-200 text-lg font-medium focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-opacity-50 transition-all duration-200"
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="Enter 6-digit game code"
                 value={roomCode}
-                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  // מאפשר רק מספרים
+                  const value = e.target.value.replace(/[^0-9]/g, "");
+                  setRoomCode(value);
+                }}
                 maxLength={6}
               />
             </div>

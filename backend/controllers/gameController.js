@@ -6,7 +6,19 @@ import Game from "../models/Game.js";
 // @access  Private
 export const createGame = asyncHandler(async (req, res) => {
   console.log("Creating a new game with song data...");
-  const { title, description, isPublic, songs } = req.body;
+  const { title, description, isPublic, songs, guessTimeLimit } = req.body;
+
+  console.log("🎮 Received game data:", {
+    title,
+    description,
+    isPublic,
+    guessTimeLimit,
+  });
+  console.log(
+    "⏱️ Received guess time limit:",
+    guessTimeLimit,
+    typeof guessTimeLimit
+  );
 
   if (!title || !songs || songs.length === 0) {
     res.status(400).json({
@@ -15,10 +27,20 @@ export const createGame = asyncHandler(async (req, res) => {
     return;
   }
 
+  // וידוא זמן ניחוש תקין
+  const validGuessTimeLimit = [15, 30, 60].includes(guessTimeLimit)
+    ? guessTimeLimit
+    : 15;
+
+  console.log("✅ Valid guess time limit:", validGuessTimeLimit);
+
   // וידוא שכל שיר מכיל את הנתונים הנדרשים
   const validatedSongs = songs.map((song) => ({
     title: song.title || "Unknown Title",
     correctAnswer: song.correctAnswer || song.title || "Unknown Title",
+    correctAnswers: song.correctAnswers || [
+      song.correctAnswer || song.title || "Unknown Title",
+    ],
     artist: song.artist || "Unknown Artist",
     previewUrl: song.previewUrl || "",
     artworkUrl: song.artworkUrl || "",
@@ -30,15 +52,28 @@ export const createGame = asyncHandler(async (req, res) => {
     description,
     songs: validatedSongs,
     isPublic,
+    guessTimeLimit: validGuessTimeLimit,
     createdBy: req.user._id,
   });
 
+  console.log(
+    "💾 About to save game with guessTimeLimit:",
+    validGuessTimeLimit
+  );
   const savedGame = await game.save();
+  console.log(
+    "✅ Game saved successfully with guessTimeLimit:",
+    savedGame.guessTimeLimit
+  );
   res.status(201).json(savedGame);
 });
 
 export const getMyGames = asyncHandler(async (req, res) => {
   const games = await Game.find({ createdBy: req.user._id });
+  console.log(`🎮 Retrieved ${games.length} games for user ${req.user._id}`);
+  if (games.length > 0) {
+    console.log("🎮 Sample game guessTimeLimit:", games[0].guessTimeLimit);
+  }
   res.json(games);
 });
 
@@ -53,6 +88,13 @@ export const getGameById = asyncHandler(async (req, res) => {
     throw new Error("Game not found");
   }
 
+  console.log("🎮 Retrieved game from DB:", {
+    id: game._id,
+    title: game.title,
+    guessTimeLimit: game.guessTimeLimit,
+    songsCount: game.songs.length,
+  });
+
   // Check if the user is the owner of the game
   if (game.createdBy.toString() !== req.user._id.toString()) {
     res.status(403);
@@ -66,7 +108,19 @@ export const getGameById = asyncHandler(async (req, res) => {
 // @route   PUT /api/games/:id
 // @access  Private
 export const updateGame = asyncHandler(async (req, res) => {
-  const { title, description, isPublic, songs } = req.body;
+  const { title, description, isPublic, songs, guessTimeLimit } = req.body;
+
+  console.log("🎮 Updating game with data:", {
+    title,
+    description,
+    isPublic,
+    guessTimeLimit,
+  });
+  console.log(
+    "⏱️ Received guess time limit:",
+    guessTimeLimit,
+    typeof guessTimeLimit
+  );
 
   const game = await Game.findById(req.params.id);
 
@@ -91,6 +145,9 @@ export const updateGame = asyncHandler(async (req, res) => {
       validatedSongs = songs.map((song) => ({
         title: song.title || "Unknown Title",
         correctAnswer: song.correctAnswer || song.title || "Unknown Title",
+        correctAnswers: song.correctAnswers || [
+          song.correctAnswer || song.title || "Unknown Title",
+        ],
         artist: song.artist || "Unknown Artist",
         previewUrl: song.previewUrl || "",
         artworkUrl: song.artworkUrl || "",
@@ -99,13 +156,27 @@ export const updateGame = asyncHandler(async (req, res) => {
     }
   }
 
+  // Validate guess time limit if provided
+  const validGuessTimeLimit =
+    guessTimeLimit !== undefined && [15, 30, 60].includes(guessTimeLimit)
+      ? guessTimeLimit
+      : game.guessTimeLimit;
+
+  console.log("✅ Valid guess time limit:", validGuessTimeLimit);
+  console.log("🔄 Current game guess time limit:", game.guessTimeLimit);
+
   // Update game fields
   game.title = title || game.title;
   game.description = description !== undefined ? description : game.description;
   game.isPublic = isPublic !== undefined ? isPublic : game.isPublic;
+  game.guessTimeLimit = validGuessTimeLimit;
   game.songs = validatedSongs;
 
   const updatedGame = await game.save();
+  console.log(
+    "💾 Game saved with guess time limit:",
+    updatedGame.guessTimeLimit
+  );
   res.json(updatedGame);
 });
 

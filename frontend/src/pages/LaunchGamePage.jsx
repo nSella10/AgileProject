@@ -4,10 +4,10 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { getSocket, disconnectSocket } from "../socket";
 import { BASE_URL } from "../constants";
-import classroomBg from "../assets/classroom-bg.png";
 
 import HostWaitingScreen from "../components/HostFlow/HostWaitingScreen";
 import HostGameScreen from "../components/HostFlow/HostGameScreen";
+import ImprovedHostGameScreen from "../components/HostFlow/ImprovedHostGameScreen";
 import InterimLeaderboardScreen from "../components/HostFlow/InterimLeaderboardScreen";
 import RoundRevealAnswerScreen from "../components/HostFlow/RoundRevealAnswerScreen";
 
@@ -28,18 +28,26 @@ const LaunchGamePage = () => {
   const [showInterimLeaderboard, setShowInterimLeaderboard] = useState(false);
   const [showAnswerReveal, setShowAnswerReveal] = useState(false);
   const [revealedSongTitle, setRevealedSongTitle] = useState("");
+  const [revealedSongPreviewUrl, setRevealedSongPreviewUrl] = useState("");
+  const [revealedSongArtist, setRevealedSongArtist] = useState("");
+  const [revealedSongArtworkUrl, setRevealedSongArtworkUrl] = useState("");
+  const [playerEmojis, setPlayerEmojis] = useState({});
   const [countdown, setCountdown] = useState(null);
   const [songNumber, setSongNumber] = useState(1);
   const [totalSongs, setTotalSongs] = useState(1);
+  const [playersAnswered, setPlayersAnswered] = useState(0);
+  const [guessTimeLimit, setGuessTimeLimit] = useState(15);
 
   const audioRef = useRef(null);
   const countdownRef = useRef(null);
 
   useEffect(() => {
+    console.log("🎮 LaunchGamePage useEffect - gameId:", gameId);
     const socket = getSocket({ userId: userInfo._id });
     socket.emit("createRoom", { gameId });
 
     socket.on("roomCreated", ({ roomCode }) => {
+      console.log("🎮 Room created with code:", roomCode);
       setRoomCode(roomCode);
     });
 
@@ -53,6 +61,7 @@ const LaunchGamePage = () => {
     });
 
     socket.on("gameStarting", () => {
+      console.log("🎬 Game is starting!");
       setGameStarted(true);
       setStatusMsg("🎬 Game is starting!");
     });
@@ -68,6 +77,12 @@ const LaunchGamePage = () => {
         songNumber,
         totalSongs,
       }) => {
+        console.log("🎵 Next round received:", {
+          roundNumber,
+          songNumber,
+          totalSongs,
+          duration,
+        });
         setStatusMsg(
           `🎵 Playing song for ${
             duration / 1000
@@ -80,11 +95,16 @@ const LaunchGamePage = () => {
         setShowInterimLeaderboard(false);
         setSongNumber(songNumber);
         setTotalSongs(totalSongs);
+        setPlayersAnswered(0); // איפוס מעקב תשובות
 
+        // עצירה ונקיון של אודיו קודם
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
-          audioRef.current = null; // נקה את הרפרנס לאודיו הקודם
+          if (audioRef.current.stopTimer) {
+            clearTimeout(audioRef.current.stopTimer);
+          }
+          audioRef.current = null;
         }
 
         // בדיקה אם זה URL מלא או יחסי
@@ -92,136 +112,372 @@ const LaunchGamePage = () => {
           ? audioUrl
           : `${BASE_URL}${audioUrl}`;
 
+        console.log(`🎵 Loading audio: ${fullAudioUrl}`);
+        console.log(`⏱️ Expected duration: ${duration}ms`);
+
         const newAudio = new Audio(fullAudioUrl);
         newAudio.crossOrigin = "anonymous";
         newAudio.preload = "auto";
 
-        // הגדרת זמן התחלה אחרי שהאודיו נטען
-        newAudio.addEventListener("loadeddata", () => {
-          // תמיד מתחילים מההתחלה (0 שניות)
-          newAudio.currentTime = 0;
-        });
-
-        // פונקציה לניסיון השמעה עם מספר ניסיונות
-        const attemptPlay = (attempt = 1) => {
-          const playPromise = newAudio.play();
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                // השמעה הצליחה
-                console.log(
-                  `🎵 Audio playing successfully (attempt ${attempt})`
-                );
-              })
-              .catch((error) => {
-                console.error(`Audio play attempt ${attempt} failed:`, error);
-
-                // אם זה הניסיון הראשון, ננסה שוב אחרי השהיה קצרה
-                if (attempt === 1) {
-                  setTimeout(() => attemptPlay(2), 300);
-                } else if (attempt === 2) {
-                  // ניסיון שלישי עם אינטראקציה של משתמש
-                  setTimeout(() => attemptPlay(3), 500);
-                } else {
-                  // אחרי 3 ניסיונות, נמשיך בלי שמע
-                  console.log(
-                    "All audio play attempts failed, continuing without audio"
-                  );
-                }
-              });
-          }
-        };
-
-        // שמירת הרפרנס לאודיו לפני התחלת השמעה
+        // שמירת הרפרנס מיד
         audioRef.current = newAudio;
 
-        // התחלת ניסיונות השמעה
-        attemptPlay();
+        // פונקציה משופרת להשמעה
+        const playAudio = () => {
+          return new Promise((resolve, reject) => {
+            const playPromise = newAudio.play();
 
-        // עצירת השמע אחרי הזמן שנקבע - חשוב לעצור בזמן!
-        const stopTimer = setTimeout(() => {
-          if (audioRef.current) {
-            console.log(`🛑 Stopping audio after ${duration}ms`);
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-          }
-        }, duration);
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  const startTime = Date.now();
+                  console.log(
+                    `✅ Audio started playing successfully at ${startTime}`
+                  );
+                  console.log(`⏰ Will stop after ${duration}ms`);
 
-        // שמירת הטיימר כדי שנוכל לבטל אותו במקרה הצורך
-        audioRef.current.stopTimer = stopTimer;
+                  // התחלת טיימר העצירה רק כשהאודיו באמת מתחיל
+                  const stopTimer = setTimeout(() => {
+                    const stopTime = Date.now();
+                    const actualDuration = stopTime - startTime;
 
-        // התחלת קאונטדאון של 15 שניות (ללא תלות בשמע)
-        setCountdown(15);
-        if (countdownRef.current) clearInterval(countdownRef.current);
+                    if (audioRef.current && audioRef.current === newAudio) {
+                      console.log(
+                        `🛑 Stopping audio after ${actualDuration}ms actual playback (expected: ${duration}ms)`
+                      );
+                      audioRef.current.pause();
+                      audioRef.current.currentTime = 0;
+                      console.log(
+                        `✅ Audio stopped successfully at ${stopTime}`
+                      );
+                    } else {
+                      console.log(`⚠️ Audio reference changed, skipping stop`);
+                    }
+                  }, duration);
 
-        countdownRef.current = setInterval(() => {
-          setCountdown((prev) => {
-            if (prev === 1) {
-              clearInterval(countdownRef.current);
-              setCountdown(null);
-              setWaitingForNext(true);
-              return 0;
+                  // שמירת הטיימר
+                  newAudio.stopTimer = stopTimer;
+
+                  resolve();
+                })
+                .catch((error) => {
+                  console.error(`❌ Audio play failed:`, error);
+                  reject(error);
+                });
+            } else {
+              // דפדפנים ישנים שלא מחזירים Promise
+              const startTime = Date.now();
+              console.log(
+                `✅ Audio started playing (legacy browser) at ${startTime}`
+              );
+              console.log(`⏰ Will stop after ${duration}ms`);
+
+              // התחלת טיימר העצירה גם לדפדפנים ישנים
+              const stopTimer = setTimeout(() => {
+                const stopTime = Date.now();
+                const actualDuration = stopTime - startTime;
+
+                if (audioRef.current && audioRef.current === newAudio) {
+                  console.log(
+                    `🛑 Stopping audio after ${actualDuration}ms actual playback (expected: ${duration}ms)`
+                  );
+                  audioRef.current.pause();
+                  audioRef.current.currentTime = 0;
+                  console.log(`✅ Audio stopped successfully at ${stopTime}`);
+                } else {
+                  console.log(`⚠️ Audio reference changed, skipping stop`);
+                }
+              }, duration);
+
+              newAudio.stopTimer = stopTimer;
+              resolve();
             }
-            return prev - 1;
           });
-        }, 1000);
+        };
+
+        // טיפול באירועי האודיו
+        newAudio.addEventListener("loadstart", () => {
+          console.log(`📥 Audio loading started`);
+        });
+
+        newAudio.addEventListener("canplay", () => {
+          console.log(`✅ Audio can start playing`);
+        });
+
+        newAudio.addEventListener("loadeddata", () => {
+          console.log(`📊 Audio data loaded`);
+          newAudio.currentTime = 0; // תמיד מתחילים מההתחלה
+        });
+
+        newAudio.addEventListener("error", (e) => {
+          console.error(`❌ Audio loading error:`, e);
+          console.error(`❌ Failed URL: ${fullAudioUrl}`);
+
+          // אם יש בעיה עם הטעינה, ננסה בלי crossOrigin
+          if (newAudio.crossOrigin) {
+            console.log(`🔄 Retrying without crossOrigin...`);
+            newAudio.crossOrigin = null;
+            newAudio.load();
+          }
+        });
+
+        // המתנה לטעינה מלאה לפני השמעה
+        const waitForLoad = () => {
+          return new Promise((resolve) => {
+            if (newAudio.readyState >= 2) {
+              // HAVE_CURRENT_DATA
+              resolve();
+            } else {
+              newAudio.addEventListener("canplay", resolve, { once: true });
+              // fallback timeout
+              setTimeout(resolve, 2000);
+            }
+          });
+        };
+
+        // פונקציה להתחלת הטיימר רק כשהאודיו מתחיל
+        const startCountdown = () => {
+          console.log(
+            `🕐 Starting countdown timer for ${guessTimeLimit} seconds`
+          );
+          console.log(`🕐 Current guessTimeLimit state:`, guessTimeLimit);
+          console.log(`🕐 Type of guessTimeLimit:`, typeof guessTimeLimit);
+          setCountdown(guessTimeLimit);
+          if (countdownRef.current) clearInterval(countdownRef.current);
+
+          countdownRef.current = setInterval(() => {
+            setCountdown((prev) => {
+              if (prev === 1) {
+                clearInterval(countdownRef.current);
+                setCountdown(null);
+                setWaitingForNext(true);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        };
+
+        // עדכון פונקציית השמעה כדי להתחיל טיימר
+        const playAudioWithTimer = () => {
+          return new Promise((resolve, reject) => {
+            const playPromise = newAudio.play();
+
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  const startTime = Date.now();
+                  console.log(
+                    `✅ Audio started playing successfully at ${startTime}`
+                  );
+                  console.log(`⏰ Will stop after ${duration}ms`);
+
+                  // התחלת הטיימר רק כשהאודיו באמת מתחיל
+                  startCountdown();
+
+                  // שליחת אירוע לשרת שהאודיו התחיל
+                  const socket = getSocket();
+                  socket.emit("audioStarted", { roomCode });
+
+                  // התחלת טיימר העצירה רק כשהאודיו באמת מתחיל
+                  const stopTimer = setTimeout(() => {
+                    const stopTime = Date.now();
+                    const actualDuration = stopTime - startTime;
+
+                    if (audioRef.current && audioRef.current === newAudio) {
+                      console.log(
+                        `🛑 Stopping audio after ${actualDuration}ms actual playback (expected: ${duration}ms)`
+                      );
+                      audioRef.current.pause();
+                      audioRef.current.currentTime = 0;
+                      console.log(
+                        `✅ Audio stopped successfully at ${stopTime}`
+                      );
+                    } else {
+                      console.log(`⚠️ Audio reference changed, skipping stop`);
+                    }
+                  }, duration);
+
+                  newAudio.stopTimer = stopTimer;
+                  resolve();
+                })
+                .catch(reject);
+            } else {
+              // דפדפנים ישנים
+              const startTime = Date.now();
+              console.log(`✅ Audio started playing (legacy) at ${startTime}`);
+              console.log(`⏰ Will stop after ${duration}ms`);
+
+              // התחלת הטיימר גם לדפדפנים ישנים
+              startCountdown();
+
+              // שליחת אירוע לשרת שהאודיו התחיל
+              const socket = getSocket();
+              socket.emit("audioStarted", { roomCode });
+
+              // התחלת טיימר העצירה גם לדפדפנים ישנים
+              const stopTimer = setTimeout(() => {
+                const stopTime = Date.now();
+                const actualDuration = stopTime - startTime;
+
+                if (audioRef.current && audioRef.current === newAudio) {
+                  console.log(
+                    `🛑 Stopping audio after ${actualDuration}ms actual playback (expected: ${duration}ms)`
+                  );
+                  audioRef.current.pause();
+                  audioRef.current.currentTime = 0;
+                  console.log(`✅ Audio stopped successfully at ${stopTime}`);
+                } else {
+                  console.log(`⚠️ Audio reference changed, skipping stop`);
+                }
+              }, duration);
+
+              newAudio.stopTimer = stopTimer;
+              resolve();
+            }
+          });
+        };
+
+        // ניסיון השמעה אחרי טעינה
+        waitForLoad().then(() => {
+          playAudioWithTimer().catch((error) => {
+            console.warn(`⚠️ First play attempt failed: ${error.message}`);
+
+            // ניסיון נוסף אחרי השהיה קצרה
+            setTimeout(() => {
+              playAudioWithTimer().catch((retryError) => {
+                console.error(
+                  `❌ Retry play also failed: ${retryError.message}`
+                );
+                // אם השמעה נכשלת, נתחיל טיימר בכל זאת
+                console.log(
+                  "🕐 Starting countdown anyway due to audio failure"
+                );
+                startCountdown();
+              });
+            }, 100);
+          });
+        });
       }
     );
 
-    socket.on("roundSucceeded", ({ scores }) => {
-      setScores(scores);
-      setShowInterimLeaderboard(true);
-      setRoundSucceeded(true);
-      setWaitingForNext(true);
-      setCountdown(null);
-      clearInterval(countdownRef.current);
+    socket.on(
+      "roundSucceeded",
+      ({
+        scores,
+        songTitle,
+        songPreviewUrl,
+        songArtist,
+        songArtworkUrl,
+        playerEmojis,
+      }) => {
+        console.log("🏆 LaunchGamePage - roundSucceeded scores:", scores);
+        setScores(scores);
+        setShowInterimLeaderboard(true);
+        setRoundSucceeded(true);
+        setWaitingForNext(true);
+        setCountdown(null);
+        clearInterval(countdownRef.current);
 
-      // עצירת השמע כשהסיבוב מצליח
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        if (audioRef.current.stopTimer) {
-          clearTimeout(audioRef.current.stopTimer);
+        // שמירת פרטי השיר להשמעה ברקע במסך הביניים
+        if (songTitle) setRevealedSongTitle(songTitle);
+        if (songPreviewUrl) setRevealedSongPreviewUrl(songPreviewUrl);
+        if (songArtist) setRevealedSongArtist(songArtist);
+        if (songArtworkUrl) setRevealedSongArtworkUrl(songArtworkUrl);
+        if (playerEmojis) setPlayerEmojis(playerEmojis);
+
+        // עצירת השמע כשהסיבוב מצליח
+        if (audioRef.current) {
+          console.log(`🎉 Round succeeded - stopping audio`);
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          if (audioRef.current.stopTimer) {
+            clearTimeout(audioRef.current.stopTimer);
+          }
         }
       }
-    });
+    );
 
-    socket.on("roundFailed", ({ allRoundsUsed, songTitle }) => {
-      setWaitingForNext(true);
-      setRoundFailed(true);
-      setRoundSucceeded(false);
-      setCountdown(null);
-      clearInterval(countdownRef.current);
-      setShowInterimLeaderboard(false);
+    socket.on(
+      "roundFailed",
+      ({
+        allRoundsUsed,
+        songTitle,
+        songPreviewUrl,
+        songArtist,
+        songArtworkUrl,
+      }) => {
+        setWaitingForNext(true);
+        setRoundFailed(true);
+        setRoundSucceeded(false);
+        setCountdown(null);
+        clearInterval(countdownRef.current);
+        setShowInterimLeaderboard(false);
 
-      // עצירת השמע כשהסיבוב נכשל
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        if (audioRef.current.stopTimer) {
-          clearTimeout(audioRef.current.stopTimer);
+        // עצירת השמע כשהסיבוב נכשל
+        if (audioRef.current) {
+          console.log(`❌ Round failed - stopping audio`);
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          if (audioRef.current.stopTimer) {
+            clearTimeout(audioRef.current.stopTimer);
+          }
+        }
+
+        if (allRoundsUsed) {
+          setShowAnswerReveal(true);
+          setRevealedSongTitle(songTitle);
+          setRevealedSongPreviewUrl(songPreviewUrl);
+          setRevealedSongArtist(songArtist);
+          setRevealedSongArtworkUrl(songArtworkUrl);
+        } else {
+          setStatusMsg("❌ No one guessed it. You can replay the song longer.");
         }
       }
-
-      if (allRoundsUsed) {
-        setShowAnswerReveal(true);
-        setRevealedSongTitle(songTitle);
-      } else {
-        setStatusMsg("❌ No one guessed it. You can replay the song longer.");
-      }
-    });
+    );
 
     socket.on("gameOver", ({ leaderboard }) => {
       setFinalLeaderboard(leaderboard);
       navigate("/final-leaderboard", { state: { leaderboard } });
     });
 
+    // האזנה לאירועי תשובות שחקנים
+    socket.on("playerAnswered", ({ totalAnswered }) => {
+      setPlayersAnswered(totalAnswered);
+    });
+
+    // קבלת זמן ניחוש מהגדרות המשחק
+    socket.on("timerStarted", ({ guessTimeLimit }) => {
+      console.log(
+        "🎮 LaunchGamePage received timerStarted with guessTimeLimit:",
+        guessTimeLimit
+      );
+      console.log("🎮 Type of received guessTimeLimit:", typeof guessTimeLimit);
+      console.log("🎮 Previous guessTimeLimit state:", guessTimeLimit);
+      setGuessTimeLimit(guessTimeLimit);
+      console.log("🎮 Updated guessTimeLimit state to:", guessTimeLimit);
+    });
+
+    // עדכון ניקוד כשמישהו עונה נכון
+    socket.on("correctAnswer", ({ scores, username, score }) => {
+      console.log(
+        `🏆 ${username} scored ${score} points. Updated scores:`,
+        scores
+      );
+      setScores(scores);
+    });
+
     return () => {
+      socket.off("playerAnswered");
+      socket.off("timerStarted");
+      socket.off("correctAnswer");
       socket.disconnect();
     };
   }, [gameId, navigate, userInfo]);
 
   const handleStartGame = () => {
+    console.log("🚀 Starting game with roomCode:", roomCode);
+    console.log("🚀 Current guessTimeLimit state:", guessTimeLimit);
     const socket = getSocket();
     socket.emit("startGame", { roomCode });
   };
@@ -239,11 +495,13 @@ const LaunchGamePage = () => {
 
     // עצירת השמע והטיימר הנוכחיים
     if (audioRef.current) {
+      console.log(`⏭️ Next round - stopping current audio`);
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       if (audioRef.current.stopTimer) {
         clearTimeout(audioRef.current.stopTimer);
       }
+      audioRef.current = null;
     }
   };
 
@@ -257,57 +515,58 @@ const LaunchGamePage = () => {
 
     // עצירת השמע והטיימר הנוכחיים
     if (audioRef.current) {
+      console.log(`🔄 Replay longer - stopping current audio`);
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       if (audioRef.current.stopTimer) {
         clearTimeout(audioRef.current.stopTimer);
       }
+      audioRef.current = null;
     }
   };
 
   // הסרנו את handleEnableAudio - השמעה תמיד אוטומטית
 
   return (
-    <div
-      style={{
-        backgroundImage: `url(${classroomBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        minHeight: "100vh",
-        width: "100%",
-      }}
-    >
+    <div>
       {showAnswerReveal ? (
-        <div
-          style={{
-            backgroundImage: `url(${classroomBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            minHeight: "100vh",
-            width: "100%",
-          }}
-        >
-          <RoundRevealAnswerScreen
-            songTitle={revealedSongTitle}
-            onNext={handleNextRound}
-          />
-        </div>
+        <RoundRevealAnswerScreen
+          songTitle={revealedSongTitle}
+          songPreviewUrl={revealedSongPreviewUrl}
+          songArtist={revealedSongArtist}
+          songArtworkUrl={revealedSongArtworkUrl}
+          onNext={handleNextRound}
+        />
       ) : showInterimLeaderboard ? (
         <InterimLeaderboardScreen
           scores={scores}
+          songPreviewUrl={revealedSongPreviewUrl}
+          songTitle={revealedSongTitle}
+          songArtist={revealedSongArtist}
+          songArtworkUrl={revealedSongArtworkUrl}
+          playerEmojis={playerEmojis}
           onNextRound={handleNextRound}
         />
       ) : finalLeaderboard ? null : gameStarted ? (
-        <HostGameScreen
-          statusMsg={statusMsg}
-          scores={scores}
-          waitingForNext={waitingForNext}
-          onNextRound={handleNextRound}
-          onReplayLonger={handleReplayLonger}
-          roundFailed={roundFailed}
-          roundSucceeded={roundSucceeded}
-          countdown={countdown}
-        />
+        <>
+          {console.log(
+            "🎮 Rendering ImprovedHostGameScreen with guessTimeLimit:",
+            guessTimeLimit
+          )}
+          <ImprovedHostGameScreen
+            statusMsg={statusMsg}
+            scores={scores}
+            waitingForNext={waitingForNext}
+            onNextRound={handleNextRound}
+            onReplayLonger={handleReplayLonger}
+            roundFailed={roundFailed}
+            roundSucceeded={roundSucceeded}
+            countdown={countdown}
+            playersAnswered={playersAnswered}
+            totalPlayers={players.length}
+            guessTimeLimit={guessTimeLimit}
+          />
+        </>
       ) : (
         <HostWaitingScreen
           roomCode={roomCode}

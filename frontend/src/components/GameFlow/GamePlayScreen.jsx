@@ -14,10 +14,18 @@ const GamePlayScreen = ({
   timeLeft,
   roundFailedForUser,
   guessResult,
+  maxTime = 15, // זמן ניחוש דינמי
 }) => {
+  console.log("🎮 GamePlayScreen props:", {
+    timeLeft,
+    maxTime,
+    hasGuessed,
+    isWaiting,
+    isGameOver,
+  });
+
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
-  const maxTime = 15;
   const progress = timeLeft ? (timeLeft / maxTime) * circumference : 0;
 
   return (
@@ -68,9 +76,14 @@ const GamePlayScreen = ({
             </div>
           )}
 
-          {/* Timer Circle */}
-          {timeLeft && !hasGuessed && !isWaiting && !isGameOver && (
+          {/* Timer Circle - מוצג תמיד כשיש זמן נותר */}
+          {timeLeft && !isGameOver && (
             <div className="flex flex-col items-center justify-center mb-8">
+              {console.log("🎮 Rendering timer circle with:", {
+                timeLeft,
+                maxTime,
+                progress,
+              })}
               <div className="relative">
                 <svg width="120" height="120" className="transform -rotate-90">
                   <circle
@@ -116,7 +129,9 @@ const GamePlayScreen = ({
                 </div>
               </div>
               <div className="mt-4 text-purple-200 text-sm animate-pulse">
-                ⏰ Time is ticking!
+                {hasGuessed
+                  ? "⏰ Waiting for others..."
+                  : "⏰ Time is ticking!"}
               </div>
             </div>
           )}

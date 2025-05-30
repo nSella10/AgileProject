@@ -12,6 +12,12 @@ const gameSchema = new mongoose.Schema(
     },
     songs: [songSchema],
     isPublic: { type: Boolean, default: false },
+    guessTimeLimit: {
+      type: Number,
+      default: 15,
+      enum: [15, 30, 60],
+      required: true,
+    }, // זמן ניחוש בשניות
   },
   { timestamps: true }
 );

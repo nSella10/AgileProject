@@ -21,6 +21,7 @@ const CreateGamePage = () => {
   const [description, setDescription] = useState("");
   const [selectedSongs, setSelectedSongs] = useState([]);
   const [isPublic, setIsPublic] = useState(true);
+  const [guessTimeLimit, setGuessTimeLimit] = useState(15);
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
@@ -50,10 +51,12 @@ const CreateGamePage = () => {
       title,
       description,
       isPublic,
+      guessTimeLimit,
       songs: selectedSongs.map((song) => ({
         title: song.title,
         artist: song.artist,
-        correctAnswer: song.title,
+        correctAnswer: song.correctAnswer || song.title,
+        correctAnswers: song.correctAnswers || [song.title],
         previewUrl: song.previewUrl,
         artworkUrl: song.artworkUrl,
         trackId: song.trackId,
@@ -186,43 +189,103 @@ const CreateGamePage = () => {
                 </div>
               </div>
 
-              {/* Visibility Settings */}
-              <div className="mt-8 p-6 bg-gray-50 rounded-2xl">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <FaUsers className="text-purple-600" />
-                  Game Visibility
-                </h3>
-                <div className="flex items-center gap-6">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="visibility"
-                      checked={isPublic}
-                      onChange={() => setIsPublic(true)}
-                      className="w-5 h-5 text-purple-600"
-                    />
-                    <div className="flex items-center gap-2">
-                      <FaGlobe className="text-green-600" />
-                      <span className="font-medium text-gray-700">Public</span>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      Anyone can join
-                    </span>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="visibility"
-                      checked={!isPublic}
-                      onChange={() => setIsPublic(false)}
-                      className="w-5 h-5 text-purple-600"
-                    />
-                    <div className="flex items-center gap-2">
-                      <FaLock className="text-orange-600" />
-                      <span className="font-medium text-gray-700">Private</span>
-                    </div>
-                    <span className="text-sm text-gray-500">Invite only</span>
-                  </label>
+              {/* Game Settings */}
+              <div className="mt-8 space-y-6">
+                {/* Visibility Settings */}
+                <div className="p-6 bg-gray-50 rounded-2xl">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <FaUsers className="text-purple-600" />
+                    Game Visibility
+                  </h3>
+                  <div className="flex items-center gap-6">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        checked={isPublic}
+                        onChange={() => setIsPublic(true)}
+                        className="w-5 h-5 text-purple-600"
+                      />
+                      <div className="flex items-center gap-2">
+                        <FaGlobe className="text-green-600" />
+                        <span className="font-medium text-gray-700">
+                          Public
+                        </span>
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        Anyone can join
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        checked={!isPublic}
+                        onChange={() => setIsPublic(false)}
+                        className="w-5 h-5 text-purple-600"
+                      />
+                      <div className="flex items-center gap-2">
+                        <FaLock className="text-orange-600" />
+                        <span className="font-medium text-gray-700">
+                          Private
+                        </span>
+                      </div>
+                      <span className="text-sm text-gray-500">Invite only</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Guess Time Limit */}
+                <div className="p-6 bg-blue-50 rounded-2xl">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    ⏱️ Guess Time Limit
+                  </h3>
+                  <div className="flex items-center gap-6">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="guessTime"
+                        checked={guessTimeLimit === 15}
+                        onChange={() => setGuessTimeLimit(15)}
+                        className="w-5 h-5 text-blue-600"
+                      />
+                      <span className="font-medium text-gray-700">
+                        15 seconds
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        Quick & exciting
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="guessTime"
+                        checked={guessTimeLimit === 30}
+                        onChange={() => setGuessTimeLimit(30)}
+                        className="w-5 h-5 text-blue-600"
+                      />
+                      <span className="font-medium text-gray-700">
+                        30 seconds
+                      </span>
+                      <span className="text-sm text-gray-500">Balanced</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="guessTime"
+                        checked={guessTimeLimit === 60}
+                        onChange={() => setGuessTimeLimit(60)}
+                        className="w-5 h-5 text-blue-600"
+                      />
+                      <span className="font-medium text-gray-700">
+                        60 seconds
+                      </span>
+                      <span className="text-sm text-gray-500">Relaxed</span>
+                    </label>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-3">
+                    How long should players have to guess each song?
+                  </p>
                 </div>
               </div>
             </div>
@@ -297,6 +360,7 @@ const CreateGamePage = () => {
                   <ul className="text-sm text-purple-700 space-y-1">
                     <li>• Mix popular and lesser-known songs for variety</li>
                     <li>• Choose songs from different genres and eras</li>
+                    <li>• Drag songs to reorder them as you like</li>
                     <li>• Aim for 5-10 songs for optimal game length</li>
                     <li>• Test your game with friends before sharing</li>
                   </ul>

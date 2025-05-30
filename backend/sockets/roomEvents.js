@@ -11,6 +11,13 @@ const handleRoomEvents = (io, socket) => {
         return;
       }
 
+      console.log(`🎮 Creating room for game:`, {
+        id: game._id,
+        title: game.title,
+        guessTimeLimit: game.guessTimeLimit,
+        songsCount: game.songs.length,
+      });
+
       const userId = socket.handshake.auth.userId;
       console.log(`User ID from socket: ${userId}`);
       console.log(`Game created by: ${game.createdBy}`);
@@ -25,11 +32,17 @@ const handleRoomEvents = (io, socket) => {
       rooms.set(roomCode, {
         hostSocketId: socket.id,
         gameId,
+        game, // שמירת פרטי המשחק כולל זמן ניחוש
         players: [],
         currentSongIndex: 0,
         currentAudioDuration: 1000, // 1 שנייה בהתחלה
         scores: {}, // username -> score
+        playerAnswerTimes: {}, // username -> timestamp when they answered
       });
+
+      console.log(
+        `🎮 Room ${roomCode} created with game guessTimeLimit: ${game.guessTimeLimit}`
+      );
 
       socket.join(roomCode);
 

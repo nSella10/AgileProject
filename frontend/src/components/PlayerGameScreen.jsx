@@ -22,17 +22,29 @@ const PlayerGameScreen = () => {
     });
 
     // כשהשרת מחזיר תגובה לניחוש
-    socket.on("guessResult", ({ correct, message, newScore }) => {
-      setFeedback(message);
+    socket.on("answerFeedback", ({ correct, score }) => {
+      if (correct) {
+        setFeedback(`✅ Correct! +${score} points`);
+        setScore((prevScore) => prevScore + score);
+      } else {
+        setFeedback("❌ Wrong answer");
+      }
       setIsGuessing(false);
-      if (correct) setScore(newScore);
+    });
+
+    // עדכון ניקוד כללי מהשרת
+    socket.on("correctAnswer", ({ scores, username }) => {
+      if (scores[username] !== undefined) {
+        setScore(scores[username]);
+      }
     });
 
     return () => {
       socket.off("startRound");
-      socket.off("guessResult");
+      socket.off("answerFeedback");
+      socket.off("correctAnswer");
     };
-  }, []);
+  }, [username]);
 
   const handleSubmitGuess = () => {
     if (!guess) return;

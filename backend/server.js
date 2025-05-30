@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import gameRoutes from "./routes/gameRoutes.js";
+import lessonRoutes from "./routes/lessonRoutes.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 import socketManager from "./sockets/index.js";
 import cookieParser from "cookie-parser";
@@ -18,7 +19,10 @@ import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load environment variables first
 dotenv.config();
+
+// Then connect to database
 connectDB();
 
 const app = express();
@@ -48,6 +52,7 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 // 🧭 Routes
 app.use("/api/users", userRoutes);
 app.use("/api/games", gameRoutes);
+app.use("/api/lessons", lessonRoutes);
 
 // 🧱 Serve React frontend if build exists
 const staticPath = path.join(__dirname, "../frontend/build");

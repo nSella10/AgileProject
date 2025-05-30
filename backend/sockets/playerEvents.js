@@ -43,6 +43,12 @@ export const handlePlayerEvents = (io, socket) => {
     };
     room.players.push(newPlayer);
 
+    // אם המשחק כבר התחיל, הוסף את השחקן לניקוד עם 0 נקודות
+    if (room.scores) {
+      room.scores[username] = 0;
+      console.log(`🏆 Added ${username} to scores with 0 points`);
+    }
+
     socket.join(roomCode);
     console.log(`✅ Player ${username} joined room ${roomCode}`);
     socket.emit("roomJoined");

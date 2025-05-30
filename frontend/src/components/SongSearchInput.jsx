@@ -1,6 +1,190 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { FaPlay, FaPause, FaPlus, FaTimes } from "react-icons/fa";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
+import {
+  FaPlay,
+  FaPause,
+  FaPlus,
+  FaTimes,
+  FaGripVertical,
+  FaSearch,
+  FaEdit,
+  FaCheck,
+} from "react-icons/fa";
 import { useLazySearchSongsQuery } from "../slices/gamesApiSlice";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+// קומפוננטה לפריט שיר שניתן לגרור - מאופטמת עם React.memo
+const SortableSongItem = React.memo(({ song, index, onRemove, onEdit }) => {
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editedTitle, setEditedTitle] = React.useState(song.title);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: song.trackId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? "none" : transition, // ביטול אנימציה בזמן גרירה
+    opacity: isDragging ? 0.8 : 1, // פחות שקיפות
+    zIndex: isDragging ? 1000 : "auto", // z-index גבוה יותר
+  };
+
+  const handleSaveEdit = () => {
+    if (editedTitle.trim() && editedTitle !== song.title) {
+      onEdit(index, editedTitle.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditedTitle(song.title);
+    setIsEditing(false);
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center p-3 bg-gray-50 rounded-lg border ${
+        isDragging
+          ? "shadow-xl bg-white border-blue-400 scale-105"
+          : "hover:bg-gray-100 hover:border-gray-300 transition-colors duration-150"
+      }`}
+    >
+      {/* מספר השיר */}
+      <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-bold mr-3">
+        {index + 1}
+      </div>
+
+      {/* ידית גרירה */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md mr-2 transition-colors duration-100"
+        title="Drag to reorder"
+      >
+        <FaGripVertical size={14} />
+      </div>
+
+      <img
+        src={song.artworkUrl}
+        alt={song.title}
+        className="w-10 h-10 rounded-md mr-3"
+      />
+      <div className="flex-1">
+        {isEditing ? (
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              className="w-full px-2 py-1 border border-blue-300 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter correct answer"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSaveEdit();
+                if (e.key === "Escape") handleCancelEdit();
+              }}
+              autoFocus
+            />
+            <p className="text-xs text-gray-500">Original: {song.title}</p>
+          </div>
+        ) : (
+          <>
+            <p className="font-medium text-gray-900">{song.title}</p>
+            <p className="text-sm text-gray-600">{song.artist}</p>
+          </>
+        )}
+      </div>
+
+      {/* כפתורי פעולה */}
+      <div className="flex items-center gap-1">
+        {isEditing ? (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSaveEdit();
+              }}
+              className="text-green-600 hover:text-green-800 p-2"
+              title="Save changes"
+            >
+              <FaCheck size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleCancelEdit();
+              }}
+              className="text-gray-500 hover:text-gray-700 p-2"
+              title="Cancel"
+            >
+              <FaTimes size={14} />
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsEditing(true);
+              }}
+              className="text-blue-600 hover:text-blue-800 p-2"
+              title="Edit answer"
+            >
+              <FaEdit size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onRemove(index);
+              }}
+              className="text-red-500 hover:text-red-700 p-2"
+              title="Remove song"
+            >
+              <FaTimes size={14} />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+});
+
+// הוספת שם לקומפוננטה לצורכי debugging
+SortableSongItem.displayName = "SortableSongItem";
 
 const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,6 +195,40 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
   const searchTimeoutRef = useRef(null);
 
   const [searchSongs, { isLoading }] = useLazySearchSongsQuery();
+
+  // הגדרת סנסורים לגרירה - מותאמים לביצועים טובים יותר
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 1, // התחלת גרירה אחרי פיקסל אחד בלבד - מהיר יותר
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // פונקציה לטיפול בסיום גרירה - מאופטמת
+  const handleDragEnd = useCallback(
+    (event) => {
+      const { active, over } = event;
+
+      if (active.id !== over?.id && over) {
+        const oldIndex = selectedSongs.findIndex(
+          (song) => song.trackId === active.id
+        );
+        const newIndex = selectedSongs.findIndex(
+          (song) => song.trackId === over.id
+        );
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const newSongs = arrayMove(selectedSongs, oldIndex, newIndex);
+          onSongSelect(newSongs, true); // true מציין שזה עדכון של הרשימה
+        }
+      }
+    },
+    [selectedSongs, onSongSelect]
+  );
 
   // חיפוש שירים דרך ה-API שלנו
   const handleSearch = useCallback(
@@ -86,20 +304,79 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
     }
   };
 
-  // בחירת שיר
+  // פונקציה ליצירת תשובות נכונות מרובות
+  const generateCorrectAnswers = (trackName, artistName) => {
+    const answers = [];
+
+    // התשובה המלאה
+    answers.push(trackName);
+
+    // הסרת סוגריים ותוכנם
+    const withoutParentheses = trackName.replace(/\([^)]*\)/g, "").trim();
+    if (withoutParentheses !== trackName && withoutParentheses.length > 0) {
+      answers.push(withoutParentheses);
+    }
+
+    // הסרת סוגריים מרובעים ותוכנם
+    const withoutBrackets = trackName.replace(/\[[^\]]*\]/g, "").trim();
+    if (withoutBrackets !== trackName && withoutBrackets.length > 0) {
+      answers.push(withoutBrackets);
+    }
+
+    // הסרת "feat.", "ft.", "featuring" וכל מה שאחריהם
+    const withoutFeat = trackName
+      .replace(/\s*(feat\.|ft\.|featuring).*$/i, "")
+      .trim();
+    if (withoutFeat !== trackName && withoutFeat.length > 0) {
+      answers.push(withoutFeat);
+    }
+
+    // הסרת מילים נפוצות בסוף כמו "Remix", "Radio Edit", "Extended Version"
+    const withoutVersions = trackName
+      .replace(
+        /\s*(remix|radio edit|extended version|acoustic|live|instrumental).*$/i,
+        ""
+      )
+      .trim();
+    if (withoutVersions !== trackName && withoutVersions.length > 0) {
+      answers.push(withoutVersions);
+    }
+
+    // הסרת סימני פיסוק מיותרים
+    const cleanTitle = trackName
+      .replace(/[^\w\s\u0590-\u05FF]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (cleanTitle !== trackName && cleanTitle.length > 0) {
+      answers.push(cleanTitle);
+    }
+
+    // הסרת כפילויות והחזרת רשימה ייחודית
+    return [...new Set(answers)].filter((answer) => answer.length > 0);
+  };
+
+  // בחירת שיר - ללא מחיקת החיפוש
   const selectSong = (song) => {
+    const correctAnswers = generateCorrectAnswers(
+      song.trackName,
+      song.artistName
+    );
+
     const songData = {
       title: song.trackName,
       artist: song.artistName,
+      correctAnswer: song.trackName, // התשובה הראשית
+      correctAnswers: correctAnswers, // כל התשובות האפשריות
       previewUrl: song.previewUrl,
       artworkUrl: song.artworkUrl100,
       trackId: song.trackId,
     };
 
     onSongSelect(songData);
-    setSearchTerm("");
-    setShowResults(false);
-    setSearchResults([]);
+    // לא מוחקים את החיפוש כדי שהמשתמש יוכל להוסיף עוד שירים
+    // setSearchTerm("");
+    // setShowResults(false);
+    // setSearchResults([]);
 
     // עצירת השמעה אם פועלת
     if (audioRef.current) {
@@ -114,19 +391,78 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
     return selectedSongs.some((song) => song.trackId === trackId);
   };
 
+  // פונקציה להסרת שיר - מאופטמת
+  const removeSong = useCallback(
+    (index) => {
+      const updatedSongs = selectedSongs.filter((_, i) => i !== index);
+      onSongSelect(updatedSongs, true);
+    },
+    [selectedSongs, onSongSelect]
+  );
+
+  // פונקציה לעריכת שיר - מאופטמת
+  const editSong = useCallback(
+    (index, newTitle) => {
+      const updatedSongs = selectedSongs.map((song, i) => {
+        if (i === index) {
+          const correctAnswers = generateCorrectAnswers(newTitle, song.artist);
+          return {
+            ...song,
+            title: newTitle,
+            correctAnswer: newTitle,
+            correctAnswers: correctAnswers,
+          };
+        }
+        return song;
+      });
+      onSongSelect(updatedSongs, true);
+    },
+    [selectedSongs, onSongSelect]
+  );
+
+  // רשימת IDs של השירים - מאופטמת
+  const songIds = useMemo(
+    () => selectedSongs.map((song) => song.trackId),
+    [selectedSongs]
+  );
+
+  // פונקציה לניקוי החיפוש
+  const clearSearch = () => {
+    setSearchTerm("");
+    setShowResults(false);
+    setSearchResults([]);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setCurrentlyPlaying(null);
+  };
+
   return (
     <div className="relative">
       <div className="mb-4">
         <label className="block text-gray-700 font-semibold mb-2">
           Search Songs
         </label>
-        <input
-          type="text"
-          placeholder="Type song name or artist..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Type song name or artist..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-3 pr-20 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+              title="Clear search"
+            >
+              <FaTimes size={14} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* תוצאות חיפוש */}
@@ -216,45 +552,41 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
         </div>
       )}
 
-      {/* רשימת שירים שנבחרו */}
+      {/* רשימת שירים שנבחרו עם drag and drop */}
       {selectedSongs.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-3">
-            Selected Songs ({selectedSongs.length})
-          </h3>
-          <div className="space-y-2">
-            {selectedSongs.map((song, index) => (
-              <div
-                key={song.trackId}
-                className="flex items-center p-3 bg-gray-50 rounded-lg border"
-              >
-                <img
-                  src={song.artworkUrl}
-                  alt={song.title}
-                  className="w-10 h-10 rounded-md mr-3"
-                />
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">{song.title}</p>
-                  <p className="text-sm text-gray-600">{song.artist}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const updatedSongs = selectedSongs.filter(
-                      (_, i) => i !== index
-                    );
-                    onSongSelect(updatedSongs, true); // true מציין שזה מחיקה
-                  }}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                  title="Remove song"
-                >
-                  <FaTimes size={14} />
-                </button>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-700">
+              Selected Songs ({selectedSongs.length})
+            </h3>
+            <p className="text-sm text-gray-500">
+              💡 Drag <FaGripVertical className="inline mx-1" /> to reorder •
+              Click <FaEdit className="inline mx-1" /> to edit answer
+            </p>
           </div>
+
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={songIds}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-2">
+                {selectedSongs.map((song, index) => (
+                  <SortableSongItem
+                    key={song.trackId}
+                    song={song}
+                    index={index}
+                    onRemove={removeSong}
+                    onEdit={editSong}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
       )}
     </div>

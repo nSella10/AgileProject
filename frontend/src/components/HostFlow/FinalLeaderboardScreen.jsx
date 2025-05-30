@@ -14,9 +14,16 @@ const FinalLeaderboardScreen = ({ leaderboard }) => {
         {leaderboard.map((entry) => (
           <div
             key={entry.username}
-            className="text-lg font-semibold mb-3 border-b border-purple-300 pb-2"
+            className="text-lg font-semibold mb-3 border-b border-purple-300 pb-2 flex items-center justify-between"
           >
-            🥇 Place {entry.place}: {entry.username} – {entry.score} pts
+            <div className="flex items-center gap-2">
+              <span>🥇</span>
+              <span className="text-2xl">{entry.emoji || "🎮"}</span>
+              <span>
+                Place {entry.place}: {entry.username}
+              </span>
+            </div>
+            <span className="font-bold">{entry.score} pts</span>
           </div>
         ))}
 

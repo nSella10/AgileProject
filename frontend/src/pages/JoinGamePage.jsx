@@ -21,6 +21,7 @@ const JoinGamePage = () => {
   const [totalSongs, setTotalSongs] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(null);
+  const [maxTime, setMaxTime] = useState(15); // זמן ניחוש מקסימלי
   const [roundFailedForUser, setRoundFailedForUser] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [currentPlayerName, setCurrentPlayerName] = useState("");
@@ -48,41 +49,58 @@ const JoinGamePage = () => {
       setStatusMsg("🎬 Game is starting!");
     });
 
-    socket.on(
-      "nextRound",
-      ({ roundNumber, roundDeadline, songNumber, totalSongs }) => {
-        setStatusMsg(`🕵️ Round ${roundNumber} - Listen and guess!`);
-        setHasGuessedThisRound(false);
-        setIsWaitingBetweenRounds(false);
-        setRoundFailedForUser(false);
-        setSongNumber(songNumber);
-        setTotalSongs(totalSongs);
-        setSubmitted(false);
-        setGuessResult(null);
+    socket.on("nextRound", ({ roundNumber, songNumber, totalSongs }) => {
+      setStatusMsg(`🎵 Round ${roundNumber} - Loading song...`);
+      setHasGuessedThisRound(false);
+      setIsWaitingBetweenRounds(false);
+      setRoundFailedForUser(false);
+      setSongNumber(songNumber);
+      setTotalSongs(totalSongs);
+      setSubmitted(false);
+      setGuessResult(null);
 
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        if (timerInterval.current) clearInterval(timerInterval.current);
+      // ניקוי טיימרים קודמים
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (timerInterval.current) clearInterval(timerInterval.current);
 
-        const now = Date.now();
-        const msLeft = roundDeadline - now;
-        const seconds = Math.ceil(msLeft / 1000);
-        setTimeLeft(seconds);
+      // עדיין לא מתחילים טיימר - נחכה לאירוע timerStarted
+      setTimeLeft(null);
+    });
 
-        timerInterval.current = setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev === 1) {
-              clearInterval(timerInterval.current);
-              return null;
-            }
-            return prev - 1;
-          });
-        }, 1000);
+    // אירוע חדש - כשהטיימר מתחיל באמת
+    socket.on("timerStarted", ({ roundDeadline, guessTimeLimit }) => {
+      console.log("🕐 Timer started for players");
+      console.log(`⏱️ Guess time limit: ${guessTimeLimit} seconds`);
+      console.log(`⏱️ Setting maxTime to: ${guessTimeLimit}`);
+      setStatusMsg(`🕵️ Listen and guess!`);
 
-        timeoutRef.current = setTimeout(() => {
-          setIsWaitingBetweenRounds(true);
-        }, msLeft);
-      }
-    );
+      const now = Date.now();
+      const msLeft = roundDeadline - now;
+      const seconds = Math.max(1, Math.ceil(msLeft / 1000)); // מינימום 1 שנייה
+      setTimeLeft(seconds);
+      setMaxTime(guessTimeLimit); // עדכון זמן מקסימלי
+
+      console.log(
+        `⏱️ Timer set - timeLeft: ${seconds}, maxTime: ${guessTimeLimit}`
+      );
+
+      // ניקוי טיימר קודם
+      if (timerInterval.current) clearInterval(timerInterval.current);
+
+      timerInterval.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerInterval.current);
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      timeoutRef.current = setTimeout(() => {
+        setIsWaitingBetweenRounds(true);
+      }, msLeft);
+    });
 
     socket.on("answerFeedback", ({ correct }) => {
       setGuessResult(correct ? "correct" : "wrong");
@@ -109,6 +127,7 @@ const JoinGamePage = () => {
       socket.off("roomJoinError");
       socket.off("gameStarting");
       socket.off("nextRound");
+      socket.off("timerStarted");
       socket.off("answerFeedback");
       socket.off("roundFailed");
       socket.off("gameOver");
@@ -170,6 +189,11 @@ const JoinGamePage = () => {
     return <WaitingScreen playerEmoji={playerEmoji} username={username} />;
   }
 
+  console.log("🎮 JoinGamePage rendering GamePlayScreen with:", {
+    timeLeft,
+    maxTime,
+  });
+
   return (
     <GamePlayScreen
       guess={guess}
@@ -183,6 +207,7 @@ const JoinGamePage = () => {
       totalSongs={totalSongs}
       submitted={submitted}
       timeLeft={timeLeft}
+      maxTime={maxTime}
       roundFailedForUser={roundFailedForUser}
       guessResult={guessResult}
     />

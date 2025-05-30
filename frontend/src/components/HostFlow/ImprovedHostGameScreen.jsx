@@ -79,14 +79,75 @@ const ImprovedHostGameScreen = ({
     correctSoundRef.current = () => createSound(523, 0.3, "correct");
     wrongSoundRef.current = () => createSound(400, 0.2, "wrong");
 
-    // יצירת מוזיקת מתח
-    const tensionMusic = new Audio();
-    // מוזיקת מתח מתאימה - Suspense/Tension Music
-    tensionMusic.src =
-      "https://www.bensound.com/bensound-music/bensound-suspense.mp3";
-    tensionMusic.loop = true;
-    tensionMusic.volume = 0.2; // עוצמה נמוכה כדי לא להפריע
-    tensionMusicRef.current = tensionMusic;
+    // יצירת מוזיקת מתח פשוטה עם Web Audio API
+    const createTensionMusic = () => {
+      try {
+        const audioContext = new (window.AudioContext ||
+          window.webkitAudioContext)();
+        let isPlaying = false;
+        let timeoutId = null;
+
+        const playTensionBeep = () => {
+          if (!isPlaying) return;
+
+          // יצירת צליל מתח פשוט - ביפ נמוך
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+
+          oscillator.frequency.setValueAtTime(200, audioContext.currentTime); // תדר נמוך
+          oscillator.type = "sine"; // צליל רך
+
+          // הגדרת עוצמה נמוכה
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(
+            0.05,
+            audioContext.currentTime + 0.1
+          );
+          gainNode.gain.linearRampToValueAtTime(
+            0,
+            audioContext.currentTime + 0.3
+          );
+
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.3);
+
+          // חזרה כל 3 שניות
+          if (isPlaying) {
+            timeoutId = setTimeout(playTensionBeep, 3000);
+          }
+        };
+
+        return {
+          play: () => {
+            console.log("🎵 Starting simple tension music");
+            isPlaying = true;
+            playTensionBeep();
+          },
+          pause: () => {
+            console.log("🛑 Stopping simple tension music");
+            isPlaying = false;
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+              timeoutId = null;
+            }
+          },
+          volume: 0.05,
+        };
+      } catch (error) {
+        console.log("❌ Web Audio API not supported, using fallback");
+        return {
+          play: () => console.log("🎵 Tension music (fallback) - playing"),
+          pause: () => console.log("🛑 Tension music (fallback) - stopped"),
+          volume: 0.05,
+        };
+      }
+    };
+
+    tensionMusicRef.current = createTensionMusic();
+    console.log("🎵 Simple tension music initialized");
 
     // ניקוי בעת יציאה מהקומפוננטה
     return () => {
@@ -123,22 +184,44 @@ const ImprovedHostGameScreen = ({
 
   // השמעת מוזיקת מתח כשהשחקנים מנחשים
   useEffect(() => {
-    if (!soundEnabled || !tensionMusicRef.current) return;
+    console.log("🎵 Tension music effect triggered:", {
+      soundEnabled,
+      tensionMusicExists: !!tensionMusicRef.current,
+      countdown,
+      waitingForNext,
+      shouldPlay: countdown !== null && !waitingForNext,
+    });
+
+    if (!soundEnabled || !tensionMusicRef.current) {
+      console.log(
+        "🔇 Tension music blocked - soundEnabled:",
+        soundEnabled,
+        "tensionMusicRef:",
+        !!tensionMusicRef.current
+      );
+      return;
+    }
 
     if (countdown !== null && !waitingForNext) {
       // השחקנים מנחשים - נשמיע מוזיקת מתח
-      const playTensionMusic = async () => {
+      console.log("🎵 Attempting to play tension music...");
+      if (!isTensionMusicPlaying) {
         try {
-          await tensionMusicRef.current.play();
+          console.log("🎵 Calling play() on tension music...");
+          tensionMusicRef.current.play();
           setIsTensionMusicPlaying(true);
-          console.log("🎵 Tension music started");
+          console.log("✅ Tension music started successfully");
         } catch (error) {
-          console.log("🔇 Tension music autoplay blocked:", error);
+          console.log("🔇 Tension music failed:", error.message);
+          console.log("🔇 Error details:", error);
         }
-      };
-      playTensionMusic();
+      }
     } else {
       // עצירת מוזיקת המתח
+      console.log(
+        "🛑 Should stop tension music - isTensionMusicPlaying:",
+        isTensionMusicPlaying
+      );
       if (isTensionMusicPlaying && tensionMusicRef.current) {
         tensionMusicRef.current.pause();
         setIsTensionMusicPlaying(false);

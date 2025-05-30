@@ -14,6 +14,8 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const fromCreate = location.state?.fromCreate; // נבדוק אם הופנינו מ־/create
+  const authMessage = location.state?.message; // הודעה מהניווט
+  const redirectAfterLogin = location.state?.redirectAfterLogin; // לאן להפנות אחרי התחברות
 
   const [login, { isLoading }] = useLoginMutation();
 
@@ -24,7 +26,15 @@ const LoginPage = () => {
     try {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials(res));
-      fromCreate ? navigate("/create") : navigate("/dashboard");
+
+      // הפניה לפי הקונטקסט
+      if (redirectAfterLogin) {
+        navigate(redirectAfterLogin);
+      } else if (fromCreate) {
+        navigate("/create");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setErrorMessage(err?.data?.message || "Login failed");
     }
@@ -96,11 +106,11 @@ const LoginPage = () => {
               <p className="text-gray-600">Sign in to your account</p>
             </div>
 
-            {fromCreate && (
+            {(fromCreate || authMessage) && (
               <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm">
                 <div className="flex items-center">
-                  <span className="mr-2">ℹ️</span>
-                  You must be logged in to create a game.
+                  <span className="mr-2">🔐</span>
+                  {authMessage || "You must be logged in to create a game."}
                 </div>
               </div>
             )}

@@ -1,7 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import PageLayout from "../components/PageLayout";
 import vocalAnalysisService from "../services/vocalAnalysisService";
+import {
+  useGetLessonByIdQuery,
+  useNextSongMutation,
+  usePreviousSongMutation,
+  useSetSongMutation,
+  useAddStudentRecordingMutation,
+  useStartLiveLessonMutation,
+} from "../slices/lessonsApiSlice";
+import { toast } from "react-toastify";
 import {
   FaPlay,
   FaStop,
@@ -25,10 +35,12 @@ import {
 
 const LiveSessionPage = () => {
   const navigate = useNavigate();
+  const { lessonId } = useParams();
+  const { userInfo } = useSelector((state) => state.auth);
   const audioRef = useRef(null);
   const recordingRef = useRef(null);
 
-  const [sessionState, setSessionState] = useState("setup"); // setup, playing, recording, analyzing, completed
+  const [sessionState, setSessionState] = useState("setup"); // setup, waiting, playing, recording, analyzing, completed
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -38,19 +50,34 @@ const LiveSessionPage = () => {
   const [analysisResults, setAnalysisResults] = useState(null);
   const [realTimeAnalysis, setRealTimeAnalysis] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [recordedData, setRecordedData] = useState([]);
+  const [lessonPin, setLessonPin] = useState("");
+  const [connectedStudents, setConnectedStudents] = useState([]);
 
-  // Mock lesson data
-  const currentLesson = {
-    title: "Vocal Warm-ups - Do Re Mi",
-    student: "Alex Johnson",
-    song: {
-      title: "Do-Re-Mi",
-      artist: "The Sound of Music",
-      duration: "2:18",
-    },
-    playbackStart: 30, // seconds
-    playbackDuration: 15, // seconds
-  };
+  // Fetch lesson data
+  const {
+    data: lessonData,
+    isLoading,
+    error,
+  } = useGetLessonByIdQuery(lessonId);
+
+  // Debug logging
+  useEffect(() => {
+    console.log("🔍 LiveSessionPage Debug Info:");
+    console.log("- Lesson ID:", lessonId);
+    console.log("- Is Loading:", isLoading);
+    console.log("- Error:", error);
+    console.log("- Lesson Data:", lessonData);
+  }, [lessonId, isLoading, error, lessonData]);
+  const [nextSong] = useNextSongMutation();
+  const [previousSong] = usePreviousSongMutation();
+  const [setSong] = useSetSongMutation();
+  const [addStudentRecording] = useAddStudentRecordingMutation();
+  const [startLiveLesson] = useStartLiveLessonMutation();
+
+  // Get current song from lesson data
+  const currentSong = lessonData?.songs?.[lessonData.currentSongIndex || 0];
+  const currentSongIndex = lessonData?.currentSongIndex || 0;
 
   // Mock analysis results
   const mockAnalysisResults = {
@@ -101,14 +128,92 @@ const LiveSessionPage = () => {
     };
   }, []);
 
+  const handleStartLesson = async () => {
+    try {
+      console.log("🚀 Starting lesson with ID:", lessonId);
+      // Start live lesson and get lesson pin from server
+      const result = await startLiveLesson(lessonId).unwrap();
+      console.log("✅ Lesson started successfully:", result);
+      setLessonPin(result.roomCode);
+      setSessionState("waiting");
+      toast.success(`Lesson started! Pin: ${result.roomCode}`);
+    } catch (error) {
+      console.error("❌ Failed to start lesson:", error);
+      toast.error(
+        `Failed to start lesson: ${
+          error.message || error.data?.message || "Unknown error"
+        }`
+      );
+    }
+  };
+
   const handlePlaySong = () => {
+    if (!currentSong) return;
+
     setSessionState("playing");
     setIsPlaying(true);
-    // Simulate audio playback
-    setTimeout(() => {
-      setIsPlaying(false);
-      setSessionState("recording");
-    }, currentLesson.playbackDuration * 1000);
+
+    // Play actual audio if available
+    if (audioRef.current && currentSong.previewUrl) {
+      audioRef.current.src = currentSong.previewUrl;
+      audioRef.current.currentTime = currentSong.playbackStart || 0;
+      audioRef.current.play();
+
+      // Stop after playback duration
+      setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+        setIsPlaying(false);
+        setSessionState("recording");
+      }, (currentSong.playbackDuration || 10) * 1000);
+    } else {
+      // Fallback to simulation
+      setTimeout(() => {
+        setIsPlaying(false);
+        setSessionState("recording");
+      }, (currentSong.playbackDuration || 10) * 1000);
+    }
+  };
+
+  const handleNextSong = async () => {
+    if (!lessonData || currentSongIndex >= lessonData.songs.length - 1) return;
+
+    try {
+      await nextSong(lessonId).unwrap();
+      setSessionState("setup");
+      setAnalysisResults(null);
+      toast.success("Switched to next song!");
+    } catch (error) {
+      toast.error("Failed to switch to next song");
+    }
+  };
+
+  const handlePreviousSong = async () => {
+    if (!lessonData || currentSongIndex <= 0) return;
+
+    try {
+      await previousSong(lessonId).unwrap();
+      setSessionState("setup");
+      setAnalysisResults(null);
+      toast.success("Switched to previous song!");
+    } catch (error) {
+      toast.error("Failed to switch to previous song");
+    }
+  };
+
+  const handleSelectSong = async (songIndex) => {
+    if (!lessonData || songIndex < 0 || songIndex >= lessonData.songs.length)
+      return;
+
+    try {
+      await setSong({ lessonId, songIndex }).unwrap();
+      setSessionState("setup");
+      setAnalysisResults(null);
+      toast.success("Song switched!");
+    } catch (error) {
+      toast.error("Failed to switch song");
+    }
   };
 
   const handleStartRecording = async () => {
@@ -163,7 +268,8 @@ const LiveSessionPage = () => {
     setSessionState("analyzing");
 
     // Stop vocal analysis
-    const recordedData = vocalAnalysisService.stopRecording();
+    const recordedDataFromService = vocalAnalysisService.stopRecording();
+    setRecordedData(recordedDataFromService);
 
     // Clear real-time analysis interval
     if (audioRef.current?.analysisInterval) {
@@ -171,17 +277,19 @@ const LiveSessionPage = () => {
     }
 
     // Perform comprehensive analysis
-    setTimeout(() => {
-      if (recordedData.length > 0) {
+    setTimeout(async () => {
+      let finalAnalysisResults;
+
+      if (recordedDataFromService.length > 0) {
         // Use real analysis results
         const analysis = vocalAnalysisService.compareWithReference(null); // No reference for now
 
         // Calculate detailed metrics
-        const pitches = recordedData
+        const pitches = recordedDataFromService
           .filter((d) => d.pitch > 50)
           .map((d) => d.pitch);
-        const volumes = recordedData.map((d) => d.volume);
-        const qualities = recordedData.map((d) => d.quality);
+        const volumes = recordedDataFromService.map((d) => d.volume);
+        const qualities = recordedDataFromService.map((d) => d.quality);
 
         const avgPitch =
           pitches.length > 0
@@ -191,7 +299,7 @@ const LiveSessionPage = () => {
         const avgQuality =
           qualities.reduce((a, b) => a + b, 0) / qualities.length;
 
-        const realAnalysisResults = {
+        finalAnalysisResults = {
           overallScore: Math.round(avgQuality),
           pitchAccuracy: Math.round(
             Math.min(100, avgPitch > 0 ? 85 + Math.random() * 15 : 0)
@@ -216,16 +324,31 @@ const LiveSessionPage = () => {
             avgPitch: Math.round(avgPitch),
             avgVolume: Math.round(avgVolume),
             avgQuality: Math.round(avgQuality),
-            totalSamples: recordedData.length,
+            totalSamples: recordedDataFromService.length,
           },
         };
-
-        setAnalysisResults(realAnalysisResults);
       } else {
         // Fallback to mock data if no recording
-        setAnalysisResults(mockAnalysisResults);
+        finalAnalysisResults = mockAnalysisResults;
       }
 
+      // Save recording to database
+      try {
+        await addStudentRecording({
+          lessonId,
+          studentName: "Teacher Demo",
+          songIndex: currentSongIndex,
+          analysisResult: finalAnalysisResults,
+        }).unwrap();
+
+        console.log("✅ Recording saved to database");
+        toast.success("Recording analyzed and saved!");
+      } catch (error) {
+        console.error("❌ Failed to save recording:", error);
+        toast.error("Failed to save recording, but analysis completed");
+      }
+
+      setAnalysisResults(finalAnalysisResults);
       setSessionState("completed");
     }, 3000);
   };
@@ -236,36 +359,275 @@ const LiveSessionPage = () => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const renderSetupPhase = () => (
+  const renderSetupPhase = () => {
+    if (isLoading) {
+      return (
+        <div className="text-center space-y-6">
+          <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-8">
+            <div className="animate-spin text-6xl text-purple-500 mx-auto mb-4">
+              ⏳
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Loading Lesson...
+            </h2>
+          </div>
+        </div>
+      );
+    }
+
+    if (error || !lessonData || !currentSong) {
+      return (
+        <div className="text-center space-y-6">
+          <div className="bg-gradient-to-r from-red-100 to-pink-100 rounded-2xl p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
+            <p className="text-gray-600 mb-4">Failed to load lesson data.</p>
+            <button
+              onClick={() => navigate("/teacher-dashboard")}
+              className="bg-gray-500 text-white px-6 py-3 rounded-xl"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        {/* Song Selection */}
+        {lessonData.songs.length > 1 && (
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Select Song ({currentSongIndex + 1} of {lessonData.songs.length})
+            </h3>
+            <div className="flex items-center justify-center space-x-4 mb-4">
+              <button
+                onClick={handlePreviousSong}
+                disabled={currentSongIndex === 0}
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ← Previous
+              </button>
+              <div className="flex space-x-2">
+                {lessonData.songs.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectSong(index)}
+                    className={`w-8 h-8 rounded-full ${
+                      index === currentSongIndex
+                        ? "bg-purple-500 text-white"
+                        : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleNextSong}
+                disabled={currentSongIndex === lessonData.songs.length - 1}
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Current Session */}
+        <div className="text-center">
+          <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-8">
+            <FaHeadphones className="text-6xl text-purple-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Ready to Start?
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Students will listen to a {currentSong.playbackDuration || 10}
+              -second clip and then record their vocal attempts.
+            </p>
+
+            <div className="bg-white rounded-xl p-4 mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-gray-900">
+                  Current Song: {currentSong.title}
+                </h3>
+                {lessonData?.songs?.length > 1 && (
+                  <span className="text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                    {currentSongIndex + 1} of {lessonData.songs.length} songs
+                  </span>
+                )}
+              </div>
+              <p className="text-gray-600 text-sm">by {currentSong.artist}</p>
+              <p className="text-gray-500 text-sm mt-1">
+                Playing from {formatTime(currentSong.playbackStart || 0)} for{" "}
+                {currentSong.playbackDuration || 10} seconds
+              </p>
+
+              {/* Show all songs in lesson */}
+              {lessonData?.songs?.length > 1 && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <p className="text-xs text-gray-500 mb-2">
+                    All songs in this lesson:
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {lessonData.songs.map((song, index) => (
+                      <span
+                        key={index}
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          index === currentSongIndex
+                            ? "bg-purple-500 text-white"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {index + 1}. {song.title}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col space-y-4">
+              <button
+                onClick={handleStartLesson}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
+              >
+                <FaPlay className="inline mr-2" />
+                Start Lesson
+              </button>
+
+              {/* Song Navigation - only show if multiple songs */}
+              {lessonData?.songs?.length > 1 && (
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={handlePreviousSong}
+                    disabled={currentSongIndex === 0}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600 transition-colors"
+                  >
+                    ← Previous Song
+                  </button>
+                  <button
+                    onClick={handleNextSong}
+                    disabled={
+                      currentSongIndex === (lessonData?.songs?.length || 1) - 1
+                    }
+                    className="bg-gray-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600 transition-colors"
+                  >
+                    Next Song →
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderWaitingPhase = () => (
     <div className="text-center space-y-6">
-      <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-8">
-        <FaHeadphones className="text-6xl text-purple-500 mx-auto mb-4" />
+      <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl p-8">
+        <FaUsers className="text-6xl text-green-500 mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Ready to Start?
+          Lesson Started!
         </h2>
         <p className="text-gray-600 mb-6">
-          The student will listen to a {currentLesson.playbackDuration}-second
-          clip and then record their attempt.
+          Students can now join using the lesson pin below
         </p>
-        <div className="bg-white rounded-xl p-4 mb-6">
-          <h3 className="font-semibold text-gray-900 mb-2">
-            Song: {currentLesson.song.title}
+
+        {/* Lesson Pin Display */}
+        <div className="bg-white rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Lesson Pin
           </h3>
-          <p className="text-gray-600 text-sm">
-            by {currentLesson.song.artist}
-          </p>
-          <p className="text-gray-500 text-sm mt-1">
-            Playing from {formatTime(currentLesson.playbackStart)} for{" "}
-            {currentLesson.playbackDuration} seconds
+          <div className="text-4xl font-bold text-purple-600 mb-4 tracking-wider">
+            {lessonPin}
+          </div>
+          <p className="text-sm text-gray-500">
+            Share this pin with your students
           </p>
         </div>
-        <button
-          onClick={handlePlaySong}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
-        >
-          <FaPlay className="inline mr-2" />
-          Start Lesson
-        </button>
+
+        {/* Connected Students */}
+        <div className="bg-white rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Connected Students ({connectedStudents.length})
+          </h3>
+          {connectedStudents.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {connectedStudents.map((student, index) => (
+                <div
+                  key={index}
+                  className="bg-green-100 text-green-800 px-3 py-2 rounded-lg text-sm"
+                >
+                  {student.name}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">
+              Waiting for students to join...
+            </p>
+          )}
+        </div>
+
+        {/* Current Song Info */}
+        <div className="bg-white rounded-xl p-4 mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-gray-900">
+              Current Song: {currentSong.title}
+            </h3>
+            {lessonData?.songs?.length > 1 && (
+              <span className="text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                {currentSongIndex + 1} of {lessonData.songs.length} songs
+              </span>
+            )}
+          </div>
+          <p className="text-gray-600 text-sm">by {currentSong.artist}</p>
+          <p className="text-gray-500 text-sm mt-1">
+            Playing from {formatTime(currentSong.playbackStart || 0)} for{" "}
+            {currentSong.playbackDuration || 10} seconds
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={handlePlaySong}
+            disabled={connectedStudents.length === 0}
+            className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-4 rounded-xl font-bold hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <FaPlay className="inline mr-2" />
+            Start Playing Song
+          </button>
+
+          <button
+            onClick={() => {
+              setSessionState("setup");
+              setLessonPin("");
+              setConnectedStudents([]);
+            }}
+            className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-4 rounded-xl font-bold hover:from-gray-600 hover:to-gray-700 transition-all duration-300"
+          >
+            Cancel Lesson
+          </button>
+        </div>
+
+        {/* Add Mock Students Button for Testing */}
+        <div className="mt-4">
+          <button
+            onClick={() => {
+              const mockStudents = [
+                { name: "Alice", id: "1" },
+                { name: "Bob", id: "2" },
+                { name: "Charlie", id: "3" },
+              ];
+              setConnectedStudents(mockStudents);
+            }}
+            className="text-sm text-purple-600 hover:text-purple-800 underline"
+          >
+            Add Mock Students (for testing)
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -276,18 +638,16 @@ const LiveSessionPage = () => {
         <FaVolumeUp className="text-6xl text-blue-500 mx-auto mb-4 animate-pulse" />
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Playing Song</h2>
         <p className="text-gray-600 mb-6">
-          Student is listening to the reference audio...
+          Students are listening to the reference audio...
         </p>
         <div className="bg-white rounded-xl p-6">
           <div className="flex items-center justify-center space-x-4 mb-4">
             <FaMusic className="text-blue-500 text-2xl" />
             <div>
               <h3 className="font-semibold text-gray-900">
-                {currentLesson.song.title}
+                {currentSong?.title}
               </h3>
-              <p className="text-gray-600 text-sm">
-                {currentLesson.song.artist}
-              </p>
+              <p className="text-gray-600 text-sm">{currentSong?.artist}</p>
             </div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
@@ -295,14 +655,14 @@ const LiveSessionPage = () => {
               className="bg-blue-500 h-2 rounded-full transition-all duration-1000"
               style={{
                 width: `${
-                  (currentTime / currentLesson.playbackDuration) * 100
+                  (currentTime / (currentSong?.playbackDuration || 10)) * 100
                 }%`,
               }}
             ></div>
           </div>
           <p className="text-sm text-gray-500">
             {formatTime(currentTime)} /{" "}
-            {formatTime(currentLesson.playbackDuration)}
+            {formatTime(currentSong?.playbackDuration || 10)}
           </p>
         </div>
       </div>
@@ -329,8 +689,8 @@ const LiveSessionPage = () => {
         </h2>
         <p className="text-gray-600 mb-6">
           {isRecording
-            ? "Student is singing. AI is analyzing in real-time..."
-            : "Click the button below to start recording the student's performance."}
+            ? "Students are singing. AI is analyzing in real-time..."
+            : "Click the button below to start recording students' performances."}
         </p>
 
         {isRecording && (
@@ -441,7 +801,7 @@ const LiveSessionPage = () => {
           Analysis Complete!
         </h2>
         <p className="text-gray-600">
-          Here's the detailed feedback for {currentLesson.student}
+          Here's the detailed feedback for the students
         </p>
       </div>
 
@@ -591,18 +951,39 @@ const LiveSessionPage = () => {
       {/* Actions */}
       <div className="flex justify-center space-x-4">
         <button
+          onClick={() => {
+            setSessionState("setup");
+            setAnalysisResults(null);
+            setRecordedData([]);
+          }}
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+        >
+          <FaPlay className="inline mr-2" />
+          Record Again
+        </button>
+
+        {lessonData?.songs?.length > 1 &&
+          currentSongIndex < (lessonData?.songs?.length || 1) - 1 && (
+            <button
+              onClick={() => {
+                handleNextSong();
+                setSessionState("setup");
+                setAnalysisResults(null);
+                setRecordedData([]);
+              }}
+              className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-bold hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
+            >
+              <FaMusic className="inline mr-2" />
+              Try Next Song
+            </button>
+          )}
+
+        <button
           onClick={() => navigate("/teacher-dashboard")}
           className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl font-bold hover:from-gray-600 hover:to-gray-700 transition-all duration-300"
         >
           <FaSave className="inline mr-2" />
-          Save & Return
-        </button>
-        <button
-          onClick={() => setSessionState("setup")}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
-        >
-          <FaPlay className="inline mr-2" />
-          New Session
+          End Session
         </button>
       </div>
     </div>
@@ -612,6 +993,8 @@ const LiveSessionPage = () => {
     switch (sessionState) {
       case "setup":
         return renderSetupPhase();
+      case "waiting":
+        return renderWaitingPhase();
       case "playing":
         return renderPlayingPhase();
       case "recording":
@@ -644,7 +1027,8 @@ const LiveSessionPage = () => {
                     Live Vocal Session
                   </h1>
                   <p className="text-purple-100">
-                    {currentLesson.title} • Student: {currentLesson.student}
+                    {lessonData?.title} • Teacher:{" "}
+                    {userInfo?.firstName || "Teacher"}
                   </p>
                 </div>
               </div>
@@ -658,44 +1042,51 @@ const LiveSessionPage = () => {
         {/* Progress Indicator */}
         <div className="max-w-4xl mx-auto px-6 py-6">
           <div className="flex items-center justify-center space-x-4">
-            {["Setup", "Playing", "Recording", "Analyzing", "Results"].map(
-              (step, index) => (
-                <div key={step} className="flex items-center">
+            {[
+              "Setup",
+              "Waiting",
+              "Playing",
+              "Recording",
+              "Analyzing",
+              "Results",
+            ].map((step, index) => (
+              <div key={step} className="flex items-center">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    index <=
+                    [
+                      "setup",
+                      "waiting",
+                      "playing",
+                      "recording",
+                      "analyzing",
+                      "completed",
+                    ].indexOf(sessionState)
+                      ? "bg-purple-500 text-white"
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {index + 1}
+                </div>
+                {index < 5 && (
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      index <=
+                    className={`w-12 h-1 mx-2 ${
+                      index <
                       [
                         "setup",
+                        "waiting",
                         "playing",
                         "recording",
                         "analyzing",
                         "completed",
                       ].indexOf(sessionState)
-                        ? "bg-purple-500 text-white"
-                        : "bg-gray-200 text-gray-600"
+                        ? "bg-purple-500"
+                        : "bg-gray-200"
                     }`}
-                  >
-                    {index + 1}
-                  </div>
-                  {index < 4 && (
-                    <div
-                      className={`w-12 h-1 mx-2 ${
-                        index <
-                        [
-                          "setup",
-                          "playing",
-                          "recording",
-                          "analyzing",
-                          "completed",
-                        ].indexOf(sessionState)
-                          ? "bg-purple-500"
-                          : "bg-gray-200"
-                      }`}
-                    ></div>
-                  )}
-                </div>
-              )
-            )}
+                  ></div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -705,6 +1096,18 @@ const LiveSessionPage = () => {
             {renderCurrentPhase()}
           </div>
         </div>
+
+        {/* Hidden Audio Element */}
+        <audio
+          ref={audioRef}
+          onEnded={() => setIsPlaying(false)}
+          onPause={() => setIsPlaying(false)}
+          onTimeUpdate={() => {
+            if (audioRef.current) {
+              setCurrentTime(Math.floor(audioRef.current.currentTime));
+            }
+          }}
+        />
       </div>
     </PageLayout>
   );

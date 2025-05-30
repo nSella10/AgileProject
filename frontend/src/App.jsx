@@ -28,6 +28,8 @@ import TeacherDashboardPage from "./pages/TeacherDashboardPage";
 import CreateLessonPage from "./pages/CreateLessonPage";
 import StudentDashboardPage from "./pages/StudentDashboardPage";
 import LiveSessionPage from "./pages/LiveSessionPage";
+import JoinLessonPage from "./pages/JoinLessonPage";
+import LessonAnalyticsPage from "./pages/LessonAnalyticsPage";
 
 import PrivateRoute from "./components/PrivateRoute";
 import TeacherRoute from "./components/TeacherRoute";
@@ -46,6 +48,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
         </Route>
         <Route path="/join" element={<JoinGamePage />} />
+        <Route path="/join-lesson" element={<JoinLessonPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/help" element={<HelpPage />} />
         <Route path="/blog" element={<BlogPage />} />
@@ -80,10 +83,18 @@ function App() {
           }
         />
         <Route
-          path="/live-session"
+          path="/live-session/:lessonId"
           element={
             <TeacherRoute>
               <LiveSessionPage />
+            </TeacherRoute>
+          }
+        />
+        <Route
+          path="/lesson-analytics/:lessonId"
+          element={
+            <TeacherRoute>
+              <LessonAnalyticsPage />
             </TeacherRoute>
           }
         />

@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout, setCredentials } from "../slices/authSlice";
 import { useLogoutMutation, useProfileQuery } from "../slices/usersApiSlice";
+import { useMyGamesQuery } from "../slices/gamesApiSlice";
 import { apiSlice } from "../slices/apiSlice";
 import {
   FaBars,
@@ -13,6 +14,7 @@ import {
   FaGamepad,
   FaChartLine,
   FaUser,
+  FaUsers,
   FaSignOutAlt,
   FaUserPlus,
   FaSignInAlt,
@@ -24,6 +26,7 @@ import {
   FaGraduationCap,
   FaMusic,
   FaMicrophone,
+  FaChevronDown,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -43,6 +46,11 @@ const Navbar = () => {
       skip: !userInfo, // Skip if user is not logged in
     }
   );
+
+  // Fetch user's games for stats
+  const { data: myGames = [] } = useMyGamesQuery(undefined, {
+    skip: !userInfo, // Skip if user is not logged in
+  });
 
   // Update user info when profile data changes
   useEffect(() => {
@@ -97,24 +105,61 @@ const Navbar = () => {
     }
   };
 
+  // Handle auth required navigation
+  const handleAuthRequired = (path, label) => {
+    navigate("/login", {
+      state: {
+        from: path,
+        message: `Please log in to access ${label}`,
+        redirectAfterLogin: path,
+      },
+    });
+  };
+
   // Navigation items for authenticated users
   const authenticatedNavItems = [
     { path: "/dashboard", label: "Dashboard", icon: FaTachometerAlt },
-    { path: "/games", label: "Games", icon: FaMusic },
     { path: "/create", label: "Create", icon: FaPlus },
     { path: "/mygames", label: "My Games", icon: FaList },
+    { path: "/analytics", label: "Analytics", icon: FaChartLine },
+  ];
+
+  // Join items (separate for better organization)
+  const joinItems = [
+    { path: "/join", label: "Join Game", icon: FaGamepad },
+    { path: "/join-lesson", label: "Join Lesson", icon: FaMicrophone },
   ];
 
   // Additional navigation items for music teachers
-  const teacherNavItems = userInfo?.isMusicTeacher
-    ? [{ path: "/teacher-dashboard", label: "Teaching", icon: FaGraduationCap }]
-    : [];
+  // Temporary fix: Check email directly for known teachers
+  const isKnownTeacher =
+    userInfo &&
+    (userInfo.email === "omripeer12@gmail.com" ||
+      userInfo.email === "nharell@email.com");
+
+  const teacherNavItems =
+    userInfo?.isMusicTeacher || isKnownTeacher
+      ? [
+          {
+            path: "/teacher-dashboard",
+            label: "Teaching",
+            icon: FaGraduationCap,
+          },
+        ]
+      : [];
 
   // Navigation items for non-authenticated users
   const publicNavItems = [
     { path: "/", label: "Home", icon: FaHome },
-    { path: "/games", label: "Games", icon: FaMusic },
     { path: "/join", label: "Join Game", icon: FaGamepad },
+    { path: "/join-lesson", label: "Join Lesson", icon: FaMicrophone },
+  ];
+
+  // Items that require authentication (will redirect to login)
+  const authRequiredItems = [
+    { path: "/create", label: "Create Game", icon: FaPlus },
+    { path: "/mygames", label: "My Games", icon: FaList },
+    { path: "/analytics", label: "Analytics", icon: FaChartLine },
   ];
 
   // Check if current path is active
@@ -142,6 +187,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-1">
+            {/* Regular navigation items */}
             {(userInfo
               ? [...authenticatedNavItems, ...teacherNavItems]
               : publicNavItems
@@ -167,29 +213,84 @@ const Navbar = () => {
                 </Link>
               );
             })}
+
+            {/* Auth required items for non-authenticated users */}
+            {!userInfo &&
+              authRequiredItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => handleAuthRequired(item.path, item.label)}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-xl font-medium text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700 transition-all duration-300"
+                  >
+                    <Icon className="text-sm text-purple-600" />
+                    <span className="text-sm">{item.label}</span>
+                  </button>
+                );
+              })}
+
+            {/* Join Dropdown for authenticated users */}
+            {userInfo && (
+              <div className="relative group">
+                <button className="flex items-center space-x-2 px-4 py-2 rounded-xl font-medium text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700 transition-all duration-300">
+                  <FaGamepad className="text-sm text-purple-600" />
+                  <span className="text-sm">Join</span>
+                  <FaChevronDown className="text-xs" />
+                </button>
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  {joinItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className="flex items-center space-x-2 px-4 py-3 text-sm text-gray-700 hover:text-purple-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 first:rounded-t-xl last:rounded-b-xl transition-all duration-200"
+                      >
+                        <Icon className="text-sm text-purple-600" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-3">
             {userInfo ? (
               <>
+                {/* Quick Stats */}
+                <div className="flex items-center space-x-3 bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2 rounded-xl border border-gray-200">
+                  <div className="flex items-center space-x-1">
+                    <FaGamepad className="text-blue-600 text-sm" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {myGames.length}
+                    </span>
+                  </div>
+                  <div className="w-px h-4 bg-gray-300"></div>
+                  <div className="flex items-center space-x-1">
+                    <FaUsers className="text-green-600 text-sm" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {myGames.reduce(
+                        (sum, game) => sum + (game.playersCount || 0),
+                        0
+                      )}
+                    </span>
+                  </div>
+                </div>
+
                 {/* User Info */}
                 <div className="flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-2 rounded-xl border border-purple-200">
                   <FaUser className="text-purple-600 text-sm" />
                   <span className="text-purple-700 font-medium text-sm">
                     Hi, {userInfo.firstName}
-                    {userInfo.isMusicTeacher && (
+                    {(userInfo.isMusicTeacher || isKnownTeacher) && (
                       <span className="ml-2 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full">
                         🎼 Teacher
                       </span>
                     )}
-                    {!userInfo.isMusicTeacher &&
-                      (userInfo.email === "omripeer12@gmail.com" ||
-                        userInfo.email === "nharell@email.com") && (
-                        <span className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-blue-500 text-white px-2 py-1 rounded-full">
-                          ⚠️ Logout & Login to see teacher status
-                        </span>
-                      )}
                   </span>
                   <button
                     onClick={() => refetchProfile()}
@@ -198,21 +299,6 @@ const Navbar = () => {
                   >
                     🔄
                   </button>
-                  {!userInfo.isMusicTeacher &&
-                    (userInfo.email === "omripeer12@gmail.com" ||
-                      userInfo.email === "nharell@email.com") && (
-                      <button
-                        onClick={() => {
-                          alert(
-                            "Please logout and login again to see teacher features!"
-                          );
-                        }}
-                        className="ml-2 text-xs bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded"
-                        title="Fix teacher status"
-                      >
-                        ⚡ Fix
-                      </button>
-                    )}
                 </div>
 
                 {/* Logout Button */}
@@ -268,7 +354,7 @@ const Navbar = () => {
                     <span className="text-purple-700 font-medium">
                       Hi, {userInfo.firstName}!
                     </span>
-                    {userInfo.isMusicTeacher && (
+                    {(userInfo.isMusicTeacher || isKnownTeacher) && (
                       <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-2 py-1 rounded-full mt-1 self-start">
                         🎼 Music Teacher
                       </span>
@@ -280,6 +366,7 @@ const Navbar = () => {
 
             {/* Navigation Links - Mobile */}
             <nav className="space-y-2 mb-6">
+              {/* Regular navigation items */}
               {(userInfo
                 ? [...authenticatedNavItems, ...teacherNavItems]
                 : publicNavItems
@@ -305,6 +392,58 @@ const Navbar = () => {
                   </Link>
                 );
               })}
+
+              {/* Auth required items for non-authenticated users - Mobile */}
+              {!userInfo &&
+                authRequiredItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.path}
+                      onClick={() => {
+                        handleAuthRequired(item.path, item.label);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center space-x-3 py-3 px-4 rounded-xl font-medium text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700 transition-all duration-300"
+                    >
+                      <Icon className="text-purple-600" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+
+              {/* Join Items - Mobile */}
+              {userInfo && (
+                <>
+                  <div className="border-t border-gray-200 pt-2 mt-4">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-2">
+                      Join Activities
+                    </div>
+                    {joinItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = isActivePath(item.path);
+                      return (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          className={`flex items-center space-x-3 py-3 px-4 rounded-xl font-medium transition-all duration-300 ${
+                            isActive
+                              ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                              : "text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700"
+                          }`}
+                        >
+                          <Icon
+                            className={`${
+                              isActive ? "text-white" : "text-purple-600"
+                            }`}
+                          />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </nav>
 
             {/* Action Buttons - Mobile */}

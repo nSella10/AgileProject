@@ -40,6 +40,7 @@ const LaunchGamePage = () => {
 
   const audioRef = useRef(null);
   const countdownRef = useRef(null);
+  const roomCodeRef = useRef("");
 
   useEffect(() => {
     console.log("🎮 LaunchGamePage useEffect - gameId:", gameId);
@@ -49,6 +50,7 @@ const LaunchGamePage = () => {
     socket.on("roomCreated", ({ roomCode }) => {
       console.log("🎮 Room created with code:", roomCode);
       setRoomCode(roomCode);
+      roomCodeRef.current = roomCode; // שמירה ב-ref גם
     });
 
     socket.on("roomJoinError", (message) => {
@@ -77,12 +79,17 @@ const LaunchGamePage = () => {
         songNumber,
         totalSongs,
       }) => {
+        // שמירת roomCode לשימוש בפונקציות פנימיות
+        const currentRoomCode = roomCodeRef.current;
         console.log("🎵 Next round received:", {
           roundNumber,
           songNumber,
           totalSongs,
           duration,
+          roomCode: currentRoomCode,
         });
+        console.log("🔍 roomCodeRef.current:", roomCodeRef.current);
+        console.log("🔍 roomCode state:", roomCode);
         setStatusMsg(
           `🎵 Playing song for ${
             duration / 1000
@@ -258,7 +265,11 @@ const LaunchGamePage = () => {
 
                   // שליחת אירוע לשרת שהאודיו התחיל
                   const socket = getSocket();
-                  socket.emit("audioStarted", { roomCode });
+                  console.log(
+                    "📤 Sending audioStarted with roomCode:",
+                    currentRoomCode
+                  );
+                  socket.emit("audioStarted", { roomCode: currentRoomCode });
 
                   // התחלת טיימר העצירה רק כשהאודיו באמת מתחיל
                   const stopTimer = setTimeout(() => {
@@ -274,6 +285,15 @@ const LaunchGamePage = () => {
                       console.log(
                         `✅ Audio stopped successfully at ${stopTime}`
                       );
+
+                      // שליחת אירוע לשרת שהאודיו נגמר - עכשיו הטיימר יתחיל
+                      const socket = getSocket();
+                      console.log(
+                        "📤 Sending audioEnded with roomCode:",
+                        currentRoomCode
+                      );
+                      socket.emit("audioEnded", { roomCode: currentRoomCode });
+                      console.log("📤 Audio ended - timer should start now");
                     } else {
                       console.log(`⚠️ Audio reference changed, skipping stop`);
                     }
@@ -296,7 +316,7 @@ const LaunchGamePage = () => {
 
               // שליחת אירוע לשרת שהאודיו התחיל
               const socket = getSocket();
-              socket.emit("audioStarted", { roomCode });
+              socket.emit("audioStarted", { roomCode: currentRoomCode });
 
               // התחלת טיימר העצירה גם לדפדפנים ישנים
               const stopTimer = setTimeout(() => {
@@ -310,6 +330,11 @@ const LaunchGamePage = () => {
                   audioRef.current.pause();
                   audioRef.current.currentTime = 0;
                   console.log(`✅ Audio stopped successfully at ${stopTime}`);
+
+                  // שליחת אירוע לשרת שהאודיו נגמר - עכשיו הטיימר יתחיל
+                  const socket = getSocket();
+                  socket.emit("audioEnded", { roomCode: currentRoomCode });
+                  console.log("📤 Audio ended - timer should start now");
                 } else {
                   console.log(`⚠️ Audio reference changed, skipping stop`);
                 }

@@ -15,6 +15,7 @@ const GamePlayScreen = ({
   roundFailedForUser,
   guessResult,
   maxTime = 15, // זמן ניחוש דינמי
+  isAudioPlaying = false, // האם השיר עדיין מתנגן
 }) => {
   console.log("🎮 GamePlayScreen props:", {
     timeLeft,
@@ -22,6 +23,7 @@ const GamePlayScreen = ({
     hasGuessed,
     isWaiting,
     isGameOver,
+    isAudioPlaying,
   });
 
   const radius = 50;
@@ -76,8 +78,8 @@ const GamePlayScreen = ({
             </div>
           )}
 
-          {/* Timer Circle - מוצג תמיד כשיש זמן נותר */}
-          {timeLeft && !isGameOver && (
+          {/* Timer Circle - מוצג רק כשיש זמן נותר והמשתתף עדיין לא ניחש */}
+          {timeLeft && !isGameOver && !hasGuessed && (
             <div className="flex flex-col items-center justify-center mb-8">
               {console.log("🎮 Rendering timer circle with:", {
                 timeLeft,
@@ -129,9 +131,7 @@ const GamePlayScreen = ({
                 </div>
               </div>
               <div className="mt-4 text-purple-200 text-sm animate-pulse">
-                {hasGuessed
-                  ? "⏰ Waiting for others..."
-                  : "⏰ Time is ticking!"}
+                ⏰ Time is ticking!
               </div>
             </div>
           )}
@@ -142,15 +142,6 @@ const GamePlayScreen = ({
               <div className="text-4xl mb-4">🎉</div>
               <p className="text-2xl text-white font-bold">Game Over!</p>
               <p className="text-green-200 mt-2">Thanks for playing!</p>
-            </div>
-          ) : isWaiting ? (
-            <div className="bg-yellow-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-yellow-400 border-opacity-30">
-              <div className="text-4xl mb-4 animate-spin">⏳</div>
-              <p className="text-white font-medium text-lg">
-                {roundFailedForUser
-                  ? "❌ No one guessed it. Waiting for host..."
-                  : "⏳ Waiting for the next song..."}
-              </p>
             </div>
           ) : hasGuessed ? (
             <div className="space-y-4">
@@ -174,6 +165,37 @@ const GamePlayScreen = ({
                   <p className="text-red-200 font-bold text-xl">Incorrect</p>
                 </div>
               )}
+            </div>
+          ) : isWaiting ? (
+            <div className="bg-yellow-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-yellow-400 border-opacity-30">
+              <div className="text-4xl mb-4 animate-spin">⏳</div>
+              <p className="text-white font-medium text-lg">
+                {roundFailedForUser
+                  ? "❌ No one guessed it. Waiting for host..."
+                  : "⏳ Waiting for the next song..."}
+              </p>
+            </div>
+          ) : isAudioPlaying ? (
+            // כשהשיר מתנגן - הצגת הודעה מתאימה במקום טופס הניחוש
+            <div className="bg-blue-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 border border-blue-400 border-opacity-30">
+              <div className="text-6xl mb-6 animate-pulse">🎵</div>
+              <p className="text-white font-bold text-2xl mb-4">
+                Listen Carefully!
+              </p>
+              <p className="text-blue-200 text-lg">
+                🔊 The song is playing... Pay attention to every note!
+              </p>
+              <div className="mt-6 flex justify-center space-x-4">
+                <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce"></div>
+                <div
+                  className="w-3 h-3 bg-pink-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.1s" }}
+                ></div>
+                <div
+                  className="w-3 h-3 bg-blue-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                ></div>
+              </div>
             </div>
           ) : (
             <div className="space-y-6">

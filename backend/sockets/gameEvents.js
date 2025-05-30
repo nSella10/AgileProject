@@ -26,6 +26,7 @@ export function handleGameEvents(io, socket) {
       room.currentRound = 0;
       room.songs = game.songs;
       room.game = game; // שמירת כל נתוני המשחק כולל guessTimeLimit
+      room.status = "playing"; // הגדרת סטטוס המשחק
 
       // אתחול ניקוד לכל השחקנים עם 0 נקודות
       room.scores = {};
@@ -169,17 +170,64 @@ export function handleGameEvents(io, socket) {
   });
 
   // אירוע חדש - כשהאודיו מתחיל להתנגן
-  socket.on("audioStarted", ({ roomCode }) => {
+  socket.on("audioStarted", (data) => {
+    console.log(`🎵 Audio started event received:`, data);
+    const { roomCode } = data;
     const room = rooms.get(roomCode);
     if (!room) return;
 
     console.log(`🎵 Audio started playing in room ${roomCode}`);
     console.log(
-      `⏰ Audio started - timer already running since ${room.roundStartTime}`
+      `⏰ Audio started - waiting for audio to end before starting timer`
     );
 
-    // הטיימר כבר רץ מאז שהתחיל הסיבוב, לא צריך להתחיל אותו שוב
-    // רק נעדכן שהאודיו התחיל בהצלחה
+    // הטיימר יתחיל רק כשהאודיו יסתיים
+  });
+
+  // אירוע חדש - כשהאודיו מסתיים
+  socket.on("audioEnded", (data) => {
+    console.log(`🎵 Audio ended event received:`, data);
+    const { roomCode } = data;
+    console.log(`🎵 Audio ended in room ${roomCode} - starting timer now`);
+    const room = rooms.get(roomCode);
+
+    if (!room) {
+      console.log(`❌ Room ${roomCode} not found for audioEnded`);
+      return;
+    }
+
+    console.log(`🔍 Room ${roomCode} status: ${room.status}`);
+    if (room.status !== "playing") {
+      console.log(
+        `❌ Room ${roomCode} is not in playing status for audioEnded`
+      );
+      return;
+    }
+
+    // עכשיו נעדכן את הטיימר לזמן הנכון
+    console.log(
+      `📤 Updating timer after audio ended with guessTimeLimit: ${room.game.guessTimeLimit}`
+    );
+    const timerDeadline = Date.now() + room.game.guessTimeLimit * 1000;
+
+    // עדכון זמן התחלת הסיבוב לחישוב ניקוד
+    room.roundStartTime = Date.now();
+    room.roundDeadline = timerDeadline;
+
+    // ביטול הטיימר הקודם
+    if (room.currentTimeout) {
+      clearTimeout(room.currentTimeout);
+    }
+
+    io.to(roomCode).emit("timerStarted", {
+      roundDeadline: timerDeadline,
+      guessTimeLimit: room.game.guessTimeLimit,
+    });
+
+    // התחלת הטיימר החדש בשרת
+    room.currentTimeout = setTimeout(() => {
+      finishRound(io, roomCode);
+    }, room.game.guessTimeLimit * 1000);
   });
 }
 
@@ -233,25 +281,31 @@ function startRound(io, roomCode) {
     totalSongs: room.songs.length,
   });
 
-  // שליחת טיימר מיד כשמתחיל הסיבוב (לא רק כשהאודיו מתחיל)
+  // נתחיל טיימר מיד עם השהיה של משך האודיו
   console.log(
-    `📤 Sending immediate timerStarted event with guessTimeLimit: ${room.game.guessTimeLimit}`
+    `📤 Starting timer with delay for audio duration: ${duration}ms, then guessTimeLimit: ${room.game.guessTimeLimit}s`
   );
-  const immediateDeadline = Date.now() + room.game.guessTimeLimit * 1000;
 
-  // הגדרת זמן התחלת הסיבוב לחישוב ניקוד
-  room.roundStartTime = Date.now();
-  room.roundDeadline = immediateDeadline;
+  // נתחיל טיימר שיתחיל לספור רק אחרי שהאודיו נגמר
+  const totalTime = duration + room.game.guessTimeLimit * 1000;
+  const timerDeadline = Date.now() + totalTime;
 
-  io.to(roomCode).emit("timerStarted", {
-    roundDeadline: immediateDeadline,
-    guessTimeLimit: room.game.guessTimeLimit,
-  });
+  // הגדרת זמן התחלת הסיבוב לחישוב ניקוד - יתחיל אחרי האודיו
+  room.roundStartTime = Date.now() + duration;
+  room.roundDeadline = timerDeadline;
 
-  // התחלת הטיימר בשרת מיד
+  // שליחת טיימר שיתחיל לספור אחרי שהאודיו נגמר
+  setTimeout(() => {
+    io.to(roomCode).emit("timerStarted", {
+      roundDeadline: Date.now() + room.game.guessTimeLimit * 1000,
+      guessTimeLimit: room.game.guessTimeLimit,
+    });
+  }, duration);
+
+  // התחלת הטיימר בשרת - יסתיים אחרי האודיו + זמן הניחוש
   room.currentTimeout = setTimeout(() => {
     finishRound(io, roomCode);
-  }, room.game.guessTimeLimit * 1000);
+  }, totalTime);
 }
 
 function finishRound(io, roomCode) {

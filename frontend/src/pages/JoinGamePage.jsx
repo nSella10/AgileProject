@@ -26,6 +26,7 @@ const JoinGamePage = () => {
   // eslint-disable-next-line no-unused-vars
   const [currentPlayerName, setCurrentPlayerName] = useState("");
   const [guessResult, setGuessResult] = useState(null); // "correct", "wrong", or null
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false); // האם השיר עדיין מתנגן
 
   const timeoutRef = useRef(null);
   const timerInterval = useRef(null);
@@ -49,30 +50,77 @@ const JoinGamePage = () => {
       setStatusMsg("🎬 Game is starting!");
     });
 
-    socket.on("nextRound", ({ roundNumber, songNumber, totalSongs }) => {
-      setStatusMsg(`🎵 Round ${roundNumber} - Loading song...`);
-      setHasGuessedThisRound(false);
-      setIsWaitingBetweenRounds(false);
-      setRoundFailedForUser(false);
-      setSongNumber(songNumber);
-      setTotalSongs(totalSongs);
-      setSubmitted(false);
-      setGuessResult(null);
+    socket.on(
+      "nextRound",
+      ({ roundNumber, songNumber, totalSongs, duration }) => {
+        setStatusMsg(`🎵 Round ${roundNumber} - Song is playing...`);
+        setHasGuessedThisRound(false);
+        setIsWaitingBetweenRounds(false);
+        setRoundFailedForUser(false);
+        setSongNumber(songNumber);
+        setTotalSongs(totalSongs);
+        setSubmitted(false);
+        setGuessResult(null);
+        setIsAudioPlaying(true); // השיר מתחיל להתנגן
 
-      // ניקוי טיימרים קודמים
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (timerInterval.current) clearInterval(timerInterval.current);
+        // ניקוי טיימרים קודמים
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (timerInterval.current) clearInterval(timerInterval.current);
 
-      // עדיין לא מתחילים טיימר - נחכה לאירוע timerStarted
-      setTimeLeft(null);
-    });
+        // עדיין לא מתחילים טיימר - נחכה לאירוע timerStarted
+        setTimeLeft(null);
+
+        // מנגנון גיבוי - אם לא מקבלים timerStarted תוך זמן סביר, נתחיל בעצמנו
+        const fallbackDuration = duration || 3000; // ברירת מחדל של 3 שניות
+        console.log(
+          `🔄 Setting fallback timer for ${fallbackDuration + 2000}ms`
+        );
+        const fallbackTimeout = setTimeout(() => {
+          console.log(
+            "⚠️ Fallback: timerStarted not received, starting timer manually"
+          );
+          setStatusMsg(`🕵️ Listen and guess!`);
+          setIsAudioPlaying(false);
+          setTimeLeft(15); // ברירת מחדל של 15 שניות
+          setMaxTime(15);
+
+          // התחלת טיימר גיבוי
+          if (timerInterval.current) clearInterval(timerInterval.current);
+          timerInterval.current = setInterval(() => {
+            setTimeLeft((prev) => {
+              if (prev <= 1) {
+                clearInterval(timerInterval.current);
+                return null;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
+          // עצירה אוטומטית אחרי 15 שניות
+          timeoutRef.current = setTimeout(() => {
+            setIsWaitingBetweenRounds(true);
+          }, 15000);
+        }, fallbackDuration + 2000); // נחכה למשך האודיו + 2 שניות נוספות
+
+        // שמירת הטיימר הגיבוי כדי לבטל אותו אם נקבל timerStarted
+        timeoutRef.current = fallbackTimeout;
+      }
+    );
 
     // אירוע חדש - כשהטיימר מתחיל באמת
     socket.on("timerStarted", ({ roundDeadline, guessTimeLimit }) => {
       console.log("🕐 Timer started for players");
       console.log(`⏱️ Guess time limit: ${guessTimeLimit} seconds`);
       console.log(`⏱️ Setting maxTime to: ${guessTimeLimit}`);
+
+      // ביטול הטיימר הגיבוי אם הוא עדיין פועל
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        console.log("✅ Cancelled fallback timer - received real timerStarted");
+      }
+
       setStatusMsg(`🕵️ Listen and guess!`);
+      setIsAudioPlaying(false); // השיר הפסיק להתנגן, עכשיו אפשר לנחש
 
       const now = Date.now();
       const msLeft = roundDeadline - now;
@@ -104,6 +152,39 @@ const JoinGamePage = () => {
 
     socket.on("answerFeedback", ({ correct }) => {
       setGuessResult(correct ? "correct" : "wrong");
+
+      // עצירת הטיימר כשהמשתתף הגיש תשובה
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+        timerInterval.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+
+      // הסתרת הטיימר אחרי הגשת תשובה
+      setTimeLeft(null);
+    });
+
+    socket.on("roundSucceeded", () => {
+      setStatusMsg("🎉 Someone got it! Waiting for next song...");
+      setHasGuessedThisRound(true);
+      setIsWaitingBetweenRounds(true);
+      setRoundFailedForUser(false);
+
+      // עצירת הטיימר כשהסיבוב הצליח
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+        timerInterval.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+
+      // הסתרת הטיימר אחרי הצלחת הסיבוב
+      setTimeLeft(null);
     });
 
     socket.on("roundFailed", () => {
@@ -111,6 +192,19 @@ const JoinGamePage = () => {
       setHasGuessedThisRound(true);
       setIsWaitingBetweenRounds(true);
       setRoundFailedForUser(true);
+
+      // עצירת הטיימר כשהסיבוב נכשל
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+        timerInterval.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+
+      // הסתרת הטיימר אחרי כישלון הסיבוב
+      setTimeLeft(null);
     });
 
     socket.on("gameOver", () => {
@@ -129,6 +223,7 @@ const JoinGamePage = () => {
       socket.off("nextRound");
       socket.off("timerStarted");
       socket.off("answerFeedback");
+      socket.off("roundSucceeded");
       socket.off("roundFailed");
       socket.off("gameOver");
       socket.off("playerAssignedEmoji");
@@ -210,6 +305,7 @@ const JoinGamePage = () => {
       maxTime={maxTime}
       roundFailedForUser={roundFailedForUser}
       guessResult={guessResult}
+      isAudioPlaying={isAudioPlaying}
     />
   );
 };

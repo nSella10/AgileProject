@@ -211,30 +211,38 @@ const ImprovedHostGameScreen = ({
       return;
     }
 
+    // מוזיקת מתח תתנגן רק כשהטיימר פעיל (countdown !== null)
+    // זה אומר שהאודיו כבר נגמר והטיימר התחיל - השחקנים מנחשים
     if (countdown !== null && !waitingForNext) {
-      // השחקנים מנחשים - נשמיע מוזיקת מתח
-      console.log("🎵 Attempting to play tension music...");
+      // הטיימר פעיל - השחקנים מנחשים - נשמיע מוזיקת מתח
+      console.log(
+        "🎵 Timer is active (audio ended) - attempting to play tension music..."
+      );
       if (!isTensionMusicPlaying) {
         try {
           console.log("🎵 Calling play() on tension music...");
           tensionMusicRef.current.play();
           setIsTensionMusicPlaying(true);
-          console.log("✅ Tension music started successfully");
+          console.log(
+            "✅ Tension music started successfully (timer active after audio ended)"
+          );
         } catch (error) {
           console.log("🔇 Tension music failed:", error.message);
           console.log("🔇 Error details:", error);
         }
       }
     } else {
-      // עצירת מוזיקת המתח
+      // הטיימר לא פעיל או מחכים לסיבוב הבא - עצירת מוזיקת המתח
       console.log(
-        "🛑 Should stop tension music - isTensionMusicPlaying:",
-        isTensionMusicPlaying
+        "🛑 Timer not active or waiting for next - should stop tension music:",
+        { countdown, waitingForNext, isTensionMusicPlaying }
       );
       if (isTensionMusicPlaying && tensionMusicRef.current) {
         tensionMusicRef.current.pause();
         setIsTensionMusicPlaying(false);
-        console.log("🛑 Tension music stopped");
+        console.log(
+          "🛑 Tension music stopped (timer not active or waiting for next)"
+        );
       }
     }
   }, [

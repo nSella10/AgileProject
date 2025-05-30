@@ -235,28 +235,7 @@ const LaunchGamePage = () => {
           });
         };
 
-        // פונקציה להתחלת הטיימר רק כשהאודיו מתחיל
-        const startCountdown = () => {
-          console.log(
-            `🕐 Starting countdown timer for ${guessTimeLimit} seconds`
-          );
-          console.log(`🕐 Current guessTimeLimit state:`, guessTimeLimit);
-          console.log(`🕐 Type of guessTimeLimit:`, typeof guessTimeLimit);
-          setCountdown(guessTimeLimit);
-          if (countdownRef.current) clearInterval(countdownRef.current);
-
-          countdownRef.current = setInterval(() => {
-            setCountdown((prev) => {
-              if (prev === 1) {
-                clearInterval(countdownRef.current);
-                setCountdown(null);
-                setWaitingForNext(true);
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
-        };
+        // הטיימר מתחיל מהשרת דרך האירוע timerStarted
 
         // עדכון פונקציית השמעה כדי להתחיל טיימר
         const playAudioWithTimer = () => {
@@ -272,8 +251,10 @@ const LaunchGamePage = () => {
                   );
                   console.log(`⏰ Will stop after ${duration}ms`);
 
-                  // התחלת הטיימר רק כשהאודיו באמת מתחיל
-                  startCountdown();
+                  // הטיימר כבר התחיל מהשרת, לא צריך להתחיל שוב
+                  console.log(
+                    "🎵 Audio started - timer already running from server"
+                  );
 
                   // שליחת אירוע לשרת שהאודיו התחיל
                   const socket = getSocket();
@@ -308,8 +289,10 @@ const LaunchGamePage = () => {
               console.log(`✅ Audio started playing (legacy) at ${startTime}`);
               console.log(`⏰ Will stop after ${duration}ms`);
 
-              // התחלת הטיימר גם לדפדפנים ישנים
-              startCountdown();
+              // הטיימר כבר התחיל מהשרת, לא צריך להתחיל שוב
+              console.log(
+                "🎵 Audio started (legacy) - timer already running from server"
+              );
 
               // שליחת אירוע לשרת שהאודיו התחיל
               const socket = getSocket();
@@ -349,11 +332,10 @@ const LaunchGamePage = () => {
                 console.error(
                   `❌ Retry play also failed: ${retryError.message}`
                 );
-                // אם השמעה נכשלת, נתחיל טיימר בכל זאת
+                // הטיימר כבר התחיל מהשרת, לא צריך להתחיל שוב
                 console.log(
-                  "🕐 Starting countdown anyway due to audio failure"
+                  "🎵 Audio failed - timer already running from server"
                 );
-                startCountdown();
               });
             }, 100);
           });
@@ -456,6 +438,25 @@ const LaunchGamePage = () => {
       console.log("🎮 Previous guessTimeLimit state:", guessTimeLimit);
       setGuessTimeLimit(guessTimeLimit);
       console.log("🎮 Updated guessTimeLimit state to:", guessTimeLimit);
+
+      // התחלת הטיימר של המארגן מיד כשמקבל את האירוע
+      console.log(
+        `🕐 Host starting countdown timer for ${guessTimeLimit} seconds`
+      );
+      setCountdown(guessTimeLimit);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+
+      countdownRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === 1) {
+            clearInterval(countdownRef.current);
+            setCountdown(null);
+            setWaitingForNext(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     });
 
     // עדכון ניקוד כשמישהו עונה נכון

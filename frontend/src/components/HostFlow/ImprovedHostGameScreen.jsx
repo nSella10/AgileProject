@@ -19,10 +19,12 @@ const ImprovedHostGameScreen = ({
   });
 
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [tensionMusicEnabled, setTensionMusicEnabled] = useState(true);
   const correctSoundRef = useRef(null);
   const wrongSoundRef = useRef(null);
   const tensionMusicRef = useRef(null);
   const [isTensionMusicPlaying, setIsTensionMusicPlaying] = useState(false);
+  const [tensionMusicReady, setTensionMusicReady] = useState(false);
 
   useEffect(() => {
     // יצירת צלילים עם Web Audio API
@@ -81,73 +83,68 @@ const ImprovedHostGameScreen = ({
 
     // יצירת מוזיקת מתח פשוטה עם Web Audio API
     const createTensionMusic = () => {
-      try {
-        const audioContext = new (window.AudioContext ||
-          window.webkitAudioContext)();
-        let isPlaying = false;
-        let timeoutId = null;
+      console.log("🎵 Creating tension music object");
 
-        const playTensionBeep = () => {
-          if (!isPlaying) return;
+      let isPlaying = false;
+      let intervalId = null;
 
-          // יצירת צליל מתח פשוט - ביפ נמוך
+      const playBeep = () => {
+        try {
+          // יצירת צליל פשוט עם Web Audio API
+          const audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
           const oscillator = audioContext.createOscillator();
           const gainNode = audioContext.createGain();
 
-          oscillator.frequency.setValueAtTime(200, audioContext.currentTime); // תדר נמוך
-          oscillator.type = "sine"; // צליל רך
+          oscillator.frequency.setValueAtTime(150, audioContext.currentTime); // תדר נמוך
+          oscillator.type = "sine";
 
-          // הגדרת עוצמה נמוכה
           gainNode.gain.setValueAtTime(0, audioContext.currentTime);
           gainNode.gain.linearRampToValueAtTime(
-            0.05,
+            0.03,
             audioContext.currentTime + 0.1
           );
           gainNode.gain.linearRampToValueAtTime(
             0,
-            audioContext.currentTime + 0.3
+            audioContext.currentTime + 0.5
           );
 
           oscillator.connect(gainNode);
           gainNode.connect(audioContext.destination);
 
           oscillator.start(audioContext.currentTime);
-          oscillator.stop(audioContext.currentTime + 0.3);
+          oscillator.stop(audioContext.currentTime + 0.5);
 
-          // חזרה כל 3 שניות
-          if (isPlaying) {
-            timeoutId = setTimeout(playTensionBeep, 3000);
-          }
-        };
+          console.log("🎵 Tension beep played");
+        } catch (error) {
+          console.log("🔇 Audio beep failed:", error.message);
+        }
+      };
 
-        return {
-          play: () => {
-            console.log("🎵 Starting simple tension music");
+      return {
+        play: () => {
+          console.log("🎵 Tension music - PLAY called");
+          if (!isPlaying) {
             isPlaying = true;
-            playTensionBeep();
-          },
-          pause: () => {
-            console.log("🛑 Stopping simple tension music");
-            isPlaying = false;
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-              timeoutId = null;
-            }
-          },
-          volume: 0.05,
-        };
-      } catch (error) {
-        console.log("❌ Web Audio API not supported, using fallback");
-        return {
-          play: () => console.log("🎵 Tension music (fallback) - playing"),
-          pause: () => console.log("🛑 Tension music (fallback) - stopped"),
-          volume: 0.05,
-        };
-      }
+            playBeep(); // ביפ ראשון מיד
+            intervalId = setInterval(playBeep, 4000); // ביפ כל 4 שניות
+          }
+        },
+        pause: () => {
+          console.log("🛑 Tension music - PAUSE called");
+          isPlaying = false;
+          if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+          }
+        },
+        volume: 0.03,
+      };
     };
 
     tensionMusicRef.current = createTensionMusic();
-    console.log("🎵 Simple tension music initialized");
+    setTensionMusicReady(true);
+    console.log("🎵 Tension music object created and ready");
 
     // ניקוי בעת יציאה מהקומפוננטה
     return () => {
@@ -186,19 +183,31 @@ const ImprovedHostGameScreen = ({
   useEffect(() => {
     console.log("🎵 Tension music effect triggered:", {
       soundEnabled,
+      tensionMusicEnabled,
+      tensionMusicReady,
       tensionMusicExists: !!tensionMusicRef.current,
       countdown,
       waitingForNext,
-      shouldPlay: countdown !== null && !waitingForNext,
+      isTensionMusicPlaying,
+      shouldPlay:
+        countdown !== null &&
+        !waitingForNext &&
+        tensionMusicEnabled &&
+        soundEnabled,
     });
 
-    if (!soundEnabled || !tensionMusicRef.current) {
-      console.log(
-        "🔇 Tension music blocked - soundEnabled:",
+    if (
+      !soundEnabled ||
+      !tensionMusicEnabled ||
+      !tensionMusicReady ||
+      !tensionMusicRef.current
+    ) {
+      console.log("🔇 Tension music blocked:", {
         soundEnabled,
-        "tensionMusicRef:",
-        !!tensionMusicRef.current
-      );
+        tensionMusicEnabled,
+        tensionMusicReady,
+        tensionMusicRef: !!tensionMusicRef.current,
+      });
       return;
     }
 
@@ -228,7 +237,13 @@ const ImprovedHostGameScreen = ({
         console.log("🛑 Tension music stopped");
       }
     }
-  }, [countdown, waitingForNext, soundEnabled]);
+  }, [
+    countdown,
+    waitingForNext,
+    soundEnabled,
+    tensionMusicEnabled,
+    tensionMusicReady,
+  ]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center px-4 relative overflow-hidden">
@@ -265,17 +280,44 @@ const ImprovedHostGameScreen = ({
               👑 HOST CONTROL
             </div>
 
-            {/* Sound Toggle */}
-            <button
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                soundEnabled
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-500 text-gray-200"
-              }`}
-            >
-              {soundEnabled ? "🔊 Sound ON" : "🔇 Sound OFF"}
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Sound Toggle */}
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  soundEnabled
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-500 text-gray-200"
+                }`}
+              >
+                {soundEnabled ? "🔊 Sound ON" : "🔇 Sound OFF"}
+              </button>
+
+              {/* Tension Music Toggle */}
+              <button
+                onClick={() => setTensionMusicEnabled(!tensionMusicEnabled)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  tensionMusicEnabled
+                    ? "bg-purple-500 text-white"
+                    : "bg-gray-500 text-gray-200"
+                }`}
+                title={
+                  tensionMusicEnabled
+                    ? "Disable tension music"
+                    : "Enable tension music"
+                }
+              >
+                {tensionMusicEnabled ? "🎵 Music ON" : "🎵 Music OFF"}
+              </button>
+
+              {/* Tension music status indicator */}
+              {isTensionMusicPlaying && (
+                <div className="flex items-center space-x-2 bg-purple-600 bg-opacity-50 px-3 py-2 rounded-full">
+                  <div className="w-2 h-2 bg-purple-300 rounded-full animate-pulse"></div>
+                  <span className="text-purple-200 text-xs">Playing</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Status Message */}

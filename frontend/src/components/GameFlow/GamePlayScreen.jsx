@@ -190,8 +190,9 @@ const GamePlayScreen = ({
                   : "⏳ Waiting for the next song..."}
               </p>
             </div>
-          ) : isAudioPlaying ? (
+          ) : isAudioPlaying && !hasGuessed ? (
             // כשהשיר מתנגן - הצגת הודעה מתאימה במקום טופס הניחוש
+            // אבל רק אם השחקן עדיין לא ניחש/וויתר
             <div className="bg-blue-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 border border-blue-400 border-opacity-30">
               <div className="text-6xl mb-6 animate-pulse">🎵</div>
               <p className="text-white font-bold text-2xl mb-4">

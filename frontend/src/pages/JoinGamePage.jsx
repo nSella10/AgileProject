@@ -166,6 +166,7 @@ const JoinGamePage = () => {
     socket.on("answerFeedback", ({ correct, skipped }) => {
       if (skipped) {
         setGuessResult("skipped");
+        setIsAudioPlaying(false); // וידוא שמצב האודיו מתעדכן
       } else {
         setGuessResult(correct ? "correct" : "wrong");
       }
@@ -291,6 +292,7 @@ const JoinGamePage = () => {
     setHasGuessedThisRound(true);
     setSubmitted(true);
     setGuessResult("skipped");
+    setIsAudioPlaying(false); // עצירת מצב השמעת האודיו
   };
 
   const handleGuessChange = (value) => {

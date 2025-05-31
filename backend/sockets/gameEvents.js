@@ -129,14 +129,22 @@ export function handleGameEvents(io, socket) {
         clearTimeout(room.currentTimeout);
       }
 
-      // אם אף אחד לא צדק, נמשיך לסניפט הבא
+      // שליחת אירוע למארגן לעצור את הטיימר שלו
+      io.to(room.hostSocketId).emit("allPlayersAnswered");
+
+      // אם אף אחד לא צדק, נשלח למארגן אפשרות לבחור
       if (room.correctUsers.size === 0) {
         // בדיקה אם יש עוד סיבובים זמינים
         if (room.currentRound < ROUND_DURATIONS.length) {
           console.log(
-            `🎯 All players guessed incorrectly, moving to next round`
+            `🎯 All players guessed incorrectly, asking host for decision`
           );
-          startRound(io, roomCode);
+          // שליחת אירוע למארגן לבחור אם להמשיך לסניפט ארוך יותר
+          io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
+            songNumber: room.currentSongIndex + 1,
+            totalSongs: room.songs.length,
+            canReplayLonger: true,
+          });
         } else {
           console.log(`🎯 All rounds used, finishing round`);
           finishRound(io, roomCode);
@@ -182,14 +190,22 @@ export function handleGameEvents(io, socket) {
         clearTimeout(room.currentTimeout);
       }
 
-      // אם אף אחד לא צדק, נמשיך לסניפט הבא
+      // שליחת אירוע למארגן לעצור את הטיימר שלו
+      io.to(room.hostSocketId).emit("allPlayersAnswered");
+
+      // אם אף אחד לא צדק, נשלח למארגן אפשרות לבחור
       if (room.correctUsers.size === 0) {
         // בדיקה אם יש עוד סיבובים זמינים
         if (room.currentRound < ROUND_DURATIONS.length) {
           console.log(
-            `⏭️ All players guessed/skipped incorrectly, moving to next round`
+            `⏭️ All players guessed/skipped incorrectly, asking host for decision`
           );
-          startRound(io, roomCode);
+          // שליחת אירוע למארגן לבחור אם להמשיך לסניפט ארוך יותר
+          io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
+            songNumber: room.currentSongIndex + 1,
+            totalSongs: room.songs.length,
+            canReplayLonger: true,
+          });
         } else {
           console.log(`⏭️ All rounds used, finishing round`);
           finishRound(io, roomCode);
@@ -240,6 +256,14 @@ export function handleGameEvents(io, socket) {
     if (!room) return;
 
     startRound(io, roomCode);
+  });
+
+  socket.on("skipToNextSong", ({ roomCode }) => {
+    const room = rooms.get(roomCode);
+    if (!room) return;
+
+    console.log(`⏭️ Host chose to skip to next song`);
+    finishRound(io, roomCode);
   });
 
   // אירוע חדש - כשהאודיו מתחיל להתנגן

@@ -8,6 +8,7 @@ const ImprovedHostGameScreen = ({
   onReplayLonger,
   roundFailed,
   roundSucceeded,
+  awaitingHostDecision,
   countdown,
   playersAnswered = 0,
   totalPlayers = 0,
@@ -488,7 +489,28 @@ const ImprovedHostGameScreen = ({
           )}
 
           {/* Action Buttons */}
-          {waitingForNext && (
+          {awaitingHostDecision && (
+            <div className="space-y-6">
+              <div className="bg-red-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-red-400 border-opacity-30">
+                <div className="text-5xl mb-4">❌</div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  No one guessed it!
+                </h3>
+                <p className="text-red-200 font-medium text-lg mb-6">
+                  😕 Want to replay it longer?
+                </p>
+                <button
+                  onClick={onReplayLonger}
+                  className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto"
+                >
+                  <span className="text-2xl">🔁</span>
+                  Replay with longer snippet
+                  <span className="text-2xl">🎵</span>
+                </button>
+              </div>
+            </div>
+          )}
+          {waitingForNext && !awaitingHostDecision && (
             <div className="space-y-6">
               {roundFailed ? (
                 <div className="bg-red-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-red-400 border-opacity-30">

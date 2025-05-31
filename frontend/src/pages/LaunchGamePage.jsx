@@ -25,6 +25,7 @@ const LaunchGamePage = () => {
   const [waitingForNext, setWaitingForNext] = useState(false);
   const [roundFailed, setRoundFailed] = useState(false);
   const [roundSucceeded, setRoundSucceeded] = useState(false);
+  const [awaitingHostDecision, setAwaitingHostDecision] = useState(false);
   const [showInterimLeaderboard, setShowInterimLeaderboard] = useState(false);
   const [showAnswerReveal, setShowAnswerReveal] = useState(false);
   const [revealedSongTitle, setRevealedSongTitle] = useState("");
@@ -443,6 +444,27 @@ const LaunchGamePage = () => {
       }
     );
 
+    socket.on("roundFailedAwaitingDecision", ({ canReplayLonger }) => {
+      console.log("🤔 Round failed, awaiting host decision");
+      setAwaitingHostDecision(true);
+      setWaitingForNext(false);
+      setRoundFailed(false);
+      setRoundSucceeded(false);
+      setCountdown(null);
+      clearInterval(countdownRef.current);
+      setShowInterimLeaderboard(false);
+
+      // עצירת השמע כשמחכים להחלטת המארגן
+      if (audioRef.current) {
+        console.log(`🤔 Awaiting decision - stopping audio`);
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        if (audioRef.current.stopTimer) {
+          clearTimeout(audioRef.current.stopTimer);
+        }
+      }
+    });
+
     socket.on("gameOver", ({ leaderboard }) => {
       setFinalLeaderboard(leaderboard);
       navigate("/final-leaderboard", { state: { leaderboard } });
@@ -451,6 +473,16 @@ const LaunchGamePage = () => {
     // האזנה לאירועי תשובות שחקנים
     socket.on("playerAnswered", ({ totalAnswered }) => {
       setPlayersAnswered(totalAnswered);
+    });
+
+    // האזנה לאירוע שכל השחקנים ענו - עצירת הטיימר
+    socket.on("allPlayersAnswered", () => {
+      console.log("🛑 All players answered - stopping host timer");
+      setCountdown(null);
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
     });
 
     // קבלת זמן ניחוש מהגדרות המשחק
@@ -495,8 +527,10 @@ const LaunchGamePage = () => {
 
     return () => {
       socket.off("playerAnswered");
+      socket.off("allPlayersAnswered");
       socket.off("timerStarted");
       socket.off("correctAnswer");
+      socket.off("roundFailedAwaitingDecision");
       socket.disconnect();
     };
   }, [gameId, navigate, userInfo]);
@@ -536,6 +570,7 @@ const LaunchGamePage = () => {
     socket.emit("replayLonger", { roomCode });
     setWaitingForNext(false);
     setRoundFailed(false);
+    setAwaitingHostDecision(false);
     setCountdown(null);
     clearInterval(countdownRef.current);
 
@@ -587,6 +622,7 @@ const LaunchGamePage = () => {
             onReplayLonger={handleReplayLonger}
             roundFailed={roundFailed}
             roundSucceeded={roundSucceeded}
+            awaitingHostDecision={awaitingHostDecision}
             countdown={countdown}
             playersAnswered={playersAnswered}
             totalPlayers={players.length}

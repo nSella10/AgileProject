@@ -57,6 +57,13 @@ export const gamesApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["Game"], // Will refresh when games change
     }),
+    updateLyricsForExistingGames: builder.mutation({
+      query: () => ({
+        url: `${GAMES_URL}/update-lyrics`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Game"], // Will refresh games data after lyrics update
+    }),
   }),
 });
 
@@ -68,4 +75,5 @@ export const {
   useDeleteGameMutation,
   useLazySearchSongsQuery,
   useGetAnalyticsQuery,
+  useUpdateLyricsForExistingGamesMutation,
 } = gamesApiSlice;

@@ -362,11 +362,187 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
       song.artistName
     );
 
+    // יצירת מילות מפתח מהשיר עם מילות מפתח ידניות לשירים מסוימים
+    const generateLyricsKeywords = (trackName, artistName) => {
+      const keywords = [];
+
+      // מילות מפתח ידניות לשירים מסוימים
+      const manualLyrics = {
+        "צליל מכוון": [
+          "בואי",
+          "הנה",
+          "את",
+          "המילים",
+          "אל",
+          "הקצב",
+          "מכוון",
+          "צליל",
+          "מוזיקה",
+          "שיר",
+        ],
+        "שיר לשלום": ["שלום", "עולם", "אהבה", "חלום", "תקווה"],
+        "בשנה הבאה": ["בשנה", "הבאה", "ירושלים", "שלום", "חג"],
+        "יש בי אהבה": ["יש", "בי", "אהבה", "לב", "רגש"],
+        "אני ואתה": ["אני", "ואתה", "נשנה", "עולם", "יחד"],
+        "לו יהי": ["לו", "יהי", "שלום", "עולם", "אהבה"],
+        "הכל עובר": ["הכל", "עובר", "חולף", "זמן", "חיים"],
+        "ילדה שלי": ["ילדה", "שלי", "אהובה", "יפה", "חמודה"],
+        אבא: ["אבא", "אהבה", "משפחה", "בית", "ילדות"],
+        אמא: ["אמא", "אהבה", "משפחה", "בית", "חום"],
+        "ירושלים של זהב": ["ירושלים", "זהב", "עיר", "קדושה", "יפה"],
+        "הנה בא השלום": ["הנה", "בא", "השלום", "שמח", "טוב"],
+        שמח: ["שמח", "שמחה", "חגיגה", "ריקוד", "כיף"],
+        "חבר שלי": ["חבר", "שלי", "ידידות", "אהבה", "יחד"],
+        "בוקר טוב": ["בוקר", "טוב", "שמש", "יום", "חדש"],
+        "לילה טוב": ["לילה", "טוב", "ירח", "כוכבים", "חלומות"],
+        "אני רוצה": ["אני", "רוצה", "חלום", "משאלה", "תקווה"],
+        "תן לי": ["תן", "לי", "בקשה", "רצון", "צורך"],
+        "come on eileen": ["come", "on", "eileen", "dance", "party"],
+        "dancing queen": ["dancing", "queen", "dance", "music", "party"],
+        "bohemian rhapsody": ["bohemian", "rhapsody", "queen", "rock", "opera"],
+        imagine: ["imagine", "peace", "world", "love", "hope"],
+        yesterday: ["yesterday", "love", "gone", "troubles", "far"],
+        "hey jude": ["hey", "jude", "dont", "afraid", "better"],
+        "let it be": ["let", "it", "be", "mother", "mary", "wisdom"],
+        "hotel california": ["hotel", "california", "eagles", "check", "out"],
+        "stairway to heaven": [
+          "stairway",
+          "heaven",
+          "lady",
+          "gold",
+          "glitters",
+        ],
+        "sweet child o mine": [
+          "sweet",
+          "child",
+          "mine",
+          "eyes",
+          "blue",
+          "skies",
+        ],
+        "smells like teen spirit": [
+          "smells",
+          "like",
+          "teen",
+          "spirit",
+          "nirvana",
+        ],
+        "billie jean": ["billie", "jean", "not", "my", "lover"],
+        thriller: ["thriller", "night", "monster", "dance", "scary"],
+        "beat it": ["beat", "it", "just", "beat", "it"],
+        "smooth criminal": ["smooth", "criminal", "annie", "you", "okay"],
+        "black or white": ["black", "or", "white", "dont", "matter"],
+        "dont stop believin": [
+          "dont",
+          "stop",
+          "believin",
+          "journey",
+          "feeling",
+        ],
+        "livin on a prayer": ["livin", "on", "a", "prayer", "halfway", "there"],
+        "sweet caroline": ["sweet", "caroline", "good", "times", "never"],
+        "piano man": ["piano", "man", "saturday", "crowd", "melody"],
+        "uptown funk": ["uptown", "funk", "you", "up", "saturday", "night"],
+        "shape of you": ["shape", "of", "you", "love", "body", "crazy"],
+        "someone like you": [
+          "someone",
+          "like",
+          "you",
+          "adele",
+          "never",
+          "mind",
+        ],
+        "rolling in the deep": [
+          "rolling",
+          "in",
+          "the",
+          "deep",
+          "fire",
+          "starting",
+        ],
+        hello: ["hello", "its", "me", "wondering", "after", "years"],
+        despacito: ["despacito", "quiero", "respirar", "cuello", "despacio"],
+        "shape of you": ["shape", "of", "you", "love", "body", "crazy"],
+      };
+
+      // בדיקה אם יש מילות מפתח ידניות לשיר הזה
+      const normalizedTitle = trackName.toLowerCase().trim();
+      const normalizedArtist = artistName.toLowerCase().trim();
+
+      // חיפוש במילות מפתח ידניות
+      for (const [songKey, lyricsWords] of Object.entries(manualLyrics)) {
+        if (
+          normalizedTitle.includes(songKey.toLowerCase()) ||
+          songKey.toLowerCase().includes(normalizedTitle)
+        ) {
+          keywords.push(...lyricsWords);
+          break;
+        }
+      }
+
+      // אם לא נמצאו מילות מפתח ידניות, ניצור אוטומטית
+      if (keywords.length === 0) {
+        // הוספת מילים מהשם השיר (ללא מילות קישור)
+        const songWords = trackName
+          .toLowerCase()
+          .replace(/[^\w\s\u0590-\u05FF]/g, " ")
+          .split(/\s+/)
+          .filter(
+            (word) =>
+              word.length > 2 &&
+              ![
+                "the",
+                "and",
+                "or",
+                "but",
+                "in",
+                "on",
+                "at",
+                "to",
+                "for",
+                "of",
+                "with",
+                "by",
+                "את",
+                "של",
+                "על",
+                "אל",
+                "עם",
+                "בין",
+                "אחר",
+                "לפני",
+                "אחרי",
+                "תחת",
+                "מעל",
+              ].includes(word)
+          );
+
+        keywords.push(...songWords);
+
+        // הוספת מילים מהזמר (ללא מילות קישור)
+        const artistWords = artistName
+          .toLowerCase()
+          .replace(/[^\w\s\u0590-\u05FF]/g, " ")
+          .split(/\s+/)
+          .filter((word) => word.length > 2);
+
+        keywords.push(...artistWords);
+      }
+
+      return [...new Set(keywords)]; // הסרת כפילויות
+    };
+
+    const lyricsKeywords = generateLyricsKeywords(
+      song.trackName,
+      song.artistName
+    );
+
     const songData = {
       title: song.trackName,
       artist: song.artistName,
       correctAnswer: song.trackName, // התשובה הראשית
       correctAnswers: correctAnswers, // כל התשובות האפשריות
+      lyricsKeywords: lyricsKeywords, // מילות מפתח לניחוש
       previewUrl: song.previewUrl,
       artworkUrl: song.artworkUrl100,
       trackId: song.trackId,

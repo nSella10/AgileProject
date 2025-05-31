@@ -1,6 +1,7 @@
 // src/pages/MyGames.jsx
 import React, { useState } from "react";
 import { useGamesWithState, useDeleteGameWithState } from "../hooks/useGames";
+import { useUpdateLyricsForExistingGamesMutation } from "../slices/gamesApiSlice";
 import PageLayout from "../components/PageLayout";
 import {
   FaHeadphones,
@@ -9,6 +10,7 @@ import {
   FaPlay,
   FaTimes,
   FaCheck,
+  FaMusic,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -16,6 +18,8 @@ import { toast } from "react-toastify";
 const MyGames = () => {
   const { games, isLoading, error } = useGamesWithState();
   const { deleteGame } = useDeleteGameWithState();
+  const [updateLyrics, { isLoading: isUpdatingLyrics }] =
+    useUpdateLyricsForExistingGamesMutation();
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [gameToDelete, setGameToDelete] = useState(null);
@@ -43,6 +47,19 @@ const MyGames = () => {
 
   const handleEditClick = (gameId) => {
     navigate(`/edit-game/${gameId}`);
+  };
+
+  const handleUpdateLyrics = async () => {
+    try {
+      const result = await updateLyrics().unwrap();
+      toast.success(
+        `Lyrics updated successfully! Updated ${result.updatedSongs} songs in ${result.updatedGames} games.`
+      );
+    } catch (error) {
+      toast.error(
+        "Failed to update lyrics: " + (error?.data?.message || error.message)
+      );
+    }
   };
 
   return (
@@ -93,10 +110,26 @@ const MyGames = () => {
             <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-4">
               🎵 My Music Games
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
               Manage your music games, edit details, and launch exciting
               sessions
             </p>
+
+            {/* Update Lyrics Button */}
+            {!isLoading && games && games.length > 0 && (
+              <div className="flex justify-center">
+                <button
+                  onClick={handleUpdateLyrics}
+                  disabled={isUpdatingLyrics}
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 flex items-center gap-2 shadow-lg transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                >
+                  <FaMusic className={isUpdatingLyrics ? "animate-spin" : ""} />
+                  {isUpdatingLyrics
+                    ? "Updating Lyrics..."
+                    : "Update Song Lyrics"}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Loading State */}

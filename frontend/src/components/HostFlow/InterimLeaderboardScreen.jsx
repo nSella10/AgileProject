@@ -8,6 +8,8 @@ const InterimLeaderboardScreen = ({
   songArtist,
   songArtworkUrl,
   playerEmojis = {},
+  playerAnswers = {},
+  onViewAnswers,
 }) => {
   const audioRef = useRef(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -227,24 +229,43 @@ const InterimLeaderboardScreen = ({
           )}
         </div>
 
-        {/* Action button */}
-        <button
-          onClick={handleNext}
-          disabled={isTransitioning}
-          className={`group px-12 py-5 rounded-3xl font-bold text-2xl transition-all duration-300 shadow-2xl transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden ${
-            isTransitioning
-              ? "bg-gradient-to-r from-yellow-500 to-orange-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 hover:shadow-green-500/25"
-          } text-white`}
-        >
-          <span className="relative z-10 flex items-center gap-3">
-            <span className="text-3xl">{isTransitioning ? "⏳" : "🎵"}</span>
-            {isTransitioning ? "Preparing Next Song..." : "Next Song"}
-            <span className="text-3xl">{isTransitioning ? "⏳" : "🚀"}</span>
-          </span>
-          {/* Animated background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-green-400/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-        </button>
+        {/* Action buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          {/* View Answers Button */}
+          {Object.keys(playerAnswers).length > 0 && onViewAnswers && (
+            <button
+              onClick={onViewAnswers}
+              disabled={isTransitioning}
+              className="group px-8 py-4 rounded-3xl font-bold text-xl transition-all duration-300 shadow-2xl transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:via-indigo-700 hover:to-blue-700 hover:shadow-purple-500/25 text-white"
+            >
+              <span className="relative z-10 flex items-center gap-3">
+                <span className="text-2xl">📊</span>
+                צפה בתשובות
+                <span className="text-2xl">👀</span>
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-purple-400/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+            </button>
+          )}
+
+          {/* Next Song Button */}
+          <button
+            onClick={handleNext}
+            disabled={isTransitioning}
+            className={`group px-12 py-5 rounded-3xl font-bold text-2xl transition-all duration-300 shadow-2xl transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden ${
+              isTransitioning
+                ? "bg-gradient-to-r from-yellow-500 to-orange-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 hover:shadow-green-500/25"
+            } text-white`}
+          >
+            <span className="relative z-10 flex items-center gap-3">
+              <span className="text-3xl">{isTransitioning ? "⏳" : "🎵"}</span>
+              {isTransitioning ? "Preparing Next Song..." : "Next Song"}
+              <span className="text-3xl">{isTransitioning ? "⏳" : "🚀"}</span>
+            </span>
+            {/* Animated background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-green-400/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+          </button>
+        </div>
       </div>
     </div>
   );

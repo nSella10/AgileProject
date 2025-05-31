@@ -50,9 +50,14 @@ const EditGamePage = () => {
           title: song.title,
           artist: song.artist,
           correctAnswer: song.correctAnswer || song.title,
+          correctAnswers: song.correctAnswers || [
+            song.correctAnswer || song.title,
+          ],
           previewUrl: song.previewUrl,
           artworkUrl: song.artworkUrl,
           trackId: song.trackId,
+          lyrics: song.lyrics || "",
+          lyricsKeywords: song.lyricsKeywords || [],
         })) || [];
 
       setSelectedSongs(formattedSongs);
@@ -96,6 +101,8 @@ const EditGamePage = () => {
         previewUrl: song.previewUrl,
         artworkUrl: song.artworkUrl,
         trackId: song.trackId,
+        lyrics: song.lyrics || "",
+        lyricsKeywords: song.lyricsKeywords || [],
       })),
     };
 

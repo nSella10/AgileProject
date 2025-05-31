@@ -54,12 +54,26 @@ const AnalyticsPage = () => {
     );
   }
 
+  // בדיקה שהנתונים קיימים לפני destructuring
+  if (!analytics) {
+    return (
+      <PageLayout>
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg">Loading analytics...</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   const {
-    overview,
-    chartData,
-    mostPopularGame,
-    genreDistribution,
-    recentActivity,
+    overview = {},
+    chartData = [],
+    mostPopularGame = null,
+    genreDistribution = [],
+    recentActivity = [],
   } = analytics;
 
   return (
@@ -101,7 +115,7 @@ const AnalyticsPage = () => {
                     Total Games
                   </p>
                   <p className="text-3xl font-bold text-gray-800">
-                    {overview.totalGames}
+                    {overview.totalGames || 0}
                   </p>
                 </div>
                 <div className="bg-purple-100 p-3 rounded-2xl">
@@ -117,7 +131,7 @@ const AnalyticsPage = () => {
                     Total Songs
                   </p>
                   <p className="text-3xl font-bold text-gray-800">
-                    {overview.totalSongs}
+                    {overview.totalSongs || 0}
                   </p>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-2xl">
@@ -133,7 +147,7 @@ const AnalyticsPage = () => {
                     Avg Songs/Game
                   </p>
                   <p className="text-3xl font-bold text-gray-800">
-                    {overview.avgSongsPerGame}
+                    {overview.avgSongsPerGame || 0}
                   </p>
                 </div>
                 <div className="bg-green-100 p-3 rounded-2xl">
@@ -149,7 +163,7 @@ const AnalyticsPage = () => {
                     Recent Games
                   </p>
                   <p className="text-3xl font-bold text-gray-800">
-                    {overview.recentGamesCount}
+                    {overview.recentGamesCount || 0}
                   </p>
                   <p className="text-xs text-gray-500">Last 30 days</p>
                 </div>
@@ -181,7 +195,7 @@ const AnalyticsPage = () => {
                     </span>
                   </div>
                   <span className="text-2xl font-bold text-green-600">
-                    {overview.publicGames}
+                    {overview.publicGames || 0}
                   </span>
                 </div>
 
@@ -193,7 +207,7 @@ const AnalyticsPage = () => {
                     </span>
                   </div>
                   <span className="text-2xl font-bold text-orange-600">
-                    {overview.privateGames}
+                    {overview.privateGames || 0}
                   </span>
                 </div>
               </div>
@@ -306,7 +320,7 @@ const AnalyticsPage = () => {
           )}
 
           {/* Empty State */}
-          {overview.totalGames === 0 && (
+          {(overview.totalGames || 0) === 0 && (
             <div className="bg-white rounded-3xl p-12 shadow-xl border border-gray-100 text-center">
               <div className="text-6xl mb-6">📊</div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">

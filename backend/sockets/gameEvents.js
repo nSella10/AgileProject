@@ -1,5 +1,9 @@
 import rooms from "./roomStore.js"; // נייבא את ה-map של החדרים
 import Game from "../models/Game.js";
+import {
+  analyzeAnswer,
+  getAnswerTypeMessage,
+} from "../utils/answerMatching.js";
 
 const ROUND_DURATIONS = [1000, 2000, 3000, 4000, 5000]; // 1s, 2s, 3s, 4s, 5s - יותר מאתגר!
 
@@ -44,7 +48,7 @@ export function handleGameEvents(io, socket) {
     }
   });
 
-  socket.on("submitAnswer", ({ roomCode, answer, username }) => {
+  socket.on("submitAnswer", async ({ roomCode, answer, username }) => {
     const room = rooms.get(roomCode);
     if (!room) return;
 
@@ -56,102 +60,179 @@ export function handleGameEvents(io, socket) {
     room.playerAnswerTimes[username] = answerTime;
     room.guessedUsers.add(username);
 
-    // בדיקת תשובה נגד כל התשובות האפשריות
-    const userAnswer = answer.trim().toLowerCase();
-    const correctAnswers = currentSong.correctAnswers || [
-      currentSong.correctAnswer,
-    ];
+    // ניתוח התשובה עם המערכת החדשה (כולל AI)
+    const timeTaken = answerTime - room.roundStartTime;
+    const maxTime = room.game.guessTimeLimit * 1000; // המרה לאלפיות שנייה
 
-    const correct = correctAnswers.some(
-      (correctAnswer) => correctAnswer.trim().toLowerCase() === userAnswer
-    );
-
-    console.log(`🎯 User answer: "${userAnswer}"`);
-    console.log(
-      `🎯 Possible correct answers:`,
-      correctAnswers.map((a) => `"${a.trim().toLowerCase()}"`)
-    );
-    console.log(`🎯 Answer is correct: ${correct}`);
-
-    // שליחת צליל למארגן על תשובה שהתקבלה
-    io.to(room.hostSocketId).emit("playerAnswered", {
-      username,
-      correct,
-      totalAnswered: room.guessedUsers.size,
-      totalPlayers: room.players.length,
-    });
-
-    if (correct) {
-      room.correctUsers.add(username);
-
-      // חישוב ניקוד מבוסס זמן
-      const guessTimeLimit = room.game.guessTimeLimit * 1000; // המרה לאלפיות שנייה
-      const timeTaken = answerTime - room.roundStartTime;
-      const timeLeft = Math.max(0, guessTimeLimit - timeTaken);
-      const timeRatio = timeLeft / guessTimeLimit;
-
-      // ניקוד בסיס של 1000 נקודות, מוכפל ביחס הזמן שנותר
-      const baseScore = 1000;
-      const timeBonus = Math.floor(baseScore * timeRatio);
-      const finalScore = Math.max(100, timeBonus); // מינימום 100 נקודות
-
-      if (!room.scores[username]) {
-        room.scores[username] = 0;
-      }
-      room.scores[username] += finalScore;
-
-      console.log(
-        `🏆 ${username} scored ${finalScore} points (time ratio: ${timeRatio.toFixed(
-          2
-        )})`
+    try {
+      const answerResult = await analyzeAnswer(
+        answer,
+        currentSong,
+        timeTaken,
+        maxTime
       );
-      console.log(`🏆 Updated scores:`, room.scores);
 
-      io.to(socket.id).emit("answerFeedback", {
-        correct: true,
-        score: finalScore,
-      });
+      console.log(`🎯 User answer: "${answer}"`);
+      console.log(`🎯 Answer analysis:`, answerResult);
 
-      io.to(roomCode).emit("correctAnswer", {
-        scores: room.scores,
-        username,
-        score: finalScore,
-      });
-    } else {
-      io.to(socket.id).emit("answerFeedback", {
-        correct: false,
-      });
-    }
-
-    if (room.guessedUsers.size === room.players.length) {
-      // ביטול הטיימר הנוכחי
-      if (room.currentTimeout) {
-        clearTimeout(room.currentTimeout);
+      if (answerResult.aiEnhanced) {
+        console.log(`🤖 AI Enhanced match: ${answerResult.explanation}`);
       }
 
-      // שליחת אירוע למארגן לעצור את הטיימר שלו
-      io.to(room.hostSocketId).emit("allPlayersAnswered");
+      // שמירת פרטי התשובה לשחקן
+      if (!room.playerAnswers) {
+        room.playerAnswers = {};
+      }
+      room.playerAnswers[username] = {
+        answer: answer.trim(),
+        result: answerResult,
+        answerTime: answerTime,
+      };
 
-      // אם אף אחד לא צדק, נשלח למארגן אפשרות לבחור
-      if (room.correctUsers.size === 0) {
-        // בדיקה אם יש עוד סיבובים זמינים
-        if (room.currentRound < ROUND_DURATIONS.length) {
-          console.log(
-            `🎯 All players guessed incorrectly, asking host for decision`
-          );
-          // שליחת אירוע למארגן לבחור אם להמשיך לסניפט ארוך יותר
-          io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
-            songNumber: room.currentSongIndex + 1,
-            totalSongs: room.songs.length,
-            canReplayLonger: true,
-          });
+      // שליחת עדכון למארגן על תשובה שהתקבלה
+      io.to(room.hostSocketId).emit("playerAnswered", {
+        username,
+        correct: answerResult.isCorrect,
+        answerType: answerResult.type,
+        totalAnswered: room.guessedUsers.size,
+        totalPlayers: room.players.length,
+      });
+
+      if (answerResult.isCorrect) {
+        room.correctUsers.add(username);
+
+        // הוספת הניקוד
+        if (!room.scores[username]) {
+          room.scores[username] = 0;
+        }
+        room.scores[username] += answerResult.score;
+
+        console.log(
+          `🏆 ${username} scored ${answerResult.score} points for ${
+            answerResult.type
+          } (similarity: ${answerResult.similarity.toFixed(2)})`
+        );
+        console.log(`🏆 Updated scores:`, room.scores);
+
+        io.to(socket.id).emit("answerFeedback", {
+          correct: true,
+          score: answerResult.score,
+          answerType: answerResult.type,
+          matchedText: answerResult.matchedText,
+        });
+
+        io.to(roomCode).emit("correctAnswer", {
+          scores: room.scores,
+          username,
+          score: answerResult.score,
+          answerType: answerResult.type,
+        });
+      } else {
+        io.to(socket.id).emit("answerFeedback", {
+          correct: false,
+          answerType: "none",
+        });
+      }
+
+      if (room.guessedUsers.size === room.players.length) {
+        // ביטול הטיימר הנוכחי
+        if (room.currentTimeout) {
+          clearTimeout(room.currentTimeout);
+        }
+
+        // שליחת אירוע למארגן לעצור את הטיימר שלו
+        io.to(room.hostSocketId).emit("allPlayersAnswered");
+
+        // אם אף אחד לא צדק, נשלח למארגן אפשרות לבחור
+        if (room.correctUsers.size === 0) {
+          // בדיקה אם יש עוד סיבובים זמינים
+          if (room.currentRound < ROUND_DURATIONS.length) {
+            console.log(
+              `🎯 All players guessed incorrectly, asking host for decision`
+            );
+            // שליחת אירוע למארגן לבחור אם להמשיך לסניפט ארוך יותר
+            io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
+              songNumber: room.currentSongIndex + 1,
+              totalSongs: room.songs.length,
+              canReplayLonger: true,
+            });
+          } else {
+            console.log(`🎯 All rounds used, finishing round`);
+            finishRound(io, roomCode);
+          }
         } else {
-          console.log(`🎯 All rounds used, finishing round`);
+          // אם מישהו צדק, נסיים את הסיבוב
           finishRound(io, roomCode);
         }
-      } else {
-        // אם מישהו צדק, נסיים את הסיבוב
-        finishRound(io, roomCode);
+      }
+    } catch (error) {
+      console.error("❌ Error analyzing answer:", error);
+
+      // fallback - טיפול בשגיאה
+      const fallbackResult = {
+        type: "none",
+        isCorrect: false,
+        score: 0,
+        matchedText: "",
+        similarity: 0,
+      };
+
+      // שמירת פרטי התשובה לשחקן
+      if (!room.playerAnswers) {
+        room.playerAnswers = {};
+      }
+      room.playerAnswers[username] = {
+        answer: answer.trim(),
+        result: fallbackResult,
+        answerTime: answerTime,
+      };
+
+      // שליחת עדכון למארגן על תשובה שהתקבלה
+      io.to(room.hostSocketId).emit("playerAnswered", {
+        username,
+        correct: false,
+        answerType: "none",
+        totalAnswered: room.guessedUsers.size,
+        totalPlayers: room.players.length,
+      });
+
+      // שליחת תגובה לשחקן
+      io.to(socket.id).emit("answerFeedback", {
+        correct: false,
+        answerType: "none",
+      });
+
+      // בדיקה אם כל השחקנים ענו
+      if (room.guessedUsers.size === room.players.length) {
+        // ביטול הטיימר הנוכחי
+        if (room.currentTimeout) {
+          clearTimeout(room.currentTimeout);
+        }
+
+        // שליחת אירוע למארגן לעצור את הטיימר שלו
+        io.to(room.hostSocketId).emit("allPlayersAnswered");
+
+        // אם אף אחד לא צדק, נשלח למארגן אפשרות לבחור
+        if (room.correctUsers.size === 0) {
+          // בדיקה אם יש עוד סיבובים זמינים
+          if (room.currentRound < ROUND_DURATIONS.length) {
+            console.log(
+              `🎯 All players guessed incorrectly (with error), asking host for decision`
+            );
+            // שליחת אירוע למארגן לבחור אם להמשיך לסניפט ארוך יותר
+            io.to(room.hostSocketId).emit("roundFailedAwaitingDecision", {
+              songNumber: room.currentSongIndex + 1,
+              totalSongs: room.songs.length,
+              canReplayLonger: true,
+            });
+          } else {
+            console.log(`🎯 All rounds used (with error), finishing round`);
+            finishRound(io, roomCode);
+          }
+        } else {
+          // אם מישהו צדק, נסיים את הסיבוב
+          finishRound(io, roomCode);
+        }
       }
     }
   });
@@ -416,31 +497,48 @@ function finishRound(io, roomCode) {
 
   const currentSong = room.songs[room.currentSongIndex];
 
+  // יצירת מפה של שמות משתמשים לאימוג'ים
+  const playerEmojiMap = {};
+  room.players.forEach((player) => {
+    playerEmojiMap[player.username] = player.emoji;
+  });
+
+  // יצירת סיכום תשובות השחקנים
+  const playerAnswersSummary = {};
+  if (room.playerAnswers) {
+    Object.entries(room.playerAnswers).forEach(([username, answerData]) => {
+      playerAnswersSummary[username] = {
+        answer: answerData.answer,
+        answerType: answerData.result.type,
+        answerTypeMessage: getAnswerTypeMessage(answerData.result, "he"),
+        score: answerData.result.score,
+        isCorrect: answerData.result.isCorrect,
+        matchedText: answerData.result.matchedText,
+      };
+    });
+  }
+
   if (room.correctUsers.size === 0) {
     io.to(roomCode).emit("roundFailed", {
       songNumber: room.currentSongIndex + 1,
       totalSongs: room.songs.length,
       allRoundsUsed: room.currentRound >= ROUND_DURATIONS.length,
       songTitle: currentSong.correctAnswer,
-      songPreviewUrl: currentSong.previewUrl, // 🆕 שליחת URL לפזמון
-      songArtist: currentSong.artist, // 🆕 שליחת שם האמן
-      songArtworkUrl: currentSong.artworkUrl, // 🆕 שליחת תמונת השיר
+      songPreviewUrl: currentSong.previewUrl,
+      songArtist: currentSong.artist,
+      songArtworkUrl: currentSong.artworkUrl,
+      playerAnswers: playerAnswersSummary,
     });
   } else {
     // ✅ לפחות שחקן אחד צדק
-    // יצירת מפה של שמות משתמשים לאימוג'ים
-    const playerEmojiMap = {};
-    room.players.forEach((player) => {
-      playerEmojiMap[player.username] = player.emoji;
-    });
-
     io.to(roomCode).emit("roundSucceeded", {
       scores: room.scores,
-      playerEmojis: playerEmojiMap, // הוספת אימוג'ים
-      songTitle: currentSong.correctAnswer, // 🆕 שליחת שם השיר גם בהצלחה
-      songPreviewUrl: currentSong.previewUrl, // 🆕 שליחת URL לפזמון גם בהצלחה
-      songArtist: currentSong.artist, // 🆕 שליחת שם האמן גם בהצלחה
-      songArtworkUrl: currentSong.artworkUrl, // 🆕 שליחת תמונת השיר גם בהצלחה
+      playerEmojis: playerEmojiMap,
+      songTitle: currentSong.correctAnswer,
+      songPreviewUrl: currentSong.previewUrl,
+      songArtist: currentSong.artist,
+      songArtworkUrl: currentSong.artworkUrl,
+      playerAnswers: playerAnswersSummary,
     });
   }
 }

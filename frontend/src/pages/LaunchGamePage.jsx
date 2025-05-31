@@ -10,6 +10,7 @@ import HostGameScreen from "../components/HostFlow/HostGameScreen";
 import ImprovedHostGameScreen from "../components/HostFlow/ImprovedHostGameScreen";
 import InterimLeaderboardScreen from "../components/HostFlow/InterimLeaderboardScreen";
 import RoundRevealAnswerScreen from "../components/HostFlow/RoundRevealAnswerScreen";
+import PlayerAnswersScreen from "../components/HostFlow/PlayerAnswersScreen";
 
 const LaunchGamePage = () => {
   const { gameId } = useParams();
@@ -28,11 +29,13 @@ const LaunchGamePage = () => {
   const [awaitingHostDecision, setAwaitingHostDecision] = useState(false);
   const [showInterimLeaderboard, setShowInterimLeaderboard] = useState(false);
   const [showAnswerReveal, setShowAnswerReveal] = useState(false);
+  const [showPlayerAnswers, setShowPlayerAnswers] = useState(false);
   const [revealedSongTitle, setRevealedSongTitle] = useState("");
   const [revealedSongPreviewUrl, setRevealedSongPreviewUrl] = useState("");
   const [revealedSongArtist, setRevealedSongArtist] = useState("");
   const [revealedSongArtworkUrl, setRevealedSongArtworkUrl] = useState("");
   const [playerEmojis, setPlayerEmojis] = useState({});
+  const [playerAnswers, setPlayerAnswers] = useState({});
   const [countdown, setCountdown] = useState(null);
   const [songNumber, setSongNumber] = useState(1);
   const [totalSongs, setTotalSongs] = useState(1);
@@ -101,6 +104,7 @@ const LaunchGamePage = () => {
         setWaitingForNext(false);
         setShowAnswerReveal(false);
         setShowInterimLeaderboard(false);
+        setShowPlayerAnswers(false);
         setSongNumber(songNumber);
         setTotalSongs(totalSongs);
         setPlayersAnswered(0); // איפוס מעקב תשובות
@@ -378,8 +382,10 @@ const LaunchGamePage = () => {
         songArtist,
         songArtworkUrl,
         playerEmojis,
+        playerAnswers,
       }) => {
         console.log("🏆 LaunchGamePage - roundSucceeded scores:", scores);
+        console.log("🏆 LaunchGamePage - playerAnswers:", playerAnswers);
         setScores(scores);
         setShowInterimLeaderboard(true);
         setRoundSucceeded(true);
@@ -387,12 +393,13 @@ const LaunchGamePage = () => {
         setCountdown(null);
         clearInterval(countdownRef.current);
 
-        // שמירת פרטי השיר להשמעה ברקע במסך הביניים
+        // שמירת פרטי השיר והתשובות
         if (songTitle) setRevealedSongTitle(songTitle);
         if (songPreviewUrl) setRevealedSongPreviewUrl(songPreviewUrl);
         if (songArtist) setRevealedSongArtist(songArtist);
         if (songArtworkUrl) setRevealedSongArtworkUrl(songArtworkUrl);
         if (playerEmojis) setPlayerEmojis(playerEmojis);
+        if (playerAnswers) setPlayerAnswers(playerAnswers);
 
         // עצירת השמע כשהסיבוב מצליח
         if (audioRef.current) {
@@ -414,6 +421,7 @@ const LaunchGamePage = () => {
         songPreviewUrl,
         songArtist,
         songArtworkUrl,
+        playerAnswers,
       }) => {
         setWaitingForNext(true);
         setRoundFailed(true);
@@ -421,6 +429,9 @@ const LaunchGamePage = () => {
         setCountdown(null);
         clearInterval(countdownRef.current);
         setShowInterimLeaderboard(false);
+
+        // שמירת תשובות השחקנים גם כשהסיבוב נכשל
+        if (playerAnswers) setPlayerAnswers(playerAnswers);
 
         // עצירת השמע כשהסיבוב נכשל
         if (audioRef.current) {
@@ -550,6 +561,7 @@ const LaunchGamePage = () => {
     setRoundSucceeded(false);
     setShowInterimLeaderboard(false);
     setShowAnswerReveal(false);
+    setShowPlayerAnswers(false);
     setCountdown(null);
     clearInterval(countdownRef.current);
 
@@ -586,11 +598,33 @@ const LaunchGamePage = () => {
     }
   };
 
+  // פונקציה למעבר למסך התשובות
+  const handleViewAnswers = () => {
+    setShowInterimLeaderboard(false);
+    setShowPlayerAnswers(true);
+  };
+
+  // פונקציה לחזרה מהמסך תשובות לליידרבורד
+  const handleBackToLeaderboard = () => {
+    setShowPlayerAnswers(false);
+    setShowInterimLeaderboard(true);
+  };
+
   // הסרנו את handleEnableAudio - השמעה תמיד אוטומטית
 
   return (
     <div>
-      {showAnswerReveal ? (
+      {showPlayerAnswers ? (
+        <PlayerAnswersScreen
+          playerAnswers={playerAnswers}
+          playerEmojis={playerEmojis}
+          songTitle={revealedSongTitle}
+          songArtist={revealedSongArtist}
+          songArtworkUrl={revealedSongArtworkUrl}
+          songPreviewUrl={revealedSongPreviewUrl}
+          onNextSong={handleNextRound}
+        />
+      ) : showAnswerReveal ? (
         <RoundRevealAnswerScreen
           songTitle={revealedSongTitle}
           songPreviewUrl={revealedSongPreviewUrl}
@@ -606,7 +640,9 @@ const LaunchGamePage = () => {
           songArtist={revealedSongArtist}
           songArtworkUrl={revealedSongArtworkUrl}
           playerEmojis={playerEmojis}
+          playerAnswers={playerAnswers}
           onNextRound={handleNextRound}
+          onViewAnswers={handleViewAnswers}
         />
       ) : finalLeaderboard ? null : gameStarted ? (
         <>

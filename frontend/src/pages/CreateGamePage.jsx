@@ -62,6 +62,8 @@ const CreateGamePage = () => {
         previewUrl: song.previewUrl,
         artworkUrl: song.artworkUrl,
         trackId: song.trackId,
+        lyrics: song.lyrics || "",
+        lyricsKeywords: song.lyricsKeywords || [],
       })),
     };
 
@@ -400,7 +402,7 @@ const CreateGamePage = () => {
                 {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Creating...
+                    Creating game & fetching lyrics...
                   </>
                 ) : (
                   <>
@@ -424,6 +426,9 @@ const CreateGamePage = () => {
                     <li>• Choose songs from different genres and eras</li>
                     <li>• Drag songs to reorder them as you like</li>
                     <li>• Aim for 5-10 songs for optimal game length</li>
+                    <li>
+                      • We automatically fetch song lyrics for better gameplay
+                    </li>
                     <li>• Test your game with friends before sharing</li>
                   </ul>
                 </div>

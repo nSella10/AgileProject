@@ -7,6 +7,7 @@ import {
   getGameById,
   updateGame,
   getAnalytics,
+  updateLyricsForExistingGames,
 } from "../controllers/gameController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 
@@ -31,6 +32,11 @@ router.get("/search-songs", protect, searchSongs);
 // @route   GET /api/games/analytics
 // @access  Private
 router.get("/analytics", protect, getAnalytics);
+
+// @desc    Update lyrics for existing games
+// @route   POST /api/games/update-lyrics
+// @access  Private
+router.post("/update-lyrics", protect, updateLyricsForExistingGames);
 
 // @desc    Get a single game by ID
 // @route   GET /api/games/:id

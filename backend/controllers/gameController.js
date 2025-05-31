@@ -76,6 +76,7 @@ export const createGame = asyncHandler(async (req, res) => {
         trackId: song.trackId || "",
         lyrics: "", // נתחיל עם ריק
         lyricsKeywords: [], // נתחיל עם ריק
+        fullLyrics: song.fullLyrics || "", // מילות השיר המלאות שהמשתמש הוסיף
       };
 
       // ניסיון לקבל מילות שיר מ-Genius API
@@ -162,6 +163,19 @@ export const getGameById = asyncHandler(async (req, res) => {
     songsCount: game.songs.length,
   });
 
+  // בדיקה של מילות השיר בשירים
+  console.log(
+    `🔍 Loading game ${req.params.id} with songs:`,
+    game.songs.map((song) => ({
+      title: song.title,
+      hasFullLyrics: !!song.fullLyrics,
+      fullLyricsLength: song.fullLyrics ? song.fullLyrics.length : 0,
+      fullLyricsPreview: song.fullLyrics
+        ? song.fullLyrics.substring(0, 50) + "..."
+        : "No lyrics",
+    }))
+  );
+
   // Check if the user is the owner of the game
   if (game.createdBy.toString() !== req.user._id.toString()) {
     res.status(403);
@@ -196,6 +210,21 @@ export const updateGame = asyncHandler(async (req, res) => {
     guessTimeLimit,
     typeof guessTimeLimit
   );
+
+  // בדיקה של מילות השיר שמתקבלות מהלקוח
+  if (songs && songs.length > 0) {
+    console.log(
+      `🔍 Received songs from client:`,
+      songs.map((song) => ({
+        title: song.title,
+        hasFullLyrics: !!song.fullLyrics,
+        fullLyricsLength: song.fullLyrics ? song.fullLyrics.length : 0,
+        fullLyricsPreview: song.fullLyrics
+          ? song.fullLyrics.substring(0, 50) + "..."
+          : "No lyrics",
+      }))
+    );
+  }
 
   const game = await Game.findById(req.params.id);
 
@@ -248,6 +277,8 @@ export const updateGame = asyncHandler(async (req, res) => {
             lyrics: existingSong?.lyrics || song.lyrics || "",
             lyricsKeywords:
               existingSong?.lyricsKeywords || song.lyricsKeywords || [],
+            // עדיפות למילות השיר החדשות שהמשתמש הוסיף, אחרת השתמש בקיימות
+            fullLyrics: song.fullLyrics || existingSong?.fullLyrics || "",
           };
 
           // אם זה שיר חדש (אין lyrics), ננסה לקבל מילות שיר
@@ -323,6 +354,20 @@ export const updateGame = asyncHandler(async (req, res) => {
     "💾 Game saved with guess time limit:",
     updatedGame.guessTimeLimit
   );
+
+  // בדיקה של מילות השיר שנשמרו
+  console.log(
+    `🔍 Saved game with songs:`,
+    updatedGame.songs.map((song) => ({
+      title: song.title,
+      hasFullLyrics: !!song.fullLyrics,
+      fullLyricsLength: song.fullLyrics ? song.fullLyrics.length : 0,
+      fullLyricsPreview: song.fullLyrics
+        ? song.fullLyrics.substring(0, 50) + "..."
+        : "No lyrics",
+    }))
+  );
+
   res.json(updatedGame);
 });
 

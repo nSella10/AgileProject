@@ -1,5 +1,32 @@
-import express from "express";
+// Load environment variables FIRST before importing anything else
 import dotenv from "dotenv";
+dotenv.config();
+
+// Fallback environment variables if .env doesn't load
+if (!process.env.MONGO_URI) {
+  process.env.MONGO_URI =
+    "mongodb+srv://omripeer12:kpM6eqJ5CkDqxozB@musicapp.0gesll7.mongodb.net/musicapp?retryWrites=true&w=majority";
+}
+if (!process.env.PORT) {
+  process.env.PORT = "8000";
+}
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = "development";
+}
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = "my_secret_key";
+}
+if (!process.env.OPENAI_API_KEY) {
+  console.warn("⚠️ OPENAI_API_KEY not found in environment variables");
+}
+
+// Debug: Check if environment variables are loaded
+console.log("🔍 Environment check:");
+console.log("PORT:", process.env.PORT);
+console.log("MONGO_URI:", process.env.MONGO_URI ? "Found" : "Not found");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+
+import express from "express";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
@@ -19,10 +46,7 @@ import fs from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables first
-dotenv.config();
-
-// Then connect to database
+// Connect to database after environment variables are loaded
 connectDB();
 
 const app = express();

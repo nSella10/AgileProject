@@ -106,8 +106,8 @@ async function checkSongTitle(userAnswer, song) {
     );
     console.log(`🤖 OpenAI song result:`, aiResult);
 
-    // אם ה-AI מצא התאמה עם ביטחון גבוה, נשתמש בתוצאה
-    if (aiResult.isMatch && aiResult.confidence >= 0.7) {
+    // אם ה-AI מצא התאמה עם ביטחון בינוני או גבוה, נשתמש בתוצאה (הורדתי את הסף ל-0.6 לשמות שירים)
+    if (aiResult.isMatch && aiResult.confidence >= 0.6) {
       console.log(
         `✅ AI found song title match: "${userAnswer}" → "${song.title}" (confidence: ${aiResult.confidence})`
       );
@@ -143,7 +143,7 @@ async function checkArtist(userAnswer, song) {
     return { isMatch: false, similarity: 0, matchedText: "" };
   }
 
-  // ניסיון ראשון: בדיקה עם OpenAI
+  // ניסיון ראשון: בדיקה עם OpenAI (לטיפול בשגיאות כתיב ותווים מיותרים)
   try {
     console.log(
       `🤖 Calling OpenAI for artist matching: "${userAnswer}" vs "${song.artist}"`
@@ -151,8 +151,8 @@ async function checkArtist(userAnswer, song) {
     const aiResult = await checkArtistMatchWithAI(userAnswer, song.artist);
     console.log(`🤖 OpenAI result:`, aiResult);
 
-    // אם ה-AI מצא התאמה עם ביטחון גבוה, נשתמש בתוצאה
-    if (aiResult.isMatch && aiResult.confidence >= 0.7) {
+    // אם ה-AI מצא התאמה עם ביטחון בינוני או גבוה, נשתמש בתוצאה (הורדתי את הסף ל-0.5 לזמרים)
+    if (aiResult.isMatch && aiResult.confidence >= 0.5) {
       console.log(
         `✅ AI found artist match: "${userAnswer}" → "${song.artist}" (confidence: ${aiResult.confidence})`
       );
@@ -165,7 +165,7 @@ async function checkArtist(userAnswer, song) {
       };
     }
 
-    // אם ה-AI לא מצא התאמה עם ביטחון גבוה, ננסה את השיטה המסורתית
+    // אם ה-AI לא מצא התאמה עם ביטחון מספיק, ננסה את השיטה המסורתית
     console.log(
       `🔄 AI confidence too low (${aiResult.confidence}), trying traditional matching...`
     );
@@ -263,42 +263,118 @@ function generateArtistVariations(artistName) {
 }
 
 /**
- * בדיקת התאמה למילים מהשיר - משתמש רק ב-OpenAI
+ * בדיקת התאמה למילים מהשיר - בדיקה ישירה מול מילות השיר שהמשתמש הוסיף
  */
 async function checkLyrics(userAnswer, song) {
   const songName = song.title || song.trackName || "Unknown Song";
-  console.log(`🔍 Checking lyrics for song: ${songName} using OpenAI`);
+  console.log(`🔍 Checking lyrics for song: ${songName}`);
   console.log(`🔍 User answer: "${userAnswer}"`);
 
-  try {
-    const aiResult = await checkLyricsMatchWithAI(
-      userAnswer,
-      song.title,
-      song.artist
+  // בדיקה אם יש מילות שיר שהמשתמש הוסיף
+  const fullLyrics = song.fullLyrics || song.lyrics || "";
+
+  if (!fullLyrics || fullLyrics.trim() === "") {
+    console.log(
+      `⚠️ No lyrics provided for song "${songName}" - trying AI fallback`
     );
 
-    // אם ה-AI מצא התאמה עם ביטחון סביר, נשתמש בתוצאה (הורדתי את הסף ל-0.4)
-    if (aiResult.isMatch && aiResult.confidence >= 0.4) {
+    // fallback ל-AI כאשר אין מילות שיר שהמשתמש הוסיף
+    try {
+      const aiResult = await checkLyricsMatchWithAI(
+        userAnswer,
+        song.title || song.trackName,
+        song.artist
+      );
+
+      // רק אם ה-AI בטוח מאוד (סף גבוה של 0.8)
+      if (aiResult.isMatch && aiResult.confidence >= 0.8) {
+        console.log(
+          `✅ AI fallback found lyrics match: "${userAnswer}" in song "${songName}" (confidence: ${aiResult.confidence})`
+        );
+        return {
+          isMatch: true,
+          similarity: aiResult.confidence,
+          matchedText: aiResult.matchedText || userAnswer,
+          aiEnhanced: true,
+          explanation: `AI fallback: ${aiResult.explanation}`,
+        };
+      }
+
       console.log(
-        `✅ AI found lyrics match: "${userAnswer}" in song "${songName}" (confidence: ${aiResult.confidence})`
+        `🔄 AI fallback confidence too low (${aiResult.confidence}) for lyrics check`
+      );
+    } catch (error) {
+      console.log(`⚠️ AI fallback failed:`, error.message);
+    }
+
+    return {
+      isMatch: false,
+      similarity: 0,
+      matchedText: "",
+      explanation: "No lyrics provided for this song and AI fallback failed",
+    };
+  }
+
+  // נרמול הטקסט
+  const normalizedUserAnswer = normalizeText(userAnswer);
+  const normalizedLyrics = normalizeText(fullLyrics);
+
+  console.log(
+    `🔍 Checking if "${normalizedUserAnswer}" appears in song lyrics`
+  );
+
+  // בדיקה ישירה אם המילים מופיעות במילות השיר
+  if (normalizedLyrics.includes(normalizedUserAnswer)) {
+    console.log(
+      `✅ Found exact lyrics match: "${userAnswer}" in song "${songName}"`
+    );
+    return {
+      isMatch: true,
+      similarity: 1.0,
+      matchedText: userAnswer,
+      explanation: "Found exact match in song lyrics",
+    };
+  }
+
+  // בדיקה של מילים בודדות (לפחות 3 תווים)
+  const userWords = normalizedUserAnswer
+    .split(/\s+/)
+    .filter((word) => word.length >= 3);
+  const matchedWords = [];
+
+  for (const word of userWords) {
+    if (normalizedLyrics.includes(word)) {
+      matchedWords.push(word);
+    }
+  }
+
+  // אם נמצאו מילים תואמות
+  if (matchedWords.length > 0) {
+    const matchRatio = matchedWords.length / userWords.length;
+
+    // דרישה לפחות 60% מהמילים תואמות
+    if (matchRatio >= 0.6) {
+      console.log(
+        `✅ Found partial lyrics match: ${matchedWords.length}/${userWords.length} words matched in song "${songName}"`
       );
       return {
         isMatch: true,
-        similarity: aiResult.confidence,
-        matchedText: aiResult.matchedText || userAnswer,
-        aiEnhanced: true,
-        explanation: aiResult.explanation,
+        similarity: matchRatio,
+        matchedText: matchedWords.join(" "),
+        explanation: `Found ${matchedWords.length} matching words in song lyrics`,
       };
     }
-
-    console.log(
-      `🔄 AI lyrics confidence too low (${aiResult.confidence}), no match found`
-    );
-  } catch (error) {
-    console.log(`⚠️ AI lyrics check failed:`, error.message);
   }
 
-  return { isMatch: false, similarity: 0, matchedText: "" };
+  console.log(
+    `❌ No lyrics match found for "${userAnswer}" in song "${songName}"`
+  );
+  return {
+    isMatch: false,
+    similarity: 0,
+    matchedText: "",
+    explanation: "No matching words found in song lyrics",
+  };
 }
 
 /**

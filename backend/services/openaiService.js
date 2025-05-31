@@ -268,6 +268,8 @@ Please respond with a JSON object containing:
   }
 }
 
+// הפונקציה הזו כבר לא נחוצה - אנחנו משתמשים במילות השיר שהמשתמש מוסיף
+
 /**
  * בדיקה אם תשובת המשתמש מכילה מילים מהשיר באמצעות OpenAI
  * @param {string} userAnswer - התשובה של המשתמש
@@ -285,27 +287,35 @@ export async function checkLyricsMatchWithAI(
       `🤖 Checking lyrics match with AI: "${userAnswer}" for song "${songTitle}" by "${artistName}"`
     );
 
+    // אנחנו לא משתמשים יותר במאגר מקומי - רק ב-AI לבדיקת מילות שיר
+    console.log(`🔍 Using AI for lyrics matching (no local database)`);
+
+    // הערה: בדיקת מילות השיר עכשיו מתבצעת ישירות מול המילות שהמשתמש הוסיף
+    // ה-AI משמש רק כ-fallback במקרה שאין מילות שיר
+
     const prompt = `
-You are an expert in music and song lyrics with extensive knowledge of Hebrew and English songs. Your task is to determine if a user's answer contains words or phrases that appear in the lyrics of a specific song.
+You are an expert in music and song lyrics with extensive knowledge of Hebrew and English songs. Your task is to determine if a user's answer contains words or phrases that ACTUALLY appear in the lyrics of a specific song.
 
 Song: "${songTitle}" by "${artistName}"
 User Answer: "${userAnswer}"
 
-IMPORTANT: Be generous in matching! If the user's words could reasonably be from this song's lyrics, mark it as a match.
+CRITICAL INSTRUCTIONS:
+1. ONLY return "isMatch": true if you are CERTAIN the words/phrase actually appears in the song lyrics
+2. Do NOT guess or assume - if you're not sure, return false
+3. Do NOT match based on themes or "sounds like it could be" - only exact or very close lyrical matches
+4. Be STRICT and ACCURATE - false positives are worse than false negatives
 
-Consider:
-1. Exact phrases and lines from the song lyrics
-2. Hebrew/English variations and transliterations
-3. Partial matches of significant lyrical phrases (even 2-3 words)
-4. Common words that appear in the song
-5. Thematic words related to the song's content
-6. Different spellings or variations of the same words
+Consider ONLY:
+1. Exact phrases that appear in the song lyrics
+2. Very close variations of actual lyrical phrases
+3. Hebrew/English transliterations of actual lyrics
+4. Partial matches of actual lyrical lines (minimum 3-4 consecutive words)
 
-Be MORE LIKELY to say "isMatch": true if:
-- The words sound like they could be from this song
-- The phrase has any similarity to known lyrics
-- The words fit the song's theme or style
-- You have any reasonable doubt
+Do NOT match:
+- Thematic words that don't actually appear in lyrics
+- Words that "sound like they could be" from the song
+- General words related to the song's topic
+- Guesses based on song title or artist
 
 Please respond with a JSON object containing:
 {
@@ -316,10 +326,12 @@ Please respond with a JSON object containing:
 }
 
 Examples:
-- If words appear in or sound like song lyrics → isMatch: true, confidence: 0.8-1.0
-- If words are thematically related to the song → isMatch: true, confidence: 0.5-0.7
-- If words might be from the song but uncertain → isMatch: true, confidence: 0.4-0.6
-- Only if completely unrelated → isMatch: false
+- If exact words/phrases appear in song lyrics → isMatch: true, confidence: 0.8-1.0
+- If very close variation of actual lyrics → isMatch: true, confidence: 0.6-0.8
+- If uncertain or thematic match only → isMatch: false, confidence: 0.0-0.3
+- If completely unrelated → isMatch: false, confidence: 0.0
+
+BE STRICT AND ACCURATE!
 `;
 
     const openai = getOpenAIClient();
@@ -358,6 +370,17 @@ Examples:
         typeof result.isMatch === "boolean" &&
         typeof result.confidence === "number"
       ) {
+        // הוספת לוג מפורט לבדיקת דיוק
+        console.log(`🔍 AI Lyrics Analysis Result:`, {
+          userAnswer,
+          songTitle,
+          artistName,
+          isMatch: result.isMatch,
+          confidence: result.confidence,
+          explanation: result.explanation,
+          matchedPhrase: result.matchedPhrase,
+        });
+
         return {
           isMatch: result.isMatch,
           confidence: result.confidence,

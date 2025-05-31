@@ -15,9 +15,15 @@ const gameSchema = new mongoose.Schema(
     guessTimeLimit: {
       type: Number,
       default: 15,
-      enum: [15, 30, 60],
+      enum: [15, 30, 45, 60],
       required: true,
     }, // זמן ניחוש בשניות
+    guessInputMethod: {
+      type: String,
+      default: "freeText",
+      enum: ["freeText", "letterClick"],
+      required: true,
+    }, // שיטת ניחוש: כתיבה חופשית או לחיצה על אותיות
   },
   { timestamps: true }
 );

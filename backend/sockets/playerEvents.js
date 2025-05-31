@@ -56,6 +56,14 @@ export const handlePlayerEvents = (io, socket) => {
     // 🔥 שליחת אימוג'י לשחקן
     socket.emit("playerAssignedEmoji", { emoji: assignedEmoji });
 
+    // 🎮 שליחת פרטי המשחק לשחקן
+    socket.emit("gameData", {
+      guessTimeLimit: room.game.guessTimeLimit,
+      guessInputMethod: room.game.guessInputMethod,
+      title: room.game.title,
+      description: room.game.description,
+    });
+
     // 🧠 שליחת רשימת שחקנים כולל אימוג'ים למארגן
     io.to(room.hostSocketId).emit("updatePlayerList", {
       players: room.players.map((p) => ({
@@ -95,6 +103,11 @@ export const handlePlayerEvents = (io, socket) => {
           roundNumber: room.currentRound,
           songNumber: room.currentSongIndex + 1,
           totalSongs: room.songs.length,
+          currentSong: {
+            title: currentSong.title,
+            artist: currentSong.artist,
+            correctAnswer: currentSong.correctAnswer,
+          },
         });
 
         // אם הטיימר כבר פועל, שלח גם timerStarted

@@ -6,13 +6,21 @@ import Game from "../models/Game.js";
 // @access  Private
 export const createGame = asyncHandler(async (req, res) => {
   console.log("Creating a new game with song data...");
-  const { title, description, isPublic, songs, guessTimeLimit } = req.body;
+  const {
+    title,
+    description,
+    isPublic,
+    songs,
+    guessTimeLimit,
+    guessInputMethod,
+  } = req.body;
 
   console.log("🎮 Received game data:", {
     title,
     description,
     isPublic,
     guessTimeLimit,
+    guessInputMethod,
   });
   console.log(
     "⏱️ Received guess time limit:",
@@ -28,11 +36,19 @@ export const createGame = asyncHandler(async (req, res) => {
   }
 
   // וידוא זמן ניחוש תקין
-  const validGuessTimeLimit = [15, 30, 60].includes(guessTimeLimit)
+  const validGuessTimeLimit = [15, 30, 45, 60].includes(guessTimeLimit)
     ? guessTimeLimit
     : 15;
 
+  // וידוא שיטת ניחוש תקינה
+  const validGuessInputMethod = ["freeText", "letterClick"].includes(
+    guessInputMethod
+  )
+    ? guessInputMethod
+    : "freeText";
+
   console.log("✅ Valid guess time limit:", validGuessTimeLimit);
+  console.log("✅ Valid guess input method:", validGuessInputMethod);
 
   // וידוא שכל שיר מכיל את הנתונים הנדרשים
   const validatedSongs = songs.map((song) => ({
@@ -53,6 +69,7 @@ export const createGame = asyncHandler(async (req, res) => {
     songs: validatedSongs,
     isPublic,
     guessTimeLimit: validGuessTimeLimit,
+    guessInputMethod: validGuessInputMethod,
     createdBy: req.user._id,
   });
 
@@ -108,13 +125,21 @@ export const getGameById = asyncHandler(async (req, res) => {
 // @route   PUT /api/games/:id
 // @access  Private
 export const updateGame = asyncHandler(async (req, res) => {
-  const { title, description, isPublic, songs, guessTimeLimit } = req.body;
+  const {
+    title,
+    description,
+    isPublic,
+    songs,
+    guessTimeLimit,
+    guessInputMethod,
+  } = req.body;
 
   console.log("🎮 Updating game with data:", {
     title,
     description,
     isPublic,
     guessTimeLimit,
+    guessInputMethod,
   });
   console.log(
     "⏱️ Received guess time limit:",
@@ -158,11 +183,19 @@ export const updateGame = asyncHandler(async (req, res) => {
 
   // Validate guess time limit if provided
   const validGuessTimeLimit =
-    guessTimeLimit !== undefined && [15, 30, 60].includes(guessTimeLimit)
+    guessTimeLimit !== undefined && [15, 30, 45, 60].includes(guessTimeLimit)
       ? guessTimeLimit
       : game.guessTimeLimit;
 
+  // Validate guess input method if provided
+  const validGuessInputMethod =
+    guessInputMethod !== undefined &&
+    ["freeText", "letterClick"].includes(guessInputMethod)
+      ? guessInputMethod
+      : game.guessInputMethod;
+
   console.log("✅ Valid guess time limit:", validGuessTimeLimit);
+  console.log("✅ Valid guess input method:", validGuessInputMethod);
   console.log("🔄 Current game guess time limit:", game.guessTimeLimit);
 
   // Update game fields
@@ -170,6 +203,7 @@ export const updateGame = asyncHandler(async (req, res) => {
   game.description = description !== undefined ? description : game.description;
   game.isPublic = isPublic !== undefined ? isPublic : game.isPublic;
   game.guessTimeLimit = validGuessTimeLimit;
+  game.guessInputMethod = validGuessInputMethod;
   game.songs = validatedSongs;
 
   const updatedGame = await game.save();

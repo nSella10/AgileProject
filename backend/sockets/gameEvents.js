@@ -279,6 +279,11 @@ function startRound(io, roomCode) {
     roundNumber: round + 1,
     songNumber: room.currentSongIndex + 1,
     totalSongs: room.songs.length,
+    currentSong: {
+      title: currentSong.title,
+      artist: currentSong.artist,
+      correctAnswer: currentSong.correctAnswer,
+    },
   });
 
   // נתחיל טיימר מיד עם השהיה של משך האודיו

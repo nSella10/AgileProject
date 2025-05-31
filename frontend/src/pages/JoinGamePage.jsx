@@ -27,6 +27,8 @@ const JoinGamePage = () => {
   const [currentPlayerName, setCurrentPlayerName] = useState("");
   const [guessResult, setGuessResult] = useState(null); // "correct", "wrong", or null
   const [isAudioPlaying, setIsAudioPlaying] = useState(false); // האם השיר עדיין מתנגן
+  const [gameData, setGameData] = useState(null); // פרטי המשחק
+  const [currentSongTitle, setCurrentSongTitle] = useState(""); // שם השיר הנוכחי
 
   const timeoutRef = useRef(null);
   const timerInterval = useRef(null);
@@ -50,9 +52,15 @@ const JoinGamePage = () => {
       setStatusMsg("🎬 Game is starting!");
     });
 
+    // מאזין לקבלת פרטי המשחק
+    socket.on("gameData", (data) => {
+      console.log("🎮 Received game data:", data);
+      setGameData(data);
+    });
+
     socket.on(
       "nextRound",
-      ({ roundNumber, songNumber, totalSongs, duration }) => {
+      ({ roundNumber, songNumber, totalSongs, duration, currentSong }) => {
         setStatusMsg(`🎵 Round ${roundNumber} - Song is playing...`);
         setHasGuessedThisRound(false);
         setIsWaitingBetweenRounds(false);
@@ -62,6 +70,11 @@ const JoinGamePage = () => {
         setSubmitted(false);
         setGuessResult(null);
         setIsAudioPlaying(true); // השיר מתחיל להתנגן
+
+        // עדכון שם השיר הנוכחי (לשיטת לחיצת אותיות)
+        if (currentSong && currentSong.title) {
+          setCurrentSongTitle(currentSong.title);
+        }
 
         // ניקוי טיימרים קודמים
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -220,6 +233,7 @@ const JoinGamePage = () => {
       socket.off("roomJoined");
       socket.off("roomJoinError");
       socket.off("gameStarting");
+      socket.off("gameData");
       socket.off("nextRound");
       socket.off("timerStarted");
       socket.off("answerFeedback");
@@ -306,6 +320,8 @@ const JoinGamePage = () => {
       roundFailedForUser={roundFailedForUser}
       guessResult={guessResult}
       isAudioPlaying={isAudioPlaying}
+      guessInputMethod={gameData?.guessInputMethod || "freeText"}
+      currentSongTitle={currentSongTitle}
     />
   );
 };

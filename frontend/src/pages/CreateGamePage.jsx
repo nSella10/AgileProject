@@ -22,6 +22,7 @@ const CreateGamePage = () => {
   const [selectedSongs, setSelectedSongs] = useState([]);
   const [isPublic, setIsPublic] = useState(true);
   const [guessTimeLimit, setGuessTimeLimit] = useState(15);
+  const [guessInputMethod, setGuessInputMethod] = useState("freeText");
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ const CreateGamePage = () => {
       description,
       isPublic,
       guessTimeLimit,
+      guessInputMethod,
       songs: selectedSongs.map((song) => ({
         title: song.title,
         artist: song.artist,
@@ -240,7 +242,7 @@ const CreateGamePage = () => {
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     ⏱️ Guess Time Limit
                   </h3>
-                  <div className="flex items-center gap-6">
+                  <div className="grid grid-cols-2 gap-4">
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="radio"
@@ -273,6 +275,19 @@ const CreateGamePage = () => {
                       <input
                         type="radio"
                         name="guessTime"
+                        checked={guessTimeLimit === 45}
+                        onChange={() => setGuessTimeLimit(45)}
+                        className="w-5 h-5 text-blue-600"
+                      />
+                      <span className="font-medium text-gray-700">
+                        45 seconds
+                      </span>
+                      <span className="text-sm text-gray-500">Extended</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="guessTime"
                         checked={guessTimeLimit === 60}
                         onChange={() => setGuessTimeLimit(60)}
                         className="w-5 h-5 text-blue-600"
@@ -285,6 +300,53 @@ const CreateGamePage = () => {
                   </div>
                   <p className="text-sm text-gray-600 mt-3">
                     How long should players have to guess each song?
+                  </p>
+                </div>
+
+                {/* Guess Input Method */}
+                <div className="p-6 bg-green-50 rounded-2xl">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    ✏️ Guess Input Method
+                  </h3>
+                  <div className="space-y-4">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="guessInputMethod"
+                        checked={guessInputMethod === "freeText"}
+                        onChange={() => setGuessInputMethod("freeText")}
+                        className="w-5 h-5 text-green-600 mt-1"
+                      />
+                      <div>
+                        <span className="font-medium text-gray-700 block">
+                          Free Text Input
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          Players can type their guess freely in a text field
+                        </span>
+                      </div>
+                    </label>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="guessInputMethod"
+                        checked={guessInputMethod === "letterClick"}
+                        onChange={() => setGuessInputMethod("letterClick")}
+                        className="w-5 h-5 text-green-600 mt-1"
+                      />
+                      <div>
+                        <span className="font-medium text-gray-700 block">
+                          Letter Clicking
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          Players click on letters to fill in dashes
+                          representing the song name
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-3">
+                    Choose how players will input their guesses.
                   </p>
                 </div>
               </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import LetterClickInput from "./LetterClickInput";
 
 const GamePlayScreen = ({
   guess,
@@ -16,6 +17,8 @@ const GamePlayScreen = ({
   guessResult,
   maxTime = 15, // זמן ניחוש דינמי
   isAudioPlaying = false, // האם השיר עדיין מתנגן
+  guessInputMethod = "freeText", // שיטת ניחוש
+  currentSongTitle = "", // שם השיר הנוכחי (לשיטת לחיצת אותיות)
 }) => {
   console.log("🎮 GamePlayScreen props:", {
     timeLeft,
@@ -199,29 +202,43 @@ const GamePlayScreen = ({
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Input Field */}
-              <div className="relative">
-                <input
-                  className="w-full bg-white bg-opacity-20 backdrop-blur-sm border-2 border-white border-opacity-30 rounded-2xl px-6 py-4 text-white text-lg placeholder-purple-200 focus:outline-none focus:border-purple-400 focus:bg-opacity-30 transition-all duration-300"
-                  type="text"
-                  value={guess}
-                  onChange={(e) => onGuessChange(e.target.value)}
-                  placeholder="Type your guess here..."
+              {/* Guess Input - תלוי בשיטת הניחוש */}
+              {guessInputMethod === "letterClick" ? (
+                <LetterClickInput
+                  songTitle={currentSongTitle}
+                  onGuessChange={onGuessChange}
+                  onSubmitGuess={onSubmitGuess}
+                  hasGuessed={hasGuessed}
+                  isWaiting={isWaiting}
+                  isGameOver={isGameOver}
                 />
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-purple-300">
-                  🎵
-                </div>
-              </div>
+              ) : (
+                <>
+                  {/* Free Text Input */}
+                  <div className="relative">
+                    <input
+                      className="w-full bg-white bg-opacity-20 backdrop-blur-sm border-2 border-white border-opacity-30 rounded-2xl px-6 py-4 text-white text-lg placeholder-purple-200 focus:outline-none focus:border-purple-400 focus:bg-opacity-30 transition-all duration-300"
+                      type="text"
+                      value={guess}
+                      onChange={(e) => onGuessChange(e.target.value)}
+                      placeholder="Type your guess here..."
+                    />
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-purple-300">
+                      🎵
+                    </div>
+                  </div>
 
-              {/* Submit Button */}
-              <button
-                onClick={onSubmitGuess}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <span className="text-xl">🚀</span>
-                Submit Guess
-                <span className="text-xl">🎯</span>
-              </button>
+                  {/* Submit Button */}
+                  <button
+                    onClick={onSubmitGuess}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-8 py-4 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    <span className="text-xl">🚀</span>
+                    Submit Guess
+                    <span className="text-xl">🎯</span>
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>

@@ -4,6 +4,7 @@ const LetterClickInput = ({
   songTitle,
   onGuessChange,
   onSubmitGuess,
+  onSkipSong,
   hasGuessed,
   isWaiting,
   isGameOver,
@@ -190,11 +191,11 @@ const LetterClickInput = ({
     .every((dash) => dash.filled);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* מקפים לשם השיר */}
-      <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-white border-opacity-30">
+      <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-4 border border-white border-opacity-30">
         <div
-          className="flex flex-wrap justify-center gap-4 text-2xl font-bold"
+          className="flex flex-wrap justify-center gap-3 text-xl font-bold"
           dir="rtl"
         >
           {(() => {
@@ -231,7 +232,7 @@ const LetterClickInput = ({
                         disabled={
                           !dash.filled || hasGuessed || isWaiting || isGameOver
                         }
-                        className="w-8 h-10 bg-white bg-opacity-30 border-2 border-white border-opacity-50 rounded-lg flex items-center justify-center text-white hover:bg-opacity-40 transition-all duration-200 cursor-pointer disabled:cursor-default"
+                        className="w-7 h-8 bg-white bg-opacity-30 border-2 border-white border-opacity-50 rounded-lg flex items-center justify-center text-white hover:bg-opacity-40 transition-all duration-200 cursor-pointer disabled:cursor-default text-sm"
                       >
                         {dash.filled ? dash.selectedLetter : "_"}
                       </button>
@@ -247,18 +248,18 @@ const LetterClickInput = ({
       </div>
 
       {/* אותיות זמינות */}
-      <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-white border-opacity-30">
-        <h4 className="text-white font-semibold mb-4 text-center">
+      <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-4 border border-white border-opacity-30">
+        <h4 className="text-white font-semibold mb-3 text-center text-sm">
           Choose Letters:
         </h4>
-        <div className="grid grid-cols-6 sm:grid-cols-8 gap-2" dir="rtl">
+        <div className="grid grid-cols-8 sm:grid-cols-10 gap-2" dir="rtl">
           {availableLetters.map((letterObj, index) => (
             <button
               key={index}
               onClick={() => handleLetterClick(index)}
               disabled={letterObj.used || hasGuessed || isWaiting || isGameOver}
               className={`
-                w-10 h-10 rounded-lg font-bold text-lg transition-all duration-200 text-center
+                w-8 h-8 rounded-lg font-bold text-base transition-all duration-200 text-center
                 ${
                   letterObj.used
                     ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
@@ -278,7 +279,7 @@ const LetterClickInput = ({
       </div>
 
       {/* כפתורי פעולה */}
-      <div className="flex gap-4">
+      <div className="flex gap-3">
         <button
           onClick={handleReset}
           disabled={
@@ -287,7 +288,7 @@ const LetterClickInput = ({
             isGameOver ||
             selectedLetters.length === 0
           }
-          className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-2xl transition-all duration-300 text-lg"
+          className="bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold px-4 py-3 rounded-2xl transition-all duration-300 text-base"
         >
           🔄 Reset
         </button>
@@ -295,12 +296,24 @@ const LetterClickInput = ({
         <button
           onClick={onSubmitGuess}
           disabled={!isGuessComplete || hasGuessed || isWaiting || isGameOver}
-          className="flex-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3"
+          className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-2xl transition-all duration-300 text-base flex items-center justify-center gap-2"
         >
-          <span className="text-xl">🚀</span>
-          Submit Guess
-          <span className="text-xl">🎯</span>
+          <span className="text-lg">🚀</span>
+          Submit
+          <span className="text-lg">🎯</span>
         </button>
+
+        {/* Skip Button */}
+        {onSkipSong && (
+          <button
+            onClick={onSkipSong}
+            disabled={hasGuessed || isWaiting || isGameOver}
+            className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold px-4 py-3 rounded-2xl transition-all duration-300 text-base flex items-center justify-center gap-2"
+          >
+            <span className="text-lg">⏭️</span>
+            Skip
+          </button>
+        )}
       </div>
 
       {/* הודעת עזרה */}

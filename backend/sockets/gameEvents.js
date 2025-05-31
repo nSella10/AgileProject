@@ -124,7 +124,80 @@ export function handleGameEvents(io, socket) {
     }
 
     if (room.guessedUsers.size === room.players.length) {
-      finishRound(io, roomCode);
+      // ביטול הטיימר הנוכחי
+      if (room.currentTimeout) {
+        clearTimeout(room.currentTimeout);
+      }
+
+      // אם אף אחד לא צדק, נמשיך לסניפט הבא
+      if (room.correctUsers.size === 0) {
+        // בדיקה אם יש עוד סיבובים זמינים
+        if (room.currentRound < ROUND_DURATIONS.length) {
+          console.log(
+            `🎯 All players guessed incorrectly, moving to next round`
+          );
+          startRound(io, roomCode);
+        } else {
+          console.log(`🎯 All rounds used, finishing round`);
+          finishRound(io, roomCode);
+        }
+      } else {
+        // אם מישהו צדק, נסיים את הסיבוב
+        finishRound(io, roomCode);
+      }
+    }
+  });
+
+  socket.on("skipSong", ({ roomCode, username }) => {
+    const room = rooms.get(roomCode);
+    if (!room) return;
+
+    if (room.guessedUsers.has(username)) return;
+
+    // סימון השחקן כמי שוויתר (מתנהג כמו תשובה שגויה)
+    room.guessedUsers.add(username);
+
+    console.log(`⏭️ ${username} skipped the song`);
+
+    // שליחת תגובה לשחקן שוויתר (כמו תשובה שגויה)
+    io.to(socket.id).emit("answerFeedback", {
+      correct: false,
+      skipped: true,
+    });
+
+    // שליחת עדכון למארגן
+    io.to(room.hostSocketId).emit("playerAnswered", {
+      username,
+      correct: false,
+      skipped: true,
+      totalAnswered: room.guessedUsers.size,
+      totalPlayers: room.players.length,
+    });
+
+    // בדיקה אם כל השחקנים ניחשו או וויתרו
+    // אם כולם טעו/וויתרו (אף אחד לא צדק), נמשיך לסניפט הבא
+    if (room.guessedUsers.size === room.players.length) {
+      // ביטול הטיימר הנוכחי
+      if (room.currentTimeout) {
+        clearTimeout(room.currentTimeout);
+      }
+
+      // אם אף אחד לא צדק, נמשיך לסניפט הבא
+      if (room.correctUsers.size === 0) {
+        // בדיקה אם יש עוד סיבובים זמינים
+        if (room.currentRound < ROUND_DURATIONS.length) {
+          console.log(
+            `⏭️ All players guessed/skipped incorrectly, moving to next round`
+          );
+          startRound(io, roomCode);
+        } else {
+          console.log(`⏭️ All rounds used, finishing round`);
+          finishRound(io, roomCode);
+        }
+      } else {
+        // אם מישהו צדק, נסיים את הסיבוב
+        finishRound(io, roomCode);
+      }
     }
   });
 

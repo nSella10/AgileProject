@@ -163,10 +163,14 @@ const JoinGamePage = () => {
       }, msLeft);
     });
 
-    socket.on("answerFeedback", ({ correct }) => {
-      setGuessResult(correct ? "correct" : "wrong");
+    socket.on("answerFeedback", ({ correct, skipped }) => {
+      if (skipped) {
+        setGuessResult("skipped");
+      } else {
+        setGuessResult(correct ? "correct" : "wrong");
+      }
 
-      // עצירת הטיימר כשהמשתתף הגיש תשובה
+      // עצירת הטיימר כשהמשתתף הגיש תשובה או וויתר
       if (timerInterval.current) {
         clearInterval(timerInterval.current);
         timerInterval.current = null;
@@ -176,7 +180,7 @@ const JoinGamePage = () => {
         timeoutRef.current = null;
       }
 
-      // הסתרת הטיימר אחרי הגשת תשובה
+      // הסתרת הטיימר אחרי הגשת תשובה או וויתור
       setTimeLeft(null);
     });
 
@@ -277,6 +281,18 @@ const JoinGamePage = () => {
     setSubmitted(true);
   };
 
+  const handleSkipSong = () => {
+    if (hasGuessedThisRound) return;
+    const socket = getSocket();
+    socket.emit("skipSong", {
+      roomCode,
+      username,
+    });
+    setHasGuessedThisRound(true);
+    setSubmitted(true);
+    setGuessResult("skipped");
+  };
+
   const handleGuessChange = (value) => {
     setGuess(value);
   };
@@ -309,6 +325,7 @@ const JoinGamePage = () => {
       statusMsg={statusMsg}
       onGuessChange={handleGuessChange}
       onSubmitGuess={handleSubmitGuess}
+      onSkipSong={handleSkipSong}
       hasGuessed={hasGuessedThisRound || isGameOver}
       isWaiting={isWaitingBetweenRounds}
       isGameOver={isGameOver}

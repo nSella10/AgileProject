@@ -55,13 +55,17 @@ const RoundRevealAnswerScreen = ({
   }, [songPreviewUrl]);
 
   const handleNext = () => {
-    setIsTransitioning(true);
-    // עצירת המוזיקה לפני מעבר לשיר הבא
+    // עצירת המוזיקה מיד כשלוחצים על הכפתור
+    console.log("🛑 RoundReveal - IMMEDIATELY stopping audio");
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.currentTime = 0; // איפוס לתחילה
       audioRef.current = null;
     }
-    // הפוגה קצרה לפני מעבר לשיר הבא
+
+    setIsTransitioning(true);
+
+    // הפוגה קצרה לפני מעבר לשיר הבא (השמע כבר נעצר)
     setTimeout(() => {
       setIsTransitioning(false);
       onNext();

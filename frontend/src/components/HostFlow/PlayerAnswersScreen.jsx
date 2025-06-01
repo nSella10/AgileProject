@@ -111,19 +111,25 @@ const PlayerAnswersScreen = ({
   }, []); // ריק כדי שירוץ רק בסגירת הקומפוננטה
 
   const handleNext = () => {
-    setIsTransitioning(true);
-    // עצירת המוזיקה המשותפת לפני מעבר לשיר הבא
+    // עצירת המוזיקה מיד כשלוחצים על הכפתור
+    console.log("🛑 PlayerAnswers - IMMEDIATELY stopping all audio");
+
     if (sharedAudioRef) {
-      console.log("🛑 PlayerAnswers - stopping shared audio");
+      console.log("🛑 PlayerAnswers - stopping shared audio IMMEDIATELY");
       sharedAudioRef.pause();
+      sharedAudioRef.currentTime = 0; // איפוס לתחילה
       setSharedAudioRef(null);
     }
     if (audioRef.current) {
-      console.log("🛑 PlayerAnswers - stopping local audio");
+      console.log("🛑 PlayerAnswers - stopping local audio IMMEDIATELY");
       audioRef.current.pause();
+      audioRef.current.currentTime = 0; // איפוס לתחילה
       audioRef.current = null;
     }
-    // הפוגה קצרה לפני מעבר לשיר הבא
+
+    setIsTransitioning(true);
+
+    // הפוגה קצרה לפני מעבר לשיר הבא (השמע כבר נעצר)
     setTimeout(() => {
       setIsTransitioning(false);
       onNextSong();

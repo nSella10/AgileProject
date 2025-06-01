@@ -14,6 +14,7 @@ import {
   FaSearch,
   FaEdit,
   FaCheck,
+  FaFileAlt,
 } from "react-icons/fa";
 import { useLazySearchSongsQuery } from "../slices/gamesApiSlice";
 import {
@@ -34,154 +35,168 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 // קומפוננטה לפריט שיר שניתן לגרור - מאופטמת עם React.memo
-const SortableSongItem = React.memo(({ song, index, onRemove, onEdit }) => {
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [editedTitle, setEditedTitle] = React.useState(song.title);
+const SortableSongItem = React.memo(
+  ({ song, index, onRemove, onEdit, onEditLyrics }) => {
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [editedTitle, setEditedTitle] = React.useState(song.title);
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: song.trackId });
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: song.trackId });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition: isDragging ? "none" : transition, // ביטול אנימציה בזמן גרירה
-    opacity: isDragging ? 0.8 : 1, // פחות שקיפות
-    zIndex: isDragging ? 1000 : "auto", // z-index גבוה יותר
-  };
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition: isDragging ? "none" : transition, // ביטול אנימציה בזמן גרירה
+      opacity: isDragging ? 0.8 : 1, // פחות שקיפות
+      zIndex: isDragging ? 1000 : "auto", // z-index גבוה יותר
+    };
 
-  const handleSaveEdit = () => {
-    if (editedTitle.trim() && editedTitle !== song.title) {
-      onEdit(index, editedTitle.trim());
-    }
-    setIsEditing(false);
-  };
+    const handleSaveEdit = () => {
+      if (editedTitle.trim() && editedTitle !== song.title) {
+        onEdit(index, editedTitle.trim());
+      }
+      setIsEditing(false);
+    };
 
-  const handleCancelEdit = () => {
-    setEditedTitle(song.title);
-    setIsEditing(false);
-  };
+    const handleCancelEdit = () => {
+      setEditedTitle(song.title);
+      setIsEditing(false);
+    };
 
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`flex items-center p-3 bg-gray-50 rounded-lg border ${
-        isDragging
-          ? "shadow-xl bg-white border-blue-400 scale-105"
-          : "hover:bg-gray-100 hover:border-gray-300 transition-colors duration-150"
-      }`}
-    >
-      {/* מספר השיר */}
-      <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-bold mr-3">
-        {index + 1}
-      </div>
-
-      {/* ידית גרירה */}
+    return (
       <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md mr-2 transition-colors duration-100"
-        title="Drag to reorder"
+        ref={setNodeRef}
+        style={style}
+        className={`flex items-center p-3 bg-gray-50 rounded-lg border ${
+          isDragging
+            ? "shadow-xl bg-white border-blue-400 scale-105"
+            : "hover:bg-gray-100 hover:border-gray-300 transition-colors duration-150"
+        }`}
       >
-        <FaGripVertical size={14} />
-      </div>
+        {/* מספר השיר */}
+        <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-bold mr-3">
+          {index + 1}
+        </div>
 
-      <img
-        src={song.artworkUrl}
-        alt={song.title}
-        className="w-10 h-10 rounded-md mr-3"
-      />
-      <div className="flex-1">
-        {isEditing ? (
-          <div className="space-y-2">
-            <input
-              type="text"
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-              className="w-full px-2 py-1 border border-blue-300 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter correct answer"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSaveEdit();
-                if (e.key === "Escape") handleCancelEdit();
-              }}
-              autoFocus
-            />
-            <p className="text-xs text-gray-500">Original: {song.title}</p>
-          </div>
-        ) : (
-          <>
-            <p className="font-medium text-gray-900">{song.title}</p>
-            <p className="text-sm text-gray-600">{song.artist}</p>
-          </>
-        )}
-      </div>
+        {/* ידית גרירה */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md mr-2 transition-colors duration-100"
+          title="Drag to reorder"
+        >
+          <FaGripVertical size={14} />
+        </div>
 
-      {/* כפתורי פעולה */}
-      <div className="flex items-center gap-1">
-        {isEditing ? (
-          <>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleSaveEdit();
-              }}
-              className="text-green-600 hover:text-green-800 p-2"
-              title="Save changes"
-            >
-              <FaCheck size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleCancelEdit();
-              }}
-              className="text-gray-500 hover:text-gray-700 p-2"
-              title="Cancel"
-            >
-              <FaTimes size={14} />
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsEditing(true);
-              }}
-              className="text-blue-600 hover:text-blue-800 p-2"
-              title="Edit answer"
-            >
-              <FaEdit size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onRemove(index);
-              }}
-              className="text-red-500 hover:text-red-700 p-2"
-              title="Remove song"
-            >
-              <FaTimes size={14} />
-            </button>
-          </>
-        )}
+        <img
+          src={song.artworkUrl}
+          alt={song.title}
+          className="w-10 h-10 rounded-md mr-3"
+        />
+        <div className="flex-1">
+          {isEditing ? (
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="w-full px-2 py-1 border border-blue-300 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter correct answer"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveEdit();
+                  if (e.key === "Escape") handleCancelEdit();
+                }}
+                autoFocus
+              />
+              <p className="text-xs text-gray-500">Original: {song.title}</p>
+            </div>
+          ) : (
+            <>
+              <p className="font-medium text-gray-900">{song.title}</p>
+              <p className="text-sm text-gray-600">{song.artist}</p>
+            </>
+          )}
+        </div>
+
+        {/* כפתורי פעולה */}
+        <div className="flex items-center gap-1">
+          {isEditing ? (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSaveEdit();
+                }}
+                className="text-green-600 hover:text-green-800 p-2"
+                title="Save changes"
+              >
+                <FaCheck size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCancelEdit();
+                }}
+                className="text-gray-500 hover:text-gray-700 p-2"
+                title="Cancel"
+              >
+                <FaTimes size={14} />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsEditing(true);
+                }}
+                className="text-blue-600 hover:text-blue-800 p-2"
+                title="Edit answer"
+              >
+                <FaEdit size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onEditLyrics(index);
+                }}
+                className="text-green-600 hover:text-green-800 p-2"
+                title="Edit lyrics"
+              >
+                <FaFileAlt size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onRemove(index);
+                }}
+                className="text-red-500 hover:text-red-700 p-2"
+                title="Remove song"
+              >
+                <FaTimes size={14} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 // הוספת שם לקומפוננטה לצורכי debugging
 SortableSongItem.displayName = "SortableSongItem";
@@ -193,6 +208,11 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const audioRef = useRef(null);
   const searchTimeoutRef = useRef(null);
+
+  // State for lyrics editing modal
+  const [showLyricsModal, setShowLyricsModal] = useState(false);
+  const [editingLyricsIndex, setEditingLyricsIndex] = useState(null);
+  const [editingLyrics, setEditingLyrics] = useState("");
 
   const [searchSongs, { isLoading }] = useLazySearchSongsQuery();
 
@@ -596,6 +616,44 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
     [selectedSongs, onSongSelect]
   );
 
+  // פונקציה לפתיחת modal לעריכת מילות השיר
+  const openLyricsModal = useCallback(
+    (index) => {
+      const song = selectedSongs[index];
+      setEditingLyricsIndex(index);
+      setEditingLyrics(song.lyrics || song.fullLyrics || "");
+      setShowLyricsModal(true);
+    },
+    [selectedSongs]
+  );
+
+  // פונקציה לשמירת מילות השיר
+  const saveLyrics = useCallback(() => {
+    if (editingLyricsIndex !== null) {
+      const updatedSongs = selectedSongs.map((song, i) => {
+        if (i === editingLyricsIndex) {
+          return {
+            ...song,
+            lyrics: editingLyrics,
+            fullLyrics: editingLyrics,
+          };
+        }
+        return song;
+      });
+      onSongSelect(updatedSongs, true);
+    }
+    setShowLyricsModal(false);
+    setEditingLyricsIndex(null);
+    setEditingLyrics("");
+  }, [selectedSongs, onSongSelect, editingLyricsIndex, editingLyrics]);
+
+  // פונקציה לביטול עריכת מילות השיר
+  const cancelLyricsEdit = useCallback(() => {
+    setShowLyricsModal(false);
+    setEditingLyricsIndex(null);
+    setEditingLyrics("");
+  }, []);
+
   // רשימת IDs של השירים - מאופטמת
   const songIds = useMemo(
     () => selectedSongs.map((song) => song.trackId),
@@ -737,7 +795,8 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
             </h3>
             <p className="text-sm text-gray-500">
               💡 Drag <FaGripVertical className="inline mx-1" /> to reorder •
-              Click <FaEdit className="inline mx-1" /> to edit answer
+              Click <FaEdit className="inline mx-1" /> to edit answer • Click{" "}
+              <FaFileAlt className="inline mx-1" /> to edit lyrics
             </p>
           </div>
 
@@ -758,11 +817,73 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
                     index={index}
                     onRemove={removeSong}
                     onEdit={editSong}
+                    onEditLyrics={openLyricsModal}
                   />
                 ))}
               </div>
             </SortableContext>
           </DndContext>
+        </div>
+      )}
+
+      {/* Modal לעריכת מילות השיר */}
+      {showLyricsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-800">
+                Edit Song Lyrics
+              </h3>
+              <button
+                onClick={cancelLyricsEdit}
+                className="text-gray-500 hover:text-gray-700 p-2"
+                title="Close"
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            {editingLyricsIndex !== null && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  <strong>Song:</strong>{" "}
+                  {selectedSongs[editingLyricsIndex]?.title} -{" "}
+                  {selectedSongs[editingLyricsIndex]?.artist}
+                </p>
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label className="block text-gray-700 font-semibold mb-2">
+                Song Lyrics
+              </label>
+              <textarea
+                value={editingLyrics}
+                onChange={(e) => setEditingLyrics(e.target.value)}
+                placeholder="Paste the song lyrics here..."
+                className="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                💡 Tip: Copy lyrics from the internet and paste them here for
+                better gameplay
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={cancelLyricsEdit}
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveLyrics}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Save Lyrics
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

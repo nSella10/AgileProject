@@ -13,6 +13,8 @@ const ImprovedHostGameScreen = ({
   playersAnswered = 0,
   totalPlayers = 0,
   guessTimeLimit = 15,
+  sharedAudioRef,
+  setSharedAudioRef,
 }) => {
   console.log("🎮 ImprovedHostGameScreen props:", {
     countdown,
@@ -541,6 +543,20 @@ const ImprovedHostGameScreen = ({
                   </p>
                   <button
                     onClick={() => {
+                      // עצירת השמע המשותף מיד לפני ה-transition
+                      console.log(
+                        "🛑 ImprovedHost - stopping shared audio IMMEDIATELY"
+                      );
+                      if (sharedAudioRef) {
+                        // הסרת event listeners לפני עצירה כדי למנוע restart
+                        sharedAudioRef.onended = null;
+                        sharedAudioRef.ontimeupdate = null;
+                        sharedAudioRef.onplay = null;
+                        sharedAudioRef.pause();
+                        sharedAudioRef.currentTime = 0;
+                        setSharedAudioRef(null);
+                      }
+
                       setIsTransitioning(true);
                       // הפוגה קצרה לפני מעבר לשיר הבא
                       setTimeout(() => {
@@ -569,6 +585,20 @@ const ImprovedHostGameScreen = ({
                   <div className="text-5xl mb-4">🎵</div>
                   <button
                     onClick={() => {
+                      // עצירת השמע המשותף מיד לפני ה-transition
+                      console.log(
+                        "🛑 ImprovedHost - stopping shared audio IMMEDIATELY (second button)"
+                      );
+                      if (sharedAudioRef) {
+                        // הסרת event listeners לפני עצירה כדי למנוע restart
+                        sharedAudioRef.onended = null;
+                        sharedAudioRef.ontimeupdate = null;
+                        sharedAudioRef.onplay = null;
+                        sharedAudioRef.pause();
+                        sharedAudioRef.currentTime = 0;
+                        setSharedAudioRef(null);
+                      }
+
                       setIsTransitioning(true);
                       // הפוגה קצרה לפני מעבר לשיר הבא
                       setTimeout(() => {

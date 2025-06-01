@@ -50,13 +50,25 @@ const PlayerAnswersScreen = ({
         audioRef.current = audio;
         setSharedAudioRef(audio); // שמירה ב-state המשותף
 
-        // כשהשיר נגמר, נתחיל אותו שוב מההתחלה
+        // כשהשיר נגמר, נתחיל אותו שוב מההתחלה (רק אם לא עוצרים אותו ולא במצב transition)
         audio.onended = () => {
-          if (audioRef.current === audio) {
+          // בדיקה מרובה לוודא שלא נמצאים במצב transition
+          if (
+            audioRef.current === audio &&
+            !isTransitioning &&
+            sharedAudioRef === audio
+          ) {
+            console.log(
+              "🔄 PlayerAnswers - Audio ended, restarting from beginning"
+            );
             audio.currentTime = 0;
             audio.play().catch((error) => {
               console.log("🔇 Audio replay failed:", error);
             });
+          } else {
+            console.log(
+              "🛑 PlayerAnswers - Audio ended but not restarting (transitioning or audio changed)"
+            );
           }
         };
 
@@ -80,6 +92,7 @@ const PlayerAnswersScreen = ({
         console.log(
           "🛑 PlayerAnswers cleanup - stopping shared audio on unmount"
         );
+        sharedAudioRef.onended = null; // הסרת event listener
         sharedAudioRef.pause();
         setSharedAudioRef(null);
       }
@@ -87,6 +100,7 @@ const PlayerAnswersScreen = ({
         console.log(
           "🛑 PlayerAnswers cleanup - stopping local audio on unmount"
         );
+        audioRef.current.onended = null; // הסרת event listener
         audioRef.current.pause();
         audioRef.current = null;
       }
@@ -99,34 +113,77 @@ const PlayerAnswersScreen = ({
       // ניקוי סופי - וודא שהשמע נעצר
       if (sharedAudioRef) {
         console.log("🛑 PlayerAnswers final cleanup - stopping shared audio");
+        sharedAudioRef.onended = null; // הסרת event listener
         sharedAudioRef.pause();
         setSharedAudioRef(null);
       }
       if (audioRef.current) {
         console.log("🛑 PlayerAnswers final cleanup - stopping local audio");
+        audioRef.current.onended = null; // הסרת event listener
         audioRef.current.pause();
         audioRef.current = null;
       }
     };
   }, []); // ריק כדי שירוץ רק בסגירת הקומפוננטה
 
-  const handleNext = () => {
-    // עצירת המוזיקה מיד כשלוחצים על הכפתור
-    console.log("🛑 PlayerAnswers - IMMEDIATELY stopping all audio");
+  // useEffect נוסף לעצירת שמע מיידית כשנכנסים למצב transition
+  useEffect(() => {
+    if (isTransitioning) {
+      console.log(
+        "🛑 PlayerAnswers - Transition started, stopping all audio immediately"
+      );
 
+      // עצירת השמע המשותף מיד
+      if (sharedAudioRef) {
+        sharedAudioRef.onended = null;
+        sharedAudioRef.ontimeupdate = null;
+        sharedAudioRef.onplay = null;
+        sharedAudioRef.pause();
+        sharedAudioRef.currentTime = 0;
+        setSharedAudioRef(null);
+      }
+
+      // עצירת השמע המקומי מיד
+      if (audioRef.current) {
+        audioRef.current.onended = null;
+        audioRef.current.ontimeupdate = null;
+        audioRef.current.onplay = null;
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
+    }
+  }, [isTransitioning, sharedAudioRef, setSharedAudioRef]);
+
+  const handleNext = () => {
+    // עצירת המוזיקה מיד כשלוחצים על הכפתור - לפני הכל!
+    console.log(
+      "🛑 PlayerAnswers - IMMEDIATELY stopping all audio BEFORE transition"
+    );
+
+    // קודם כל נעצור את כל השמע מיד - לפני שמגדירים transition
     if (sharedAudioRef) {
       console.log("🛑 PlayerAnswers - stopping shared audio IMMEDIATELY");
+      // הסרת event listeners לפני עצירה כדי למנוע restart
+      sharedAudioRef.onended = null;
+      sharedAudioRef.ontimeupdate = null;
+      sharedAudioRef.onplay = null;
       sharedAudioRef.pause();
       sharedAudioRef.currentTime = 0; // איפוס לתחילה
       setSharedAudioRef(null);
     }
     if (audioRef.current) {
       console.log("🛑 PlayerAnswers - stopping local audio IMMEDIATELY");
+      // הסרת event listeners לפני עצירה כדי למנוע restart
+      audioRef.current.onended = null;
+      audioRef.current.ontimeupdate = null;
+      audioRef.current.onplay = null;
       audioRef.current.pause();
       audioRef.current.currentTime = 0; // איפוס לתחילה
       audioRef.current = null;
     }
 
+    // רק אחרי שעצרנו את כל השמע - מגדירים transition
     setIsTransitioning(true);
 
     // הפוגה קצרה לפני מעבר לשיר הבא (השמע כבר נעצר)

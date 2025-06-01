@@ -6,6 +6,8 @@ const RoundRevealAnswerScreen = ({
   songArtist,
   songArtworkUrl,
   onNext,
+  sharedAudioRef,
+  setSharedAudioRef,
 }) => {
   console.log(songTitle);
   const audioRef = useRef(null);
@@ -16,53 +18,103 @@ const RoundRevealAnswerScreen = ({
     if (songPreviewUrl) {
       console.log("🎵 Playing song preview for answer reveal:", songPreviewUrl);
 
-      const audio = new Audio(songPreviewUrl);
-      audio.crossOrigin = "anonymous";
-      audio.volume = 0.4; // עוצמה בינונית
-      audio.loop = false; // לא חוזרים על הפזמון - נותנים לו להתנגן עד הסוף
-      audioRef.current = audio;
+      // אם יש כבר audio object משותף, נשתמש בו
+      if (sharedAudioRef && sharedAudioRef.src.includes(songPreviewUrl)) {
+        console.log("🔄 RoundReveal - Using existing shared audio");
+        audioRef.current = sharedAudioRef;
 
-      // כשהשיר נגמר, נתחיל אותו שוב מההתחלה
-      audio.onended = () => {
-        if (audioRef.current === audio) {
-          audio.currentTime = 0;
-          audio.play().catch((error) => {
-            console.log("🔇 Audio replay failed:", error);
+        // אם השמע לא מתנגן, נתחיל אותו
+        if (sharedAudioRef.paused) {
+          sharedAudioRef.play().catch((error) => {
+            console.log("🔇 Shared audio play failed:", error);
           });
         }
-      };
+      } else {
+        // יצירת audio object חדש
+        const audio = new Audio(songPreviewUrl);
+        audio.crossOrigin = "anonymous";
+        audio.volume = 0.4; // עוצמה בינונית
+        audio.loop = false; // לא חוזרים על הפזמון - נותנים לו להתנגן עד הסוף
+        audioRef.current = audio;
+        setSharedAudioRef(audio); // שמירה ב-state המשותף
 
-      const playAudio = async () => {
-        try {
-          await audio.play();
-          console.log("✅ Answer reveal music started playing");
-        } catch (error) {
-          console.log("🔇 Answer reveal music autoplay blocked:", error);
-        }
-      };
+        // כשהשיר נגמר, נתחיל אותו שוב מההתחלה (רק אם לא עוצרים אותו ולא במצב transition)
+        audio.onended = () => {
+          // בדיקה מרובה לוודא שלא נמצאים במצב transition
+          if (
+            audioRef.current === audio &&
+            !isTransitioning &&
+            sharedAudioRef === audio
+          ) {
+            console.log(
+              "🔄 RoundReveal - Audio ended, restarting from beginning"
+            );
+            audio.currentTime = 0;
+            audio.play().catch((error) => {
+              console.log("🔇 Audio replay failed:", error);
+            });
+          } else {
+            console.log(
+              "🛑 RoundReveal - Audio ended but not restarting (transitioning or audio changed)"
+            );
+          }
+        };
 
-      playAudio();
+        const playAudio = async () => {
+          try {
+            await audio.play();
+            console.log("✅ Answer reveal music started playing");
+          } catch (error) {
+            console.log("🔇 Answer reveal music autoplay blocked:", error);
+          }
+        };
+
+        playAudio();
+      }
     }
 
     // ניקוי כשיוצאים מהקומפוננטה
     return () => {
       if (audioRef.current) {
+        audioRef.current.onended = null; // הסרת event listener
         audioRef.current.pause();
         audioRef.current = null;
         console.log("🛑 Answer reveal music stopped");
       }
     };
-  }, [songPreviewUrl]);
+  }, [songPreviewUrl, sharedAudioRef, setSharedAudioRef, isTransitioning]);
 
   const handleNext = () => {
-    // עצירת המוזיקה מיד כשלוחצים על הכפתור
-    console.log("🛑 RoundReveal - IMMEDIATELY stopping audio");
+    // עצירת המוזיקה מיד כשלוחצים על הכפתור - לפני הכל!
+    console.log(
+      "🛑 RoundReveal - IMMEDIATELY stopping ALL audio BEFORE transition"
+    );
+
+    // קודם כל נעצור את כל השמע מיד - לפני שמגדירים transition
+    if (sharedAudioRef) {
+      console.log("🛑 RoundReveal - stopping shared audio IMMEDIATELY");
+      // הסרת event listeners לפני עצירה כדי למנוע restart
+      sharedAudioRef.onended = null;
+      sharedAudioRef.ontimeupdate = null;
+      sharedAudioRef.onplay = null;
+      sharedAudioRef.pause();
+      sharedAudioRef.currentTime = 0;
+      setSharedAudioRef(null);
+    }
+
+    // עצירת השמע המקומי מיד
     if (audioRef.current) {
+      console.log("🛑 RoundReveal - stopping local audio IMMEDIATELY");
+      // הסרת event listeners לפני עצירה כדי למנוע restart
+      audioRef.current.onended = null;
+      audioRef.current.ontimeupdate = null;
+      audioRef.current.onplay = null;
       audioRef.current.pause();
       audioRef.current.currentTime = 0; // איפוס לתחילה
       audioRef.current = null;
     }
 
+    // רק אחרי שעצרנו את כל השמע - מתחילים את ה-transition
     setIsTransitioning(true);
 
     // הפוגה קצרה לפני מעבר לשיר הבא (השמע כבר נעצר)

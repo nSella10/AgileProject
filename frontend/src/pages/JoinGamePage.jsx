@@ -26,6 +26,7 @@ const JoinGamePage = () => {
   // eslint-disable-next-line no-unused-vars
   const [currentPlayerName, setCurrentPlayerName] = useState("");
   const [guessResult, setGuessResult] = useState(null); // "correct", "wrong", or null
+  const [answerDetails, setAnswerDetails] = useState(null); // פרטי התשובה (ניקוד, סוג, וכו')
   const [isAudioPlaying, setIsAudioPlaying] = useState(false); // האם השיר עדיין מתנגן
   const [gameData, setGameData] = useState(null); // פרטי המשחק
   const [currentSongTitle, setCurrentSongTitle] = useState(""); // שם השיר הנוכחי
@@ -163,27 +164,40 @@ const JoinGamePage = () => {
       }, msLeft);
     });
 
-    socket.on("answerFeedback", ({ correct, skipped }) => {
-      if (skipped) {
-        setGuessResult("skipped");
-        setIsAudioPlaying(false); // וידוא שמצב האודיו מתעדכן
-      } else {
-        setGuessResult(correct ? "correct" : "wrong");
-      }
+    socket.on(
+      "answerFeedback",
+      ({ correct, skipped, score, answerType, matchedText }) => {
+        if (skipped) {
+          setGuessResult("skipped");
+          setAnswerDetails(null);
+          setIsAudioPlaying(false); // וידוא שמצב האודיו מתעדכן
+        } else {
+          setGuessResult(correct ? "correct" : "wrong");
+          if (correct) {
+            setAnswerDetails({
+              score,
+              answerType,
+              matchedText,
+            });
+          } else {
+            setAnswerDetails(null);
+          }
+        }
 
-      // עצירת הטיימר כשהמשתתף הגיש תשובה או וויתר
-      if (timerInterval.current) {
-        clearInterval(timerInterval.current);
-        timerInterval.current = null;
-      }
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
+        // עצירת הטיימר כשהמשתתף הגיש תשובה או וויתר
+        if (timerInterval.current) {
+          clearInterval(timerInterval.current);
+          timerInterval.current = null;
+        }
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
 
-      // הסתרת הטיימר אחרי הגשת תשובה או וויתור
-      setTimeLeft(null);
-    });
+        // הסתרת הטיימר אחרי הגשת תשובה או וויתור
+        setTimeLeft(null);
+      }
+    );
 
     socket.on("roundSucceeded", () => {
       setStatusMsg("🎉 Someone got it! Waiting for next song...");
@@ -338,6 +352,7 @@ const JoinGamePage = () => {
       maxTime={maxTime}
       roundFailedForUser={roundFailedForUser}
       guessResult={guessResult}
+      answerDetails={answerDetails}
       isAudioPlaying={isAudioPlaying}
       guessInputMethod={gameData?.guessInputMethod || "freeText"}
       currentSongTitle={currentSongTitle}

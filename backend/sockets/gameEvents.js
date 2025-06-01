@@ -74,10 +74,7 @@ export function handleGameEvents(io, socket) {
 
       console.log(`🎯 User answer: "${answer}"`);
       console.log(`🎯 Answer analysis:`, answerResult);
-
-      if (answerResult.aiEnhanced) {
-        console.log(`🤖 AI Enhanced match: ${answerResult.explanation}`);
-      }
+      console.log(`🔍 Match explanation: ${answerResult.explanation}`);
 
       // שמירת פרטי התשובה לשחקן
       if (!room.playerAnswers) {

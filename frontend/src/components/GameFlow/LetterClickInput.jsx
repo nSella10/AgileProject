@@ -318,8 +318,11 @@ const LetterClickInput = ({
 
       {/* הודעת עזרה */}
       {!isGuessComplete && !hasGuessed && (
-        <div className="text-center text-purple-200 text-sm">
-          Click on letters to fill in the song name
+        <div className="text-center text-purple-200 text-sm space-y-1">
+          <div>Click on letters to fill in the song name</div>
+          <div className="text-xs">
+            💡 Or type the artist name or lyrics in chat!
+          </div>
         </div>
       )}
     </div>

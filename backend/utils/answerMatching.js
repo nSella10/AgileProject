@@ -1,10 +1,5 @@
 import stringSimilarity from "string-similarity";
 import Fuse from "fuse.js";
-import {
-  checkArtistMatchWithAI,
-  checkSongTitleMatchWithAI,
-  checkLyricsMatchWithAI,
-} from "../services/openaiService.js";
 
 /**
  * מחזיר את סוג התשובה והניקוד בהתאם לתשובה שהמשתמש נתן
@@ -27,8 +22,8 @@ export async function analyzeAnswer(userAnswer, song, timeTaken, maxTime) {
       score,
       matchedText: songTitleMatch.matchedText,
       similarity: songTitleMatch.similarity,
-      aiEnhanced: songTitleMatch.aiEnhanced || false,
-      explanation: songTitleMatch.explanation || "",
+      explanation:
+        songTitleMatch.explanation || "Traditional matching algorithm",
     };
   }
 
@@ -42,8 +37,7 @@ export async function analyzeAnswer(userAnswer, song, timeTaken, maxTime) {
       score,
       matchedText: artistMatch.matchedText,
       similarity: artistMatch.similarity,
-      aiEnhanced: artistMatch.aiEnhanced || false,
-      explanation: artistMatch.explanation || "",
+      explanation: artistMatch.explanation || "Traditional matching algorithm",
     };
   }
 
@@ -57,8 +51,7 @@ export async function analyzeAnswer(userAnswer, song, timeTaken, maxTime) {
       score,
       matchedText: lyricsMatch.matchedText,
       similarity: lyricsMatch.similarity,
-      aiEnhanced: lyricsMatch.aiEnhanced || false,
-      explanation: lyricsMatch.explanation || "",
+      explanation: lyricsMatch.explanation || "Traditional matching algorithm",
     };
   }
 
@@ -85,7 +78,79 @@ function normalizeText(text) {
 }
 
 /**
- * בדיקת התאמה לשם השיר
+ * חישוב Levenshtein Distance בין שני מחרוזות
+ * @param {string} str1
+ * @param {string} str2
+ * @returns {number} המרחק בין המחרוזות
+ */
+function levenshteinDistance(str1, str2) {
+  const matrix = [];
+
+  // יצירת מטריצה ריקה
+  for (let i = 0; i <= str2.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= str1.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  // מילוי המטריצה
+  for (let i = 1; i <= str2.length; i++) {
+    for (let j = 1; j <= str1.length; j++) {
+      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // החלפה
+          matrix[i][j - 1] + 1, // הוספה
+          matrix[i - 1][j] + 1 // מחיקה
+        );
+      }
+    }
+  }
+
+  return matrix[str2.length][str1.length];
+}
+
+/**
+ * חישוב דמיון בין שני מחרוזות על בסיס Levenshtein Distance
+ * @param {string} str1
+ * @param {string} str2
+ * @returns {number} ציון דמיון בין 0 ל-1
+ */
+function calculateSimilarity(str1, str2) {
+  const maxLength = Math.max(str1.length, str2.length);
+  if (maxLength === 0) return 1.0;
+
+  const distance = levenshteinDistance(str1, str2);
+  return 1 - distance / maxLength;
+}
+
+/**
+ * בדיקה אם שני מחרוזות דומים מספיק (טיפול בשגיאות כתיב)
+ * @param {string} userInput
+ * @param {string} target
+ * @param {number} threshold - סף דמיון (ברירת מחדל 0.8)
+ * @returns {boolean}
+ */
+function isSimilarEnough(userInput, target, threshold = 0.8) {
+  // בדיקה מדויקת קודם
+  if (userInput === target) return true;
+
+  // בדיקה עם Levenshtein
+  const similarity = calculateSimilarity(userInput, target);
+  if (similarity >= threshold) return true;
+
+  // בדיקה עם string-similarity
+  const stringSim = stringSimilarity.compareTwoStrings(userInput, target);
+  if (stringSim >= threshold) return true;
+
+  return false;
+}
+
+/**
+ * בדיקת התאמה לשם השיר - ללא AI, רק שיטות מסורתיות משופרות
  */
 async function checkSongTitle(userAnswer, song) {
   const songTitles = [
@@ -94,93 +159,61 @@ async function checkSongTitle(userAnswer, song) {
     ...(song.correctAnswers || []),
   ].filter(Boolean);
 
-  // ניסיון ראשון: בדיקה עם OpenAI
-  try {
-    console.log(
-      `🤖 Calling OpenAI for song title matching: "${userAnswer}" vs "${song.title}"`
-    );
-    const aiResult = await checkSongTitleMatchWithAI(
-      userAnswer,
-      song.title,
-      songTitles
-    );
-    console.log(`🤖 OpenAI song result:`, aiResult);
+  console.log(
+    `🎵 Checking song title match: "${userAnswer}" vs possible titles:`,
+    songTitles
+  );
 
-    // אם ה-AI מצא התאמה עם ביטחון בינוני או גבוה, נשתמש בתוצאה (הורדתי את הסף ל-0.6 לשמות שירים)
-    if (aiResult.isMatch && aiResult.confidence >= 0.6) {
-      console.log(
-        `✅ AI found song title match: "${userAnswer}" → "${song.title}" (confidence: ${aiResult.confidence})`
-      );
-      return {
-        isMatch: true,
-        similarity: aiResult.confidence,
-        matchedText: aiResult.matchedText || song.title,
-        aiEnhanced: true,
-        explanation: aiResult.explanation,
-      };
-    }
+  // נרמול התשובה של המשתמש
+  const normalizedUserAnswer = normalizeText(userAnswer);
 
+  // בדיקה מול כל האפשרויות
+  const normalizedTitles = songTitles.map(normalizeText);
+  const result = findBestMatch(normalizedUserAnswer, normalizedTitles);
+
+  if (result.isMatch) {
     console.log(
-      `🔄 AI song confidence too low (${aiResult.confidence}), trying traditional matching...`
+      `✅ Found song title match: "${userAnswer}" → "${result.matchedText}" (similarity: ${result.similarity})`
     );
-  } catch (error) {
-    console.log(
-      `⚠️ AI song title check failed, falling back to traditional matching:`,
-      error.message
-    );
+  } else {
+    console.log(`❌ No song title match found for: "${userAnswer}"`);
   }
 
-  // fallback לשיטה המסורתית
-  const normalizedTitles = songTitles.map(normalizeText);
-  return findBestMatch(userAnswer, normalizedTitles);
+  return result;
 }
 
 /**
- * בדיקת התאמה לשם הזמר/להקה
+ * בדיקת התאמה לשם הזמר/להקה - ללא AI, רק שיטות מסורתיות משופרות
  */
 async function checkArtist(userAnswer, song) {
   if (!song.artist || song.artist === "Unknown Artist") {
     return { isMatch: false, similarity: 0, matchedText: "" };
   }
 
-  // ניסיון ראשון: בדיקה עם OpenAI (לטיפול בשגיאות כתיב ותווים מיותרים)
-  try {
-    console.log(
-      `🤖 Calling OpenAI for artist matching: "${userAnswer}" vs "${song.artist}"`
-    );
-    const aiResult = await checkArtistMatchWithAI(userAnswer, song.artist);
-    console.log(`🤖 OpenAI result:`, aiResult);
+  console.log(`🎤 Checking artist match: "${userAnswer}" vs "${song.artist}"`);
 
-    // אם ה-AI מצא התאמה עם ביטחון בינוני או גבוה, נשתמש בתוצאה (הורדתי את הסף ל-0.5 לזמרים)
-    if (aiResult.isMatch && aiResult.confidence >= 0.5) {
-      console.log(
-        `✅ AI found artist match: "${userAnswer}" → "${song.artist}" (confidence: ${aiResult.confidence})`
-      );
-      return {
-        isMatch: true,
-        similarity: aiResult.confidence,
-        matchedText: aiResult.matchedText || song.artist,
-        aiEnhanced: true,
-        explanation: aiResult.explanation,
-      };
-    }
-
-    // אם ה-AI לא מצא התאמה עם ביטחון מספיק, ננסה את השיטה המסורתית
-    console.log(
-      `🔄 AI confidence too low (${aiResult.confidence}), trying traditional matching...`
-    );
-  } catch (error) {
-    console.log(
-      `⚠️ AI artist check failed, falling back to traditional matching:`,
-      error.message
-    );
-  }
-
-  // fallback לשיטה המסורתית
+  // יצירת וריאציות של שם האמן
   const artistVariations = generateArtistVariations(song.artist);
+  console.log(`🎤 Artist variations:`, artistVariations);
+
+  // נרמול התשובה של המשתמש
+  const normalizedUserAnswer = normalizeText(userAnswer);
+
+  // נרמול כל הוריאציות
   const normalizedVariations = artistVariations.map(normalizeText);
 
-  return findBestMatch(userAnswer, normalizedVariations);
+  // חיפוש ההתאמה הטובה ביותר
+  const result = findBestMatch(normalizedUserAnswer, normalizedVariations);
+
+  if (result.isMatch) {
+    console.log(
+      `✅ Found artist match: "${userAnswer}" → "${result.matchedText}" (similarity: ${result.similarity})`
+    );
+  } else {
+    console.log(`❌ No artist match found for: "${userAnswer}"`);
+  }
+
+  return result;
 }
 
 /**
@@ -203,6 +236,22 @@ function generateArtistVariations(artistName) {
     "naomi shemer": ["נעמי שמר"],
     "ehud banai": ["אהוד בנאי"],
     "berry sakharof": ["ברי סחרוף", "ברי סחרוף"],
+    "ofra haza": ["עפרה חזה", "עפרה חזרה", "עופרה חזה", "עופרה חזרה"],
+    "riki gal": ["ריקי גל", "ריקי גל"],
+    "zohar argov": ["זוהר ארגוב", "זוהר ארגב"],
+    "yossi banai": ["יוסי בנאי"],
+    "gidi gov": ["גידי גוב", "גידי גב"],
+    "boaz sharabi": ["בועז שרעבי"],
+    "yehuda poliker": ["יהודה פוליקר"],
+    "rami kleinstein": ["רמי קליינשטיין"],
+    "corinne allal": ["קורין אלאל"],
+    "margalit tzan'ani": ["מרגלית צנעני"],
+    "yardena arazi": ["ירדנה ארזי"],
+    ilanit: ["אילנית"],
+    daklon: ["דקלון"],
+    "svika pick": ["צביקה פיק"],
+    "mike brant": ["מייק בראנט"],
+    "tzvika hadar": ["צביקה הדר"],
     mashina: ["משינה", "מאשינה"],
     kaveret: ["כוורת"],
     typex: ["טייפקס"],
@@ -245,6 +294,34 @@ function generateArtistVariations(artistName) {
     }
   }
 
+  // חיפוש מטושטש במיפוי - לטיפול בשגיאות כתיב
+  for (const [english, hebrewVariations] of Object.entries(nameMapping)) {
+    // בדיקה אם השם דומה לאנגלי
+    if (
+      stringSimilarity.compareTwoStrings(
+        normalizedArtist,
+        english.toLowerCase()
+      ) > 0.8
+    ) {
+      variations.push(english);
+      variations.push(...hebrewVariations);
+    }
+
+    // בדיקה אם השם דומה לאחת מהוריאציות העבריות
+    for (const hebrewVar of hebrewVariations) {
+      if (
+        stringSimilarity.compareTwoStrings(
+          normalizedArtist,
+          hebrewVar.toLowerCase()
+        ) > 0.8
+      ) {
+        variations.push(english);
+        variations.push(...hebrewVariations);
+        break;
+      }
+    }
+  }
+
   // הוספת וריאציות נוספות
   variations.push(
     // הסרת רווחים
@@ -259,59 +336,136 @@ function generateArtistVariations(artistName) {
     artistName.split(" ").pop()
   );
 
+  // הוספת תרגומים פונטיים אוטומטיים
+  const phoneticVariations = generatePhoneticVariations(artistName);
+  variations.push(...phoneticVariations);
+
   return [...new Set(variations)]; // הסרת כפילויות
 }
 
 /**
- * בדיקת התאמה למילים מהשיר - בדיקה ישירה מול מילות השיר שהמשתמש הוסיף
+ * יצירת וריאציות פונטיות לשמות (עברית <-> אנגלית)
+ */
+function generatePhoneticVariations(name) {
+  const variations = [];
+  const normalizedName = name.toLowerCase().trim();
+
+  // מיפוי אותיות עבריות לאנגליות (פונטי)
+  const hebrewToEnglish = {
+    א: ["a", "e"],
+    ב: ["b", "v"],
+    ג: ["g"],
+    ד: ["d"],
+    ה: ["h", ""],
+    ו: ["v", "u", "o"],
+    ז: ["z"],
+    ח: ["ch", "h"],
+    ט: ["t"],
+    י: ["y", "i"],
+    כ: ["k", "ch"],
+    ך: ["k", "ch"],
+    ל: ["l"],
+    מ: ["m"],
+    ם: ["m"],
+    ן: ["n"],
+    נ: ["n"],
+    ס: ["s"],
+    ע: ["", "a", "e"],
+    פ: ["p", "f"],
+    ף: ["p", "f"],
+    צ: ["tz", "ts"],
+    ץ: ["tz", "ts"],
+    ק: ["k", "q"],
+    ר: ["r"],
+    ש: ["sh", "s"],
+    ת: ["t", "th"],
+  };
+
+  // מיפוי אנגלית לעברית (פונטי)
+  const englishToHebrew = {
+    a: ["א", "ע"],
+    b: ["ב"],
+    c: ["ק", "כ"],
+    d: ["ד"],
+    e: ["א", "ע", "י"],
+    f: ["פ"],
+    g: ["ג"],
+    h: ["ה", "ח"],
+    i: ["י", "א"],
+    j: ["ג'", "ז'"],
+    k: ["ק", "כ"],
+    l: ["ל"],
+    m: ["מ"],
+    n: ["נ"],
+    o: ["ו", "א"],
+    p: ["פ"],
+    q: ["ק"],
+    r: ["ר"],
+    s: ["ס", "ש"],
+    t: ["ת", "ט"],
+    u: ["ו", "א"],
+    v: ["ב", "ו"],
+    w: ["ו"],
+    x: ["קס"],
+    y: ["י"],
+    z: ["ז"],
+  };
+
+  // אם השם מכיל עברית, ננסה לתרגם לאנגלית
+  if (/[\u0590-\u05FF]/.test(normalizedName)) {
+    let englishVersion = "";
+    for (let char of normalizedName) {
+      if (hebrewToEnglish[char]) {
+        englishVersion += hebrewToEnglish[char][0]; // נקח את האפשרות הראשונה
+      } else if (char === " ") {
+        englishVersion += " ";
+      } else {
+        englishVersion += char;
+      }
+    }
+    if (englishVersion.trim()) {
+      variations.push(englishVersion.trim());
+    }
+  }
+
+  // אם השם באנגלית, ננסה לתרגם לעברית
+  if (/^[a-zA-Z\s]+$/.test(normalizedName)) {
+    let hebrewVersion = "";
+    for (let char of normalizedName) {
+      if (englishToHebrew[char.toLowerCase()]) {
+        hebrewVersion += englishToHebrew[char.toLowerCase()][0]; // נקח את האפשרות הראשונה
+      } else if (char === " ") {
+        hebrewVersion += " ";
+      }
+    }
+    if (hebrewVersion.trim()) {
+      variations.push(hebrewVersion.trim());
+    }
+  }
+
+  return variations;
+}
+
+/**
+ * בדיקת התאמה למילים מהשיר - בדיקה ישירה מול מילות השיר שהמשתמש הוסיף (ללא AI)
  */
 async function checkLyrics(userAnswer, song) {
   const songName = song.title || song.trackName || "Unknown Song";
-  console.log(`🔍 Checking lyrics for song: ${songName}`);
-  console.log(`🔍 User answer: "${userAnswer}"`);
+  console.log(`🎼 Checking lyrics for song: ${songName}`);
+  console.log(`🎼 User answer: "${userAnswer}"`);
 
   // בדיקה אם יש מילות שיר שהמשתמש הוסיף
   const fullLyrics = song.fullLyrics || song.lyrics || "";
 
   if (!fullLyrics || fullLyrics.trim() === "") {
     console.log(
-      `⚠️ No lyrics provided for song "${songName}" - trying AI fallback`
+      `⚠️ No lyrics provided for song "${songName}" - cannot check lyrics match`
     );
-
-    // fallback ל-AI כאשר אין מילות שיר שהמשתמש הוסיף
-    try {
-      const aiResult = await checkLyricsMatchWithAI(
-        userAnswer,
-        song.title || song.trackName,
-        song.artist
-      );
-
-      // רק אם ה-AI בטוח מאוד (סף גבוה של 0.8)
-      if (aiResult.isMatch && aiResult.confidence >= 0.8) {
-        console.log(
-          `✅ AI fallback found lyrics match: "${userAnswer}" in song "${songName}" (confidence: ${aiResult.confidence})`
-        );
-        return {
-          isMatch: true,
-          similarity: aiResult.confidence,
-          matchedText: aiResult.matchedText || userAnswer,
-          aiEnhanced: true,
-          explanation: `AI fallback: ${aiResult.explanation}`,
-        };
-      }
-
-      console.log(
-        `🔄 AI fallback confidence too low (${aiResult.confidence}) for lyrics check`
-      );
-    } catch (error) {
-      console.log(`⚠️ AI fallback failed:`, error.message);
-    }
-
     return {
       isMatch: false,
       similarity: 0,
       matchedText: "",
-      explanation: "No lyrics provided for this song and AI fallback failed",
+      explanation: "No lyrics provided for this song",
     };
   }
 
@@ -378,7 +532,7 @@ async function checkLyrics(userAnswer, song) {
 }
 
 /**
- * מציאת ההתאמה הטובה ביותר מתוך רשימת אפשרויות
+ * מציאת ההתאמה הטובה ביותר מתוך רשימת אפשרויות - משופר עם אלגוריתמים נוספים
  */
 function findBestMatch(userAnswer, options) {
   let bestMatch = { isMatch: false, similarity: 0, matchedText: "" };
@@ -393,10 +547,22 @@ function findBestMatch(userAnswer, options) {
       };
     }
 
+    // בדיקה עם Levenshtein Distance (הוספנו)
+    const levenshteinSim = calculateSimilarity(userAnswer, option);
+    if (levenshteinSim >= 0.75) {
+      // סף נמוך יותר ל-Levenshtein
+      if (levenshteinSim > bestMatch.similarity) {
+        bestMatch = {
+          isMatch: true,
+          similarity: levenshteinSim,
+          matchedText: option,
+        };
+      }
+    }
+
     // בדיקת דמיון עם string-similarity
     const similarity = stringSimilarity.compareTwoStrings(userAnswer, option);
     if (similarity >= 0.8) {
-      // סף דמיון גבוה
       if (similarity > bestMatch.similarity) {
         bestMatch = {
           isMatch: true,
@@ -420,6 +586,20 @@ function findBestMatch(userAnswer, options) {
         bestMatch = {
           isMatch: true,
           similarity: fuseScore,
+          matchedText: option,
+        };
+      }
+    }
+
+    // בדיקה אם המילים מכילות אחת את השנייה (לטיפול בשמות חלקיים)
+    if (userAnswer.includes(option) || option.includes(userAnswer)) {
+      const containsSim =
+        Math.min(userAnswer.length, option.length) /
+        Math.max(userAnswer.length, option.length);
+      if (containsSim >= 0.7 && containsSim > bestMatch.similarity) {
+        bestMatch = {
+          isMatch: true,
+          similarity: containsSim,
           matchedText: option,
         };
       }

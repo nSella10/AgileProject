@@ -39,7 +39,7 @@ const InterimLeaderboardScreen = ({
         audioRef.current = audio;
         setSharedAudioRef(audio); // שמירה ב-state המשותף
 
-        // כשהשיר נגמר, נתחיל אותו שוב מההתחלה
+        // כשהשיר נגמר, נתחיל אותו שוב מההתחלה (רק אם לא עוצרים אותו)
         audio.onended = () => {
           if (audioRef.current === audio) {
             audio.currentTime = 0;

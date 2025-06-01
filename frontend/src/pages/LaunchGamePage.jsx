@@ -123,6 +123,15 @@ const LaunchGamePage = () => {
           audioRef.current = null;
         }
 
+        // עצירה ונקיון של השמע המשותף (מהמסכים הקודמים)
+        if (sharedAudioRef) {
+          console.log(`🛑 Next round - stopping shared audio IMMEDIATELY`);
+          sharedAudioRef.onended = null; // הסרת event listener
+          sharedAudioRef.pause();
+          sharedAudioRef.currentTime = 0;
+          setSharedAudioRef(null);
+        }
+
         // בדיקה אם זה URL מלא או יחסי
         const fullAudioUrl = audioUrl.startsWith("http")
           ? audioUrl
@@ -414,6 +423,15 @@ const LaunchGamePage = () => {
             clearTimeout(audioRef.current.stopTimer);
           }
         }
+
+        // עצירת השמע המשותף כשהסיבוב מצליח
+        if (sharedAudioRef) {
+          console.log(`🎉 Round succeeded - stopping shared audio`);
+          sharedAudioRef.onended = null; // הסרת event listener
+          sharedAudioRef.pause();
+          sharedAudioRef.currentTime = 0;
+          setSharedAudioRef(null);
+        }
       }
     );
 
@@ -447,6 +465,15 @@ const LaunchGamePage = () => {
           }
         }
 
+        // עצירת השמע המשותף כשהסיבוב נכשל
+        if (sharedAudioRef) {
+          console.log(`❌ Round failed - stopping shared audio`);
+          sharedAudioRef.onended = null; // הסרת event listener
+          sharedAudioRef.pause();
+          sharedAudioRef.currentTime = 0;
+          setSharedAudioRef(null);
+        }
+
         if (allRoundsUsed) {
           setShowAnswerReveal(true);
           setRevealedSongTitle(songTitle);
@@ -478,9 +505,37 @@ const LaunchGamePage = () => {
           clearTimeout(audioRef.current.stopTimer);
         }
       }
+
+      // עצירת השמע המשותף כשמחכים להחלטת המארגן
+      if (sharedAudioRef) {
+        console.log(`🤔 Awaiting decision - stopping shared audio`);
+        sharedAudioRef.onended = null; // הסרת event listener
+        sharedAudioRef.pause();
+        sharedAudioRef.currentTime = 0;
+        setSharedAudioRef(null);
+      }
     });
 
     socket.on("gameOver", ({ leaderboard }) => {
+      // עצירת כל השמע כשהמשחק נגמר
+      if (audioRef.current) {
+        console.log(`🏁 Game over - stopping audio`);
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        if (audioRef.current.stopTimer) {
+          clearTimeout(audioRef.current.stopTimer);
+        }
+        audioRef.current = null;
+      }
+
+      if (sharedAudioRef) {
+        console.log(`🏁 Game over - stopping shared audio`);
+        sharedAudioRef.onended = null; // הסרת event listener
+        sharedAudioRef.pause();
+        sharedAudioRef.currentTime = 0;
+        setSharedAudioRef(null);
+      }
+
       setFinalLeaderboard(leaderboard);
       navigate("/final-leaderboard", { state: { leaderboard } });
     });
@@ -572,6 +627,7 @@ const LaunchGamePage = () => {
     // עצירת השמע המשותף והטיימר הנוכחיים
     if (sharedAudioRef) {
       console.log(`⏭️ Next round - stopping shared audio`);
+      sharedAudioRef.onended = null; // הסרת event listener
       sharedAudioRef.pause();
       sharedAudioRef.currentTime = 0;
       setSharedAudioRef(null);
@@ -603,6 +659,7 @@ const LaunchGamePage = () => {
     // עצירת השמע המשותף והטיימר הנוכחיים
     if (sharedAudioRef) {
       console.log(`🔄 Replay longer - stopping shared audio`);
+      sharedAudioRef.onended = null; // הסרת event listener
       sharedAudioRef.pause();
       sharedAudioRef.currentTime = 0;
       setSharedAudioRef(null);
@@ -662,6 +719,8 @@ const LaunchGamePage = () => {
           songArtist={revealedSongArtist}
           songArtworkUrl={revealedSongArtworkUrl}
           onNext={handleNextRound}
+          sharedAudioRef={sharedAudioRef}
+          setSharedAudioRef={setSharedAudioRef}
         />
       ) : showInterimLeaderboard ? (
         <InterimLeaderboardScreen
@@ -696,6 +755,8 @@ const LaunchGamePage = () => {
             playersAnswered={playersAnswered}
             totalPlayers={players.length}
             guessTimeLimit={guessTimeLimit}
+            sharedAudioRef={sharedAudioRef}
+            setSharedAudioRef={setSharedAudioRef}
           />
         </>
       ) : (

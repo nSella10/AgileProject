@@ -16,6 +16,7 @@ const GamePlayScreen = ({
   timeLeft,
   roundFailedForUser,
   guessResult,
+  answerDetails,
   maxTime = 15, // זמן ניחוש דינמי
   isAudioPlaying = false, // האם השיר עדיין מתנגן
   guessInputMethod = "freeText", // שיטת ניחוש
@@ -28,7 +29,22 @@ const GamePlayScreen = ({
     isWaiting,
     isGameOver,
     isAudioPlaying,
+    answerDetails,
   });
+
+  // פונקציה להצגת סוג התשובה
+  const getAnswerTypeDisplay = (answerType) => {
+    switch (answerType) {
+      case "songTitle":
+        return { emoji: "🎵", text: "Song Name", color: "text-yellow-300" };
+      case "artist":
+        return { emoji: "🎤", text: "Artist Name", color: "text-orange-300" };
+      case "lyrics":
+        return { emoji: "📝", text: "Song Lyrics", color: "text-red-300" };
+      default:
+        return { emoji: "🎯", text: "Correct Answer", color: "text-green-300" };
+    }
+  };
 
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
@@ -75,8 +91,62 @@ const GamePlayScreen = ({
             🎧 Guess the Song!
           </h1>
 
+          {/* Scoring Info */}
+          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-3 border border-yellow-400 border-opacity-30 mb-4">
+            <div className="text-white text-sm space-y-1">
+              <div className="flex justify-between items-center">
+                <span>🎵 Song Name:</span>
+                <span className="font-bold text-yellow-200">1000 pts</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>🎤 Artist Name:</span>
+                <span className="font-bold text-orange-200">600 pts</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>📝 Song Lyrics:</span>
+                <span className="font-bold text-red-200">300 pts</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Answer Details - הצגת פרטי התשובה הנכונה */}
+          {guessResult === "correct" && answerDetails && (
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-4 border border-green-400 border-opacity-30 mb-4">
+              <div className="text-center space-y-2">
+                <div className="text-green-200 text-lg font-bold">
+                  🎉 Correct Answer!
+                </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <span
+                    className={`text-2xl ${
+                      getAnswerTypeDisplay(answerDetails.answerType).emoji
+                    }`}
+                  >
+                    {getAnswerTypeDisplay(answerDetails.answerType).emoji}
+                  </span>
+                  <span
+                    className={`font-semibold ${
+                      getAnswerTypeDisplay(answerDetails.answerType).color
+                    }`}
+                  >
+                    {getAnswerTypeDisplay(answerDetails.answerType).text}
+                  </span>
+                </div>
+                <div className="text-white text-sm">
+                  You guessed:{" "}
+                  <span className="font-bold text-green-200">
+                    "{answerDetails.matchedText}"
+                  </span>
+                </div>
+                <div className="text-yellow-300 text-xl font-bold">
+                  +{answerDetails.score} points!
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Status Message */}
-          {!roundFailedForUser && (
+          {!roundFailedForUser && guessResult !== "correct" && (
             <div className="bg-blue-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-3 border border-blue-400 border-opacity-30 mb-4">
               <p className="text-white font-medium text-base">🕵️ {statusMsg}</p>
             </div>
@@ -235,11 +305,17 @@ const GamePlayScreen = ({
                       type="text"
                       value={guess}
                       onChange={(e) => onGuessChange(e.target.value)}
-                      placeholder="Type your guess here..."
+                      placeholder="Song name, artist, or lyrics..."
                     />
                     <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-purple-300">
                       🎵
                     </div>
+                  </div>
+
+                  {/* Hint Text */}
+                  <div className="text-center text-purple-200 text-sm">
+                    💡 You can guess the song name, artist name, or lyrics from
+                    the song
                   </div>
 
                   {/* Action Buttons */}

@@ -73,14 +73,42 @@ const PlayerAnswersScreen = ({
       }
     }
 
-    // ניקוי כשיוצאים מהקומפוננטה - לא עוצרים את השמע כי הוא משותף
+    // ניקוי כשיוצאים מהקומפוננטה - עוצרים את השמע אם עוברים לשיר הבא
     return () => {
-      // לא עוצרים את השמע כי הוא עשוי לחזור לקומפוננטה הקודמת
-      console.log(
-        "🔄 PlayerAnswers cleanup - keeping audio for potential return"
-      );
+      // אם הקומפוננטה נסגרת בזמן שהשמע מתנגן, נעצור אותו
+      if (sharedAudioRef && !sharedAudioRef.paused) {
+        console.log(
+          "🛑 PlayerAnswers cleanup - stopping shared audio on unmount"
+        );
+        sharedAudioRef.pause();
+        setSharedAudioRef(null);
+      }
+      if (audioRef.current) {
+        console.log(
+          "🛑 PlayerAnswers cleanup - stopping local audio on unmount"
+        );
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
   }, [songPreviewUrl, sharedAudioRef, setSharedAudioRef, currentAudioTime]);
+
+  // useEffect נוסף לוודא שהשמע נעצר כשהקומפוננטה נסגרת
+  useEffect(() => {
+    return () => {
+      // ניקוי סופי - וודא שהשמע נעצר
+      if (sharedAudioRef) {
+        console.log("🛑 PlayerAnswers final cleanup - stopping shared audio");
+        sharedAudioRef.pause();
+        setSharedAudioRef(null);
+      }
+      if (audioRef.current) {
+        console.log("🛑 PlayerAnswers final cleanup - stopping local audio");
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []); // ריק כדי שירוץ רק בסגירת הקומפוננטה
 
   const handleNext = () => {
     setIsTransitioning(true);

@@ -8,6 +8,9 @@ const PlayerAnswersScreen = ({
   songArtworkUrl,
   songPreviewUrl,
   onNextSong,
+  sharedAudioRef,
+  setSharedAudioRef,
+  currentAudioTime,
 }) => {
   const audioRef = useRef(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -15,40 +18,80 @@ const PlayerAnswersScreen = ({
   useEffect(() => {
     // השמעת הפזמון ברקע כשמציגים את התשובות
     if (songPreviewUrl) {
-      console.log("🎵 Playing song preview for answers review:", songPreviewUrl);
+      console.log(
+        "🎵 Playing song preview for answers review:",
+        songPreviewUrl
+      );
 
-      const audio = new Audio(songPreviewUrl);
-      audio.crossOrigin = "anonymous";
-      audio.volume = 0.3; // עוצמה נמוכה יותר
-      audio.loop = true; // חזרה על הפזמון
-      audioRef.current = audio;
+      // אם יש כבר audio object משותף, נשתמש בו ונמשיך מהמיקום הנוכחי
+      if (sharedAudioRef && sharedAudioRef.src.includes(songPreviewUrl)) {
+        console.log(
+          "🔄 Using existing shared audio, continuing from current position"
+        );
+        audioRef.current = sharedAudioRef;
 
-      const playAudio = async () => {
-        try {
-          await audio.play();
-          console.log("✅ Answers review music started playing");
-        } catch (error) {
-          console.log("🔇 Answers review music autoplay blocked:", error);
+        // אם השמע לא מתנגן, נתחיל אותו מהמיקום הנוכחי
+        if (sharedAudioRef.paused) {
+          // אם יש מיקום שמור, נתחיל ממנו
+          if (currentAudioTime && currentAudioTime > 0) {
+            sharedAudioRef.currentTime = currentAudioTime;
+            console.log(`🎵 Resuming audio from ${currentAudioTime} seconds`);
+          }
+          sharedAudioRef.play().catch((error) => {
+            console.log("🔇 Shared audio play failed:", error);
+          });
         }
-      };
+      } else {
+        // יצירת audio object חדש (לא אמור לקרות אם הלוגיקה עובדת נכון)
+        const audio = new Audio(songPreviewUrl);
+        audio.crossOrigin = "anonymous";
+        audio.volume = 0.3; // עוצמה נמוכה יותר
+        audio.loop = false; // לא חוזרים על הפזמון - נותנים לו להתנגן עד הסוף
+        audioRef.current = audio;
+        setSharedAudioRef(audio); // שמירה ב-state המשותף
 
-      playAudio();
+        // כשהשיר נגמר, נתחיל אותו שוב מההתחלה
+        audio.onended = () => {
+          if (audioRef.current === audio) {
+            audio.currentTime = 0;
+            audio.play().catch((error) => {
+              console.log("🔇 Audio replay failed:", error);
+            });
+          }
+        };
+
+        const playAudio = async () => {
+          try {
+            await audio.play();
+            console.log("✅ Answers review music started playing");
+          } catch (error) {
+            console.log("🔇 Answers review music autoplay blocked:", error);
+          }
+        };
+
+        playAudio();
+      }
     }
 
-    // ניקוי כשיוצאים מהקומפוננטה
+    // ניקוי כשיוצאים מהקומפוננטה - לא עוצרים את השמע כי הוא משותף
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-        console.log("🛑 Answers review music stopped");
-      }
+      // לא עוצרים את השמע כי הוא עשוי לחזור לקומפוננטה הקודמת
+      console.log(
+        "🔄 PlayerAnswers cleanup - keeping audio for potential return"
+      );
     };
-  }, [songPreviewUrl]);
+  }, [songPreviewUrl, sharedAudioRef, setSharedAudioRef, currentAudioTime]);
 
   const handleNext = () => {
     setIsTransitioning(true);
-    // עצירת המוזיקה לפני מעבר לשיר הבא
+    // עצירת המוזיקה המשותפת לפני מעבר לשיר הבא
+    if (sharedAudioRef) {
+      console.log("🛑 PlayerAnswers - stopping shared audio");
+      sharedAudioRef.pause();
+      setSharedAudioRef(null);
+    }
     if (audioRef.current) {
+      console.log("🛑 PlayerAnswers - stopping local audio");
       audioRef.current.pause();
       audioRef.current = null;
     }
@@ -64,27 +107,37 @@ const PlayerAnswersScreen = ({
 
   // קיבוץ לפי סוג התשובה
   const groupedAnswers = {
-    songTitle: answersArray.filter(([_, data]) => data.answerType === 'songTitle'),
-    artist: answersArray.filter(([_, data]) => data.answerType === 'artist'),
-    lyrics: answersArray.filter(([_, data]) => data.answerType === 'lyrics'),
-    none: answersArray.filter(([_, data]) => data.answerType === 'none')
+    songTitle: answersArray.filter(
+      ([_, data]) => data.answerType === "songTitle"
+    ),
+    artist: answersArray.filter(([_, data]) => data.answerType === "artist"),
+    lyrics: answersArray.filter(([_, data]) => data.answerType === "lyrics"),
+    none: answersArray.filter(([_, data]) => data.answerType === "none"),
   };
 
   const getAnswerTypeIcon = (type) => {
     switch (type) {
-      case 'songTitle': return '🎵';
-      case 'artist': return '🎤';
-      case 'lyrics': return '📝';
-      default: return '❌';
+      case "songTitle":
+        return "🎵";
+      case "artist":
+        return "🎤";
+      case "lyrics":
+        return "📝";
+      default:
+        return "❌";
     }
   };
 
   const getAnswerTypeColor = (type) => {
     switch (type) {
-      case 'songTitle': return 'from-green-500 to-emerald-600';
-      case 'artist': return 'from-blue-500 to-indigo-600';
-      case 'lyrics': return 'from-purple-500 to-violet-600';
-      default: return 'from-gray-400 to-gray-500';
+      case "songTitle":
+        return "from-green-500 to-emerald-600";
+      case "artist":
+        return "from-blue-500 to-indigo-600";
+      case "lyrics":
+        return "from-purple-500 to-violet-600";
+      default:
+        return "from-gray-400 to-gray-500";
     }
   };
 
@@ -93,8 +146,12 @@ const PlayerAnswersScreen = ({
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-8xl mb-4 animate-spin">🎵</div>
-          <h2 className="text-4xl font-bold text-white mb-2">Moving to next song...</h2>
-          <p className="text-xl text-purple-200">Get ready for the next challenge!</p>
+          <h2 className="text-4xl font-bold text-white mb-2">
+            Moving to next song...
+          </h2>
+          <p className="text-xl text-purple-200">
+            Get ready for the next challenge!
+          </p>
         </div>
       </div>
     );
@@ -131,7 +188,9 @@ const PlayerAnswersScreen = ({
             />
           )}
           <div className="text-right">
-            <h2 className="text-2xl font-bold text-purple-800 mb-1">{songTitle}</h2>
+            <h2 className="text-2xl font-bold text-purple-800 mb-1">
+              {songTitle}
+            </h2>
             <p className="text-lg text-gray-600">by {songArtist}</p>
           </div>
         </div>
@@ -146,13 +205,24 @@ const PlayerAnswersScreen = ({
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {groupedAnswers.songTitle.map(([username, data]) => (
-                  <div key={username} className="bg-white/80 rounded-xl p-4 border border-green-300">
+                  <div
+                    key={username}
+                    className="bg-white/80 rounded-xl p-4 border border-green-300"
+                  >
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-2xl">{playerEmojis[username] || "🎮"}</span>
-                      <span className="font-bold text-green-800">{username}</span>
+                      <span className="text-2xl">
+                        {playerEmojis[username] || "🎮"}
+                      </span>
+                      <span className="font-bold text-green-800">
+                        {username}
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-1">"{data.answer}"</p>
-                    <p className="text-xs text-green-600 font-semibold">+{data.score} נקודות</p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      "{data.answer}"
+                    </p>
+                    <p className="text-xs text-green-600 font-semibold">
+                      +{data.score} נקודות
+                    </p>
                   </div>
                 ))}
               </div>
@@ -167,13 +237,24 @@ const PlayerAnswersScreen = ({
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {groupedAnswers.artist.map(([username, data]) => (
-                  <div key={username} className="bg-white/80 rounded-xl p-4 border border-blue-300">
+                  <div
+                    key={username}
+                    className="bg-white/80 rounded-xl p-4 border border-blue-300"
+                  >
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-2xl">{playerEmojis[username] || "🎮"}</span>
-                      <span className="font-bold text-blue-800">{username}</span>
+                      <span className="text-2xl">
+                        {playerEmojis[username] || "🎮"}
+                      </span>
+                      <span className="font-bold text-blue-800">
+                        {username}
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-1">"{data.answer}"</p>
-                    <p className="text-xs text-blue-600 font-semibold">+{data.score} נקודות</p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      "{data.answer}"
+                    </p>
+                    <p className="text-xs text-blue-600 font-semibold">
+                      +{data.score} נקודות
+                    </p>
                   </div>
                 ))}
               </div>
@@ -188,13 +269,24 @@ const PlayerAnswersScreen = ({
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {groupedAnswers.lyrics.map(([username, data]) => (
-                  <div key={username} className="bg-white/80 rounded-xl p-4 border border-purple-300">
+                  <div
+                    key={username}
+                    className="bg-white/80 rounded-xl p-4 border border-purple-300"
+                  >
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-2xl">{playerEmojis[username] || "🎮"}</span>
-                      <span className="font-bold text-purple-800">{username}</span>
+                      <span className="text-2xl">
+                        {playerEmojis[username] || "🎮"}
+                      </span>
+                      <span className="font-bold text-purple-800">
+                        {username}
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-1">"{data.answer}"</p>
-                    <p className="text-xs text-purple-600 font-semibold">+{data.score} נקודות</p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      "{data.answer}"
+                    </p>
+                    <p className="text-xs text-purple-600 font-semibold">
+                      +{data.score} נקודות
+                    </p>
                   </div>
                 ))}
               </div>
@@ -209,10 +301,17 @@ const PlayerAnswersScreen = ({
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {groupedAnswers.none.map(([username, data]) => (
-                  <div key={username} className="bg-white/80 rounded-xl p-4 border border-gray-300">
+                  <div
+                    key={username}
+                    className="bg-white/80 rounded-xl p-4 border border-gray-300"
+                  >
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-2xl">{playerEmojis[username] || "🎮"}</span>
-                      <span className="font-bold text-gray-800">{username}</span>
+                      <span className="text-2xl">
+                        {playerEmojis[username] || "🎮"}
+                      </span>
+                      <span className="font-bold text-gray-800">
+                        {username}
+                      </span>
                     </div>
                     <p className="text-sm text-gray-600">"{data.answer}"</p>
                   </div>

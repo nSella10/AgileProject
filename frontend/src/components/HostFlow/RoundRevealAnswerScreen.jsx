@@ -19,8 +19,18 @@ const RoundRevealAnswerScreen = ({
       const audio = new Audio(songPreviewUrl);
       audio.crossOrigin = "anonymous";
       audio.volume = 0.4; // עוצמה בינונית
-      audio.loop = true; // חזרה על הפזמון
+      audio.loop = false; // לא חוזרים על הפזמון - נותנים לו להתנגן עד הסוף
       audioRef.current = audio;
+
+      // כשהשיר נגמר, נתחיל אותו שוב מההתחלה
+      audio.onended = () => {
+        if (audioRef.current === audio) {
+          audio.currentTime = 0;
+          audio.play().catch((error) => {
+            console.log("🔇 Audio replay failed:", error);
+          });
+        }
+      };
 
       const playAudio = async () => {
         try {

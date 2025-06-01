@@ -42,6 +42,10 @@ const LaunchGamePage = () => {
   const [playersAnswered, setPlayersAnswered] = useState(0);
   const [guessTimeLimit, setGuessTimeLimit] = useState(15);
 
+  // State for shared audio management
+  const [sharedAudioRef, setSharedAudioRef] = useState(null);
+  const [currentAudioTime, setCurrentAudioTime] = useState(0);
+
   const audioRef = useRef(null);
   const countdownRef = useRef(null);
   const roomCodeRef = useRef("");
@@ -565,7 +569,14 @@ const LaunchGamePage = () => {
     setCountdown(null);
     clearInterval(countdownRef.current);
 
-    // עצירת השמע והטיימר הנוכחיים
+    // עצירת השמע המשותף והטיימר הנוכחיים
+    if (sharedAudioRef) {
+      console.log(`⏭️ Next round - stopping shared audio`);
+      sharedAudioRef.pause();
+      sharedAudioRef.currentTime = 0;
+      setSharedAudioRef(null);
+    }
+
     if (audioRef.current) {
       console.log(`⏭️ Next round - stopping current audio`);
       audioRef.current.pause();
@@ -575,6 +586,9 @@ const LaunchGamePage = () => {
       }
       audioRef.current = null;
     }
+
+    // איפוס מיקום השמע
+    setCurrentAudioTime(0);
   };
 
   const handleReplayLonger = () => {
@@ -586,7 +600,14 @@ const LaunchGamePage = () => {
     setCountdown(null);
     clearInterval(countdownRef.current);
 
-    // עצירת השמע והטיימר הנוכחיים
+    // עצירת השמע המשותף והטיימר הנוכחיים
+    if (sharedAudioRef) {
+      console.log(`🔄 Replay longer - stopping shared audio`);
+      sharedAudioRef.pause();
+      sharedAudioRef.currentTime = 0;
+      setSharedAudioRef(null);
+    }
+
     if (audioRef.current) {
       console.log(`🔄 Replay longer - stopping current audio`);
       audioRef.current.pause();
@@ -596,10 +617,17 @@ const LaunchGamePage = () => {
       }
       audioRef.current = null;
     }
+
+    // איפוס מיקום השמע
+    setCurrentAudioTime(0);
   };
 
   // פונקציה למעבר למסך התשובות
   const handleViewAnswers = () => {
+    // שמירת המיקום הנוכחי של השמע לפני מעבר למסך התשובות
+    if (sharedAudioRef && !sharedAudioRef.paused) {
+      setCurrentAudioTime(sharedAudioRef.currentTime);
+    }
     setShowInterimLeaderboard(false);
     setShowPlayerAnswers(true);
   };
@@ -623,6 +651,9 @@ const LaunchGamePage = () => {
           songArtworkUrl={revealedSongArtworkUrl}
           songPreviewUrl={revealedSongPreviewUrl}
           onNextSong={handleNextRound}
+          sharedAudioRef={sharedAudioRef}
+          setSharedAudioRef={setSharedAudioRef}
+          currentAudioTime={currentAudioTime}
         />
       ) : showAnswerReveal ? (
         <RoundRevealAnswerScreen
@@ -643,6 +674,8 @@ const LaunchGamePage = () => {
           playerAnswers={playerAnswers}
           onNextRound={handleNextRound}
           onViewAnswers={handleViewAnswers}
+          sharedAudioRef={sharedAudioRef}
+          setSharedAudioRef={setSharedAudioRef}
         />
       ) : finalLeaderboard ? null : gameStarted ? (
         <>

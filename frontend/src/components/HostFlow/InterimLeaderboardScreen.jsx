@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 const InterimLeaderboardScreen = ({
   scores,
@@ -10,56 +10,68 @@ const InterimLeaderboardScreen = ({
   playerEmojis = {},
   playerAnswers = {},
   onViewAnswers,
+  sharedAudioRef,
+  setSharedAudioRef,
 }) => {
   const audioRef = useRef(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     // השמעת הפזמון ברקע כשמישהו מצליח לנחש
     if (songPreviewUrl) {
       console.log("🎉 Playing success celebration music:", songPreviewUrl);
 
-      const audio = new Audio(songPreviewUrl);
-      audio.crossOrigin = "anonymous";
-      audio.volume = 0.3; // עוצמה נמוכה יותר כדי לא להפריע
-      audio.loop = true; // חזרה על הפזמון
-      audioRef.current = audio;
-
-      const playAudio = async () => {
-        try {
-          await audio.play();
-          console.log("✅ Success celebration music started playing");
-        } catch (error) {
-          console.log("🔇 Success celebration music autoplay blocked:", error);
+      // אם יש כבר audio object משותף, נשתמש בו
+      if (sharedAudioRef && sharedAudioRef.src.includes(songPreviewUrl)) {
+        console.log("🔄 Using existing shared audio");
+        audioRef.current = sharedAudioRef;
+        // אם השמע לא מתנגן, נתחיל אותו
+        if (sharedAudioRef.paused) {
+          sharedAudioRef.play().catch((error) => {
+            console.log("🔇 Shared audio play failed:", error);
+          });
         }
-      };
+      } else {
+        // יצירת audio object חדש
+        const audio = new Audio(songPreviewUrl);
+        audio.crossOrigin = "anonymous";
+        audio.volume = 0.3; // עוצמה נמוכה יותר כדי לא להפריע
+        audio.loop = false; // לא חוזרים על הפזמון - נותנים לו להתנגן עד הסוף
+        audioRef.current = audio;
+        setSharedAudioRef(audio); // שמירה ב-state המשותף
 
-      playAudio();
-    }
+        // כשהשיר נגמר, נתחיל אותו שוב מההתחלה
+        audio.onended = () => {
+          if (audioRef.current === audio) {
+            audio.currentTime = 0;
+            audio.play().catch((error) => {
+              console.log("🔇 Audio replay failed:", error);
+            });
+          }
+        };
 
-    // ניקוי כשיוצאים מהקומפוננטה
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-        console.log("🛑 Success celebration music stopped");
+        const playAudio = async () => {
+          try {
+            await audio.play();
+            console.log("✅ Success celebration music started playing");
+          } catch (error) {
+            console.log(
+              "🔇 Success celebration music autoplay blocked:",
+              error
+            );
+          }
+        };
+
+        playAudio();
       }
-    };
-  }, [songPreviewUrl]);
-
-  const handleNext = () => {
-    setIsTransitioning(true);
-    // עצירת המוזיקה לפני מעבר לשיר הבא
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
     }
-    // הפוגה קצרה לפני מעבר לשיר הבא
-    setTimeout(() => {
-      setIsTransitioning(false);
-      onNextRound();
-    }, 1500); // הפוגה של 1.5 שניות
-  };
+
+    // ניקוי כשיוצאים מהקומפוננטה - לא עוצרים את השמע כי הוא משותף
+    return () => {
+      // לא עוצרים את השמע כי הוא עובר לקומפוננטה הבאה
+      console.log("🔄 Leaderboard cleanup - keeping audio for next component");
+    };
+  }, [songPreviewUrl, sharedAudioRef, setSharedAudioRef]);
+
   // יצירת רשימה מלאה של כל השחקנים כולל אלה עם 0 נקודות
   const allPlayers = Object.entries(scores || {});
 
@@ -235,7 +247,6 @@ const InterimLeaderboardScreen = ({
           {Object.keys(playerAnswers).length > 0 && onViewAnswers && (
             <button
               onClick={onViewAnswers}
-              disabled={isTransitioning}
               className="group px-8 py-4 rounded-3xl font-bold text-xl transition-all duration-300 shadow-2xl transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:via-indigo-700 hover:to-blue-700 hover:shadow-purple-500/25 text-white"
             >
               <span className="relative z-10 flex items-center gap-3">
@@ -246,25 +257,6 @@ const InterimLeaderboardScreen = ({
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-purple-400/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
             </button>
           )}
-
-          {/* Next Song Button */}
-          <button
-            onClick={handleNext}
-            disabled={isTransitioning}
-            className={`group px-12 py-5 rounded-3xl font-bold text-2xl transition-all duration-300 shadow-2xl transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden ${
-              isTransitioning
-                ? "bg-gradient-to-r from-yellow-500 to-orange-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 hover:shadow-green-500/25"
-            } text-white`}
-          >
-            <span className="relative z-10 flex items-center gap-3">
-              <span className="text-3xl">{isTransitioning ? "⏳" : "🎵"}</span>
-              {isTransitioning ? "Preparing Next Song..." : "Next Song"}
-              <span className="text-3xl">{isTransitioning ? "⏳" : "🚀"}</span>
-            </span>
-            {/* Animated background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-green-400/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-          </button>
         </div>
       </div>
     </div>

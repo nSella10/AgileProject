@@ -15,6 +15,7 @@ import {
   FaEdit,
   FaCheck,
   FaFileAlt,
+  FaUser,
 } from "react-icons/fa";
 import { useLazySearchSongsQuery } from "../slices/gamesApiSlice";
 import {
@@ -36,9 +37,11 @@ import { CSS } from "@dnd-kit/utilities";
 
 // קומפוננטה לפריט שיר שניתן לגרור - מאופטמת עם React.memo
 const SortableSongItem = React.memo(
-  ({ song, index, onRemove, onEdit, onEditLyrics }) => {
-    const [isEditing, setIsEditing] = React.useState(false);
+  ({ song, index, onRemove, onEdit, onEditArtist, onEditLyrics }) => {
+    const [isEditingTitle, setIsEditingTitle] = React.useState(false);
+    const [isEditingArtist, setIsEditingArtist] = React.useState(false);
     const [editedTitle, setEditedTitle] = React.useState(song.title);
+    const [editedArtist, setEditedArtist] = React.useState(song.artist);
 
     const {
       attributes,
@@ -56,16 +59,28 @@ const SortableSongItem = React.memo(
       zIndex: isDragging ? 1000 : "auto", // z-index גבוה יותר
     };
 
-    const handleSaveEdit = () => {
+    const handleSaveTitleEdit = () => {
       if (editedTitle.trim() && editedTitle !== song.title) {
         onEdit(index, editedTitle.trim());
       }
-      setIsEditing(false);
+      setIsEditingTitle(false);
     };
 
-    const handleCancelEdit = () => {
+    const handleCancelTitleEdit = () => {
       setEditedTitle(song.title);
-      setIsEditing(false);
+      setIsEditingTitle(false);
+    };
+
+    const handleSaveArtistEdit = () => {
+      if (editedArtist.trim() && editedArtist !== song.artist) {
+        onEditArtist(index, editedArtist.trim());
+      }
+      setIsEditingArtist(false);
+    };
+
+    const handleCancelArtistEdit = () => {
+      setEditedArtist(song.artist);
+      setIsEditingArtist(false);
     };
 
     return (
@@ -99,21 +114,39 @@ const SortableSongItem = React.memo(
           className="w-10 h-10 rounded-md mr-3"
         />
         <div className="flex-1">
-          {isEditing ? (
+          {isEditingTitle ? (
             <div className="space-y-2">
               <input
                 type="text"
                 value={editedTitle}
                 onChange={(e) => setEditedTitle(e.target.value)}
                 className="w-full px-2 py-1 border border-blue-300 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter correct answer"
+                placeholder="Enter song title"
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSaveEdit();
-                  if (e.key === "Escape") handleCancelEdit();
+                  if (e.key === "Enter") handleSaveTitleEdit();
+                  if (e.key === "Escape") handleCancelTitleEdit();
                 }}
                 autoFocus
               />
               <p className="text-xs text-gray-500">Original: {song.title}</p>
+              <p className="text-sm text-gray-600">{song.artist}</p>
+            </div>
+          ) : isEditingArtist ? (
+            <div className="space-y-2">
+              <p className="font-medium text-gray-900">{song.title}</p>
+              <input
+                type="text"
+                value={editedArtist}
+                onChange={(e) => setEditedArtist(e.target.value)}
+                className="w-full px-2 py-1 border border-green-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Enter artist name"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveArtistEdit();
+                  if (e.key === "Escape") handleCancelArtistEdit();
+                }}
+                autoFocus
+              />
+              <p className="text-xs text-gray-500">Original: {song.artist}</p>
             </div>
           ) : (
             <>
@@ -125,17 +158,17 @@ const SortableSongItem = React.memo(
 
         {/* כפתורי פעולה */}
         <div className="flex items-center gap-1">
-          {isEditing ? (
+          {isEditingTitle ? (
             <>
               <button
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleSaveEdit();
+                  handleSaveTitleEdit();
                 }}
                 className="text-green-600 hover:text-green-800 p-2"
-                title="Save changes"
+                title="Save title changes"
               >
                 <FaCheck size={14} />
               </button>
@@ -144,7 +177,34 @@ const SortableSongItem = React.memo(
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleCancelEdit();
+                  handleCancelTitleEdit();
+                }}
+                className="text-gray-500 hover:text-gray-700 p-2"
+                title="Cancel"
+              >
+                <FaTimes size={14} />
+              </button>
+            </>
+          ) : isEditingArtist ? (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSaveArtistEdit();
+                }}
+                className="text-green-600 hover:text-green-800 p-2"
+                title="Save artist changes"
+              >
+                <FaCheck size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCancelArtistEdit();
                 }}
                 className="text-gray-500 hover:text-gray-700 p-2"
                 title="Cancel"
@@ -159,12 +219,24 @@ const SortableSongItem = React.memo(
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  setIsEditing(true);
+                  setIsEditingTitle(true);
                 }}
                 className="text-blue-600 hover:text-blue-800 p-2"
-                title="Edit answer"
+                title="Edit song title"
               >
                 <FaEdit size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsEditingArtist(true);
+                }}
+                className="text-purple-600 hover:text-purple-800 p-2"
+                title="Edit artist name"
+              >
+                <FaUser size={14} />
               </button>
               <button
                 type="button"
@@ -616,6 +688,26 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
     [selectedSongs, onSongSelect]
   );
 
+  // פונקציה לעריכת שם המבצע - מאופטמת
+  const editArtist = useCallback(
+    (index, newArtist) => {
+      const updatedSongs = selectedSongs.map((song, i) => {
+        if (i === index) {
+          const correctAnswers = generateCorrectAnswers(song.title, newArtist);
+          return {
+            ...song,
+            artist: newArtist,
+            artistName: newArtist, // עדכון גם של artistName אם קיים
+            correctAnswers: correctAnswers,
+          };
+        }
+        return song;
+      });
+      onSongSelect(updatedSongs, true);
+    },
+    [selectedSongs, onSongSelect]
+  );
+
   // פונקציה לפתיחת modal לעריכת מילות השיר
   const openLyricsModal = useCallback(
     (index) => {
@@ -795,7 +887,8 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
             </h3>
             <p className="text-sm text-gray-500">
               💡 Drag <FaGripVertical className="inline mx-1" /> to reorder •
-              Click <FaEdit className="inline mx-1" /> to edit answer • Click{" "}
+              Click <FaEdit className="inline mx-1" /> to edit title • Click{" "}
+              <FaUser className="inline mx-1" /> to edit artist • Click{" "}
               <FaFileAlt className="inline mx-1" /> to edit lyrics
             </p>
           </div>
@@ -817,6 +910,7 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
                     index={index}
                     onRemove={removeSong}
                     onEdit={editSong}
+                    onEditArtist={editArtist}
                     onEditLyrics={openLyricsModal}
                   />
                 ))}

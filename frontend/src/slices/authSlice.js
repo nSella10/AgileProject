@@ -16,7 +16,12 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       state.userInfo = null;
+      // מחיקה סלקטיבית של localStorage - שמירת lastGameSession
+      const lastGameSession = localStorage.getItem("lastGameSession");
       localStorage.clear();
+      if (lastGameSession) {
+        localStorage.setItem("lastGameSession", lastGameSession);
+      }
       // Note: Games cache will be cleared by the logout action listener
     },
   },

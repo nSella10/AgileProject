@@ -21,6 +21,8 @@ const GamePlayScreen = ({
   isAudioPlaying = false, // האם השיר עדיין מתנגן
   guessInputMethod = "freeText", // שיטת ניחוש
   currentSongTitle = "", // שם השיר הנוכחי (לשיטת לחיצת אותיות)
+  isGamePaused = false, // האם המשחק מושהה
+  pauseReason = "", // סיבת ההשהיה
 }) => {
   console.log("🎮 GamePlayScreen props:", {
     timeLeft,
@@ -152,8 +154,8 @@ const GamePlayScreen = ({
             </div>
           )}
 
-          {/* Timer Circle - מוצג רק כשיש זמן נותר והמשתתף עדיין לא ניחש */}
-          {timeLeft && !isGameOver && !hasGuessed && (
+          {/* Timer Circle - מוצג רק כשיש זמן נותר והמשתתף עדיין לא ניחש ולא במצב השהיה */}
+          {timeLeft && !isGameOver && !hasGuessed && !isGamePaused && (
             <div className="flex flex-col items-center justify-center mb-6">
               {console.log("🎮 Rendering timer circle with:", {
                 timeLeft,
@@ -251,16 +253,36 @@ const GamePlayScreen = ({
                 </div>
               )}
             </div>
+          ) : isGamePaused ? (
+            // מצב השהיה - עדיפות עליונה
+            <div className="bg-orange-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-orange-400 border-opacity-30">
+              <div className="text-4xl mb-4 animate-pulse">⏸️</div>
+              <p className="text-white font-bold text-xl mb-2">Game Paused</p>
+              <p className="text-orange-200 text-base">{pauseReason}</p>
+              <div className="mt-4 flex justify-center space-x-2">
+                <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                <div
+                  className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.1s" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                ></div>
+              </div>
+            </div>
           ) : isWaiting ? (
             <div className="bg-yellow-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-yellow-400 border-opacity-30">
               <div className="text-4xl mb-4 animate-spin">⏳</div>
               <p className="text-white font-medium text-lg">
                 {roundFailedForUser
                   ? "❌ No one guessed it. Waiting for host..."
+                  : statusMsg.includes("next song - you'll join")
+                  ? "🔄 You rejoined during an active round - you'll participate from the next song!"
                   : "⏳ Waiting for the next song..."}
               </p>
             </div>
-          ) : isAudioPlaying && !hasGuessed ? (
+          ) : isAudioPlaying && !hasGuessed && !isGamePaused ? (
             // כשהשיר מתנגן - הצגת הודעה מתאימה במקום טופס הניחוש
             // אבל רק אם השחקן עדיין לא ניחש/וויתר
             <div className="bg-blue-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 border border-blue-400 border-opacity-30">
@@ -283,7 +305,7 @@ const GamePlayScreen = ({
                 ></div>
               </div>
             </div>
-          ) : (
+          ) : !isGamePaused ? (
             <div className="space-y-6">
               {/* Guess Input - תלוי בשיטת הניחוש */}
               {guessInputMethod === "letterClick" ? (
@@ -345,7 +367,7 @@ const GamePlayScreen = ({
                 </>
               )}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

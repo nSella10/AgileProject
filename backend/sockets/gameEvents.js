@@ -32,10 +32,19 @@ export function handleGameEvents(io, socket) {
       room.game = game; // שמירת כל נתוני המשחק כולל guessTimeLimit
       room.status = "playing"; // הגדרת סטטוס המשחק
 
-      // אתחול ניקוד לכל השחקנים עם 0 נקודות
+      // שמירת רשימת השחקנים המקוריים לפני תחילת המשחק
+      room.originalPlayers = room.players
+        .filter((player) => player.status !== "disconnected")
+        .map((player) => player.username);
+
+      console.log(`📝 Saved original players list:`, room.originalPlayers);
+
+      // אתחול ניקוד לכל השחקנים המחוברים עם 0 נקודות
       room.scores = {};
       room.players.forEach((player) => {
-        room.scores[player.username] = 0;
+        if (player.status !== "disconnected") {
+          room.scores[player.username] = 0;
+        }
       });
 
       room.currentTimeout = null;
@@ -87,12 +96,15 @@ export function handleGameEvents(io, socket) {
       };
 
       // שליחת עדכון למארגן על תשובה שהתקבלה
+      const connectedPlayersCount = room.players.filter(
+        (p) => p.status !== "disconnected"
+      ).length;
       io.to(room.hostSocketId).emit("playerAnswered", {
         username,
         correct: answerResult.isCorrect,
         answerType: answerResult.type,
         totalAnswered: room.guessedUsers.size,
-        totalPlayers: room.players.length,
+        totalPlayers: connectedPlayersCount,
       });
 
       if (answerResult.isCorrect) {
@@ -131,7 +143,10 @@ export function handleGameEvents(io, socket) {
         });
       }
 
-      if (room.guessedUsers.size === room.players.length) {
+      const connectedPlayersCount1 = room.players.filter(
+        (p) => p.status !== "disconnected"
+      ).length;
+      if (room.guessedUsers.size === connectedPlayersCount1) {
         // ביטול הטיימר הנוכחי
         if (room.currentTimeout) {
           clearTimeout(room.currentTimeout);
@@ -185,12 +200,15 @@ export function handleGameEvents(io, socket) {
       };
 
       // שליחת עדכון למארגן על תשובה שהתקבלה
+      const connectedPlayersCount = room.players.filter(
+        (p) => p.status !== "disconnected"
+      ).length;
       io.to(room.hostSocketId).emit("playerAnswered", {
         username,
         correct: false,
         answerType: "none",
         totalAnswered: room.guessedUsers.size,
-        totalPlayers: room.players.length,
+        totalPlayers: connectedPlayersCount,
       });
 
       // שליחת תגובה לשחקן
@@ -199,8 +217,11 @@ export function handleGameEvents(io, socket) {
         answerType: "none",
       });
 
-      // בדיקה אם כל השחקנים ענו
-      if (room.guessedUsers.size === room.players.length) {
+      // בדיקה אם כל השחקנים המחוברים ענו
+      const connectedPlayersCount2 = room.players.filter(
+        (p) => p.status !== "disconnected"
+      ).length;
+      if (room.guessedUsers.size === connectedPlayersCount2) {
         // ביטול הטיימר הנוכחי
         if (room.currentTimeout) {
           clearTimeout(room.currentTimeout);
@@ -252,17 +273,23 @@ export function handleGameEvents(io, socket) {
     });
 
     // שליחת עדכון למארגן
+    const connectedPlayersCount = room.players.filter(
+      (p) => p.status !== "disconnected"
+    ).length;
     io.to(room.hostSocketId).emit("playerAnswered", {
       username,
       correct: false,
       skipped: true,
       totalAnswered: room.guessedUsers.size,
-      totalPlayers: room.players.length,
+      totalPlayers: connectedPlayersCount,
     });
 
-    // בדיקה אם כל השחקנים ניחשו או וויתרו
+    // בדיקה אם כל השחקנים המחוברים ניחשו או וויתרו
     // אם כולם טעו/וויתרו (אף אחד לא צדק), נמשיך לסניפט הבא
-    if (room.guessedUsers.size === room.players.length) {
+    const connectedPlayersCount3 = room.players.filter(
+      (p) => p.status !== "disconnected"
+    ).length;
+    if (room.guessedUsers.size === connectedPlayersCount3) {
       // ביטול הטיימר הנוכחי
       if (room.currentTimeout) {
         clearTimeout(room.currentTimeout);
@@ -489,7 +516,7 @@ function startRound(io, roomCode) {
   }, totalTime);
 }
 
-function finishRound(io, roomCode) {
+export function finishRound(io, roomCode) {
   const room = rooms.get(roomCode);
   if (!room) return;
 

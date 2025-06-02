@@ -11,6 +11,7 @@ import ImprovedHostGameScreen from "../components/HostFlow/ImprovedHostGameScree
 import InterimLeaderboardScreen from "../components/HostFlow/InterimLeaderboardScreen";
 import RoundRevealAnswerScreen from "../components/HostFlow/RoundRevealAnswerScreen";
 import PlayerAnswersScreen from "../components/HostFlow/PlayerAnswersScreen";
+import PlayerDisconnectedModal from "../components/HostFlow/PlayerDisconnectedModal";
 
 const LaunchGamePage = () => {
   const { gameId } = useParams();
@@ -45,6 +46,13 @@ const LaunchGamePage = () => {
   // State for shared audio management
   const [sharedAudioRef, setSharedAudioRef] = useState(null);
   const [currentAudioTime, setCurrentAudioTime] = useState(0);
+
+  // State for player disconnection handling
+  const [disconnectedPlayer, setDisconnectedPlayer] = useState(null);
+  const [showDisconnectionModal, setShowDisconnectionModal] = useState(false);
+  const [showRoomCodeForReconnection, setShowRoomCodeForReconnection] =
+    useState(false);
+  const [waitingForPlayerReturn, setWaitingForPlayerReturn] = useState(null);
 
   const audioRef = useRef(null);
   const countdownRef = useRef(null);
@@ -595,13 +603,186 @@ const LaunchGamePage = () => {
       setScores(scores);
     });
 
+    // טיפול בניתוק שחקן
+    socket.on(
+      "playerDisconnected",
+      ({ username, emoji, roomCode, gameInProgress }) => {
+        console.log(`🚪 Player ${username} disconnected`);
+        setDisconnectedPlayer({ username, emoji, roomCode, gameInProgress });
+        setShowDisconnectionModal(true);
+        setShowRoomCodeForReconnection(false);
+        setWaitingForPlayerReturn(null);
+      }
+    );
+
+    // טיפול בחזרת שחקן
+    socket.on("playerReconnected", ({ username, emoji }) => {
+      console.log(`🔄 Player ${username} reconnected`);
+      console.log(`🔍 Current state:`, {
+        waitingForPlayerReturn,
+        showDisconnectionModal,
+        showRoomCodeForReconnection,
+      });
+
+      // הסרת הודעות קיימות ולאחר מכן הצגת הודעה חדשה
+      toast.dismiss();
+      toast.success(`${username} ${emoji} rejoined the game!`);
+
+      // סגירת המודל בכל מקרה כשהשחקן חוזר
+      console.log(`✅ Closing modal for reconnected player: ${username}`);
+      setShowDisconnectionModal(false);
+      setShowRoomCodeForReconnection(false);
+      setWaitingForPlayerReturn(null);
+      setDisconnectedPlayer(null); // איפוס גם את המידע על השחקן המנותק
+    });
+
+    // סגירת מודל ההמתנה כשהשחקן חוזר
+    socket.on("closeWaitingModal", ({ username }) => {
+      console.log(`🔄 Closing waiting modal for ${username}`);
+      console.log(`🔍 Current state:`, {
+        waitingForPlayerReturn,
+        showDisconnectionModal,
+        showRoomCodeForReconnection,
+      });
+
+      // סגירת המודל בכל מקרה כשהשחקן חוזר
+      console.log(`✅ Force closing modal for ${username}`);
+      setShowDisconnectionModal(false);
+      setShowRoomCodeForReconnection(false);
+      setWaitingForPlayerReturn(null);
+      setDisconnectedPlayer(null); // איפוס גם את המידע על השחקן המנותק
+    });
+
+    // הצגת קוד המשחק לחזרת שחקן
+    socket.on(
+      "showRoomCodeForReconnection",
+      ({ roomCode, waitingForPlayer }) => {
+        console.log(`⏳ Showing room code for ${waitingForPlayer} to return`);
+        setShowRoomCodeForReconnection(true);
+        setWaitingForPlayerReturn(waitingForPlayer);
+      }
+    );
+
+    // עדכון כשמסירים שחקן מהמשחק
+    socket.on("playerRemovedFromGame", ({ username, newTotalPlayers }) => {
+      console.log(
+        `❌ Player ${username} removed from game. New total: ${newTotalPlayers}`
+      );
+      toast.info(`${username} was removed from the game`);
+      setShowDisconnectionModal(false);
+      setShowRoomCodeForReconnection(false);
+      setWaitingForPlayerReturn(null);
+      setDisconnectedPlayer(null); // איפוס גם את המידע על השחקן המנותק
+    });
+
+    // טיפול בשחקן שסירב לחזור למשחק
+    socket.on("playerDeclinedRejoin", ({ username, newTotalPlayers }) => {
+      console.log(
+        `❌ Player ${username} declined to rejoin. New total: ${newTotalPlayers}`
+      );
+      console.log(`📥 Received playerDeclinedRejoin event in organizer screen`);
+      console.log(`🔍 Current modal state before closing:`, {
+        showDisconnectionModal,
+        showRoomCodeForReconnection,
+        waitingForPlayerReturn,
+      });
+
+      // סגירת המודל מיידית
+      console.log(
+        `🔄 Closing modal immediately for declined player: ${username}`
+      );
+      setShowDisconnectionModal(false);
+      setShowRoomCodeForReconnection(false);
+      setWaitingForPlayerReturn(null);
+      setDisconnectedPlayer(null); // איפוס גם את המידע על השחקן המנותק
+
+      toast.warning(`${username} chose not to return to the game`);
+      console.log(
+        `✅ Modal state updated after player declined - all states reset`
+      );
+    });
+
+    // טיפול בהשהיית המשחק
+    socket.on("gamePaused", ({ reason, disconnectedPlayer }) => {
+      console.log(`⏸️ Game paused due to ${reason}: ${disconnectedPlayer}`);
+
+      // עצירת הטיימר של המארגן
+      console.log(`⏸️ Host timer - stopping countdown due to game pause`);
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+        console.log(`⏸️ Host timer - cleared countdown interval`);
+      }
+
+      // שמירת הזמן שנותר לחידוש מאוחר יותר
+      console.log(`⏸️ Host timer - current countdown value: ${countdown}`);
+
+      // עצירת הטיימר הויזואלי
+      setCountdown(null);
+    });
+
+    // טיפול בחידוש המשחק
+    socket.on("gameResumed", ({ roundDeadline, timeLeft }) => {
+      console.log(`▶️ Game resumed with ${timeLeft}ms left`);
+
+      // איפוס מצבי המסך כדי לחזור למסך הטיימר הרגיל
+      setWaitingForNext(false);
+      setShowAnswerReveal(false);
+      setShowInterimLeaderboard(false);
+      setShowPlayerAnswers(false);
+      setRoundFailed(false);
+      setRoundSucceeded(false);
+      setAwaitingHostDecision(false);
+
+      // חידוש הטיימר של המארגן עם הזמן שנותר
+      const secondsLeft = Math.max(1, Math.ceil(timeLeft / 1000));
+      console.log(
+        `▶️ Host timer - resuming countdown with ${secondsLeft} seconds`
+      );
+      setCountdown(secondsLeft);
+
+      // ניקוי טיימר קודם אם קיים
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+      }
+
+      // התחלת טיימר חדש
+      countdownRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === 1) {
+            clearInterval(countdownRef.current);
+            setCountdown(null);
+            setWaitingForNext(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      console.log("🔄 Reset all screen states to show timer screen");
+    });
+
     return () => {
       socket.off("playerAnswered");
       socket.off("allPlayersAnswered");
       socket.off("timerStarted");
       socket.off("correctAnswer");
       socket.off("roundFailedAwaitingDecision");
+      socket.off("playerDisconnected");
+      socket.off("playerReconnected");
+      socket.off("closeWaitingModal");
+      socket.off("showRoomCodeForReconnection");
+      socket.off("playerRemovedFromGame");
+      socket.off("playerDeclinedRejoin");
+      socket.off("gamePaused");
+      socket.off("gameResumed");
       socket.disconnect();
+
+      // ניקוי הטיימר של המארגן
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
     };
   }, [gameId, navigate, userInfo]);
 
@@ -695,6 +876,58 @@ const LaunchGamePage = () => {
     setShowInterimLeaderboard(true);
   };
 
+  // פונקציות לטיפול בניתוק שחקנים
+  const handleWaitForPlayerReturn = () => {
+    if (!disconnectedPlayer) return;
+
+    const socket = getSocket();
+    socket.emit("handleDisconnectedPlayer", {
+      roomCode: disconnectedPlayer.roomCode,
+      username: disconnectedPlayer.username,
+      action: "waitForReturn",
+    });
+  };
+
+  const handleContinueWithoutPlayer = () => {
+    if (!disconnectedPlayer) return;
+
+    const socket = getSocket();
+    socket.emit("handleDisconnectedPlayer", {
+      roomCode: disconnectedPlayer.roomCode,
+      username: disconnectedPlayer.username,
+      action: "continueWithoutPlayer",
+    });
+
+    // סגירת המודל מיידית
+    setShowDisconnectionModal(false);
+    setShowRoomCodeForReconnection(false);
+    setWaitingForPlayerReturn(null);
+    setDisconnectedPlayer(null);
+  };
+
+  const handleCancelWaiting = () => {
+    if (!waitingForPlayerReturn) return;
+
+    const socket = getSocket();
+    socket.emit("cancelWaitingForPlayer", {
+      roomCode: roomCode,
+      username: waitingForPlayerReturn,
+    });
+
+    // סגירת המודל מיידית
+    setShowDisconnectionModal(false);
+    setShowRoomCodeForReconnection(false);
+    setWaitingForPlayerReturn(null);
+    setDisconnectedPlayer(null);
+  };
+
+  const handleCloseDisconnectionModal = () => {
+    setShowDisconnectionModal(false);
+    setShowRoomCodeForReconnection(false);
+    setWaitingForPlayerReturn(null);
+    setDisconnectedPlayer(null);
+  };
+
   // הסרנו את handleEnableAudio - השמעה תמיד אוטומטית
 
   return (
@@ -766,6 +999,24 @@ const LaunchGamePage = () => {
           onStart={handleStartGame}
         />
       )}
+
+      {/* מודל לטיפול בניתוק שחקנים */}
+      <PlayerDisconnectedModal
+        isOpen={
+          showDisconnectionModal &&
+          (disconnectedPlayer || waitingForPlayerReturn)
+        }
+        playerName={disconnectedPlayer?.username || waitingForPlayerReturn}
+        playerEmoji={disconnectedPlayer?.emoji}
+        roomCode={roomCode}
+        gameInProgress={disconnectedPlayer?.gameInProgress}
+        onWaitForReturn={handleWaitForPlayerReturn}
+        onContinueWithout={handleContinueWithoutPlayer}
+        onClose={handleCloseDisconnectionModal}
+        showRoomCode={showRoomCodeForReconnection}
+        waitingForPlayer={waitingForPlayerReturn}
+        onCancelWaiting={handleCancelWaiting}
+      />
     </div>
   );
 };

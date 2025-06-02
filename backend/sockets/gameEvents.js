@@ -433,6 +433,7 @@ function startRound(io, roomCode) {
   room.correctUsers = new Set();
   room.guessedUsers = new Set();
   room.playerAnswerTimes = {}; // איפוס זמני התשובות
+  room.playerAnswers = {}; // איפוס תשובות השחקנים מהסבב הקודם
   room.currentTimeout && clearTimeout(room.currentTimeout);
 
   // שליחת URL ישיר של השיר

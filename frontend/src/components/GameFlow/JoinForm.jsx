@@ -1,6 +1,7 @@
 import React from "react";
 
-const JoinForm = ({
+// הקומפוננט הישן - נשמר כגיבוי
+const JoinFormOld = ({
   roomCode,
   username,
   error,
@@ -97,4 +98,4 @@ const JoinForm = ({
   );
 };
 
-export default JoinForm;
+export default JoinFormOld;

@@ -370,17 +370,7 @@ const ImprovedHostGameScreen = ({
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Sound Toggle */}
-              <button
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  soundEnabled
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-500 text-gray-200"
-                }`}
-              >
-                {soundEnabled ? "🔊 Sound ON" : "🔇 Sound OFF"}
-              </button>
+              {/* כפתור Sound הוסר - זה משחק מוזיקלי, ברור שיש סאונד */}
             </div>
           </div>
 

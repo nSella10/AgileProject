@@ -14,6 +14,36 @@ const availableEmojis = [
 ];
 
 export const handlePlayerEvents = (io, socket) => {
+  // בדיקת תקינות קוד משחק בלבד (ללא הצטרפות)
+  socket.on("validateRoomCode", ({ roomCode }) => {
+    console.log(`🔍 Validating room code: ${roomCode}`);
+
+    const room = rooms.get(roomCode);
+    if (!room) {
+      console.log(`❌ Room ${roomCode} not found`);
+      socket.emit("roomValidationResult", {
+        isValid: false,
+        error: "Game code is incorrect or game does not exist",
+      });
+      return;
+    }
+
+    // בדיקה אם המשחק כבר התחיל
+    if (room.status === "playing") {
+      console.log(`⚠️ Room ${roomCode} is already playing`);
+      socket.emit("roomValidationResult", {
+        isValid: false,
+        error: "Game has already started",
+      });
+      return;
+    }
+
+    console.log(`✅ Room ${roomCode} is valid and available`);
+    socket.emit("roomValidationResult", {
+      isValid: true,
+    });
+  });
+
   // בדיקת סטטוס משחק קודם
   socket.on("checkPreviousGame", ({ roomCode, username }) => {
     console.log(

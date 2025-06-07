@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "react-toastify";
 import { getSocket, disconnectSocket } from "../socket";
-import JoinForm from "../components/GameFlow/JoinForm";
+import GameCodeInput from "../components/GameFlow/GameCodeInput";
+import NicknameInput from "../components/GameFlow/NicknameInput";
 import WaitingScreen from "../components/GameFlow/WaitingScreen";
 import GamePlayScreen from "../components/GameFlow/GamePlayScreen";
 import RejoinGameModal from "../components/RejoinGameModal";
@@ -14,6 +15,9 @@ const JoinGamePage = () => {
   const [error, setError] = useState("");
   const [joined, setJoined] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+
+  // מצב השלב בתהליך ההצטרפות
+  const [joinStep, setJoinStep] = useState("gameCode"); // "gameCode" או "nickname"
 
   // מצב הצעת חזרה למשחק קודם
   const [showRejoinModal, setShowRejoinModal] = useState(false);
@@ -998,7 +1002,23 @@ const JoinGamePage = () => {
     isCheckingRef.current = false;
     setCheckingPreviousGame(false);
 
+    // איפוס לשלב הראשון ונקה נתונים
+    setJoinStep("gameCode");
+    setRoomCode("");
+    setUsername("");
+    setError("");
+
     console.log("🧹 Cleaned up local state after declining rejoin");
+  };
+
+  // פונקציה למעבר משלב הכנסת קוד למשחק לשלב הכנסת nickname
+  const handleGameCodeNext = () => {
+    if (!roomCode || roomCode.length !== 5) {
+      setError("Please enter a valid 5-digit game code.");
+      return;
+    }
+    setError(""); // נקה שגיאות קודמות
+    setJoinStep("nickname");
   };
 
   const handleJoin = () => {
@@ -1097,12 +1117,20 @@ const JoinGamePage = () => {
           </div>
         )}
 
-        {!checkingPreviousGame && (
-          <JoinForm
+        {!checkingPreviousGame && joinStep === "gameCode" && (
+          <GameCodeInput
+            roomCode={roomCode}
+            error={error}
+            setRoomCode={setRoomCode}
+            onNext={handleGameCodeNext}
+          />
+        )}
+
+        {!checkingPreviousGame && joinStep === "nickname" && (
+          <NicknameInput
             roomCode={roomCode}
             username={username}
             error={error}
-            setRoomCode={setRoomCode}
             setUsername={setUsername}
             onJoin={handleJoin}
           />

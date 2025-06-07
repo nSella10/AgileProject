@@ -137,9 +137,9 @@ const HostWaitingScreen = ({ roomCode, players, onStart }) => {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-400 opacity-10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-400 opacity-5 rounded-full blur-3xl animate-pulse"></div>
       </div>
-      {/* אפקט הצטרפות שחקן */}
+      {/* אפקט הצטרפות שחקן - מיקום למעלה כדי לא לחסום את השחקנים */}
       {showJoinEffect && (
-        <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 pointer-events-none z-50">
           <div className="bg-green-500 text-white px-8 py-4 rounded-2xl shadow-2xl animate-bounce text-xl font-bold">
             🎉 New Player Joined! 🎉
           </div>
@@ -202,14 +202,14 @@ const HostWaitingScreen = ({ roomCode, players, onStart }) => {
         {/* Players List */}
         {players.length > 0 && (
           <>
-            <div className="flex flex-wrap justify-center gap-6 mb-6">
+            <div className="flex flex-wrap justify-center gap-8 mb-6">
               {players.map((player, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col items-center bg-purple-100 px-6 py-4 rounded-2xl shadow-lg w-28 h-28"
+                  className="flex flex-col items-center bg-purple-100 px-8 py-6 rounded-3xl shadow-lg w-36 h-36"
                 >
-                  <div className="text-4xl mb-1">{player.emoji}</div>
-                  <span className="font-semibold text-lg text-purple-900">
+                  <div className="text-6xl mb-2">{player.emoji}</div>
+                  <span className="font-semibold text-lg text-purple-900 text-center">
                     {player.username}
                   </span>
                 </div>

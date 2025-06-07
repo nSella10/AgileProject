@@ -8,6 +8,7 @@ import {
   updateGame,
   getAnalytics,
   updateLyricsForExistingGames,
+  fetchSongLyrics,
 } from "../controllers/gameController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 
@@ -27,6 +28,11 @@ router.get("/mine", protect, getMyGames);
 // @route   GET /api/games/search-songs
 // @access  Private
 router.get("/search-songs", protect, searchSongs);
+
+// @desc    Fetch lyrics for a specific song
+// @route   POST /api/games/fetch-lyrics
+// @access  Private
+router.post("/fetch-lyrics", protect, fetchSongLyrics);
 
 // @desc    Get analytics data
 // @route   GET /api/games/analytics

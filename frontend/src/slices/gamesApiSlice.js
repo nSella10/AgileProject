@@ -64,6 +64,13 @@ export const gamesApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Game"], // Will refresh games data after lyrics update
     }),
+    fetchSongLyrics: builder.mutation({
+      query: ({ title, artist }) => ({
+        url: `${GAMES_URL}/fetch-lyrics`,
+        method: "POST",
+        body: { title, artist },
+      }),
+    }),
   }),
 });
 
@@ -76,4 +83,5 @@ export const {
   useLazySearchSongsQuery,
   useGetAnalyticsQuery,
   useUpdateLyricsForExistingGamesMutation,
+  useFetchSongLyricsMutation,
 } = gamesApiSlice;

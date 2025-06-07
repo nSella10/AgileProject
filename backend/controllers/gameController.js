@@ -658,3 +658,65 @@ export const updateLyricsForExistingGames = asyncHandler(async (req, res) => {
     });
   }
 });
+
+// @desc    Fetch lyrics for a specific song
+// @route   POST /api/games/fetch-lyrics
+// @access  Private
+export const fetchSongLyrics = asyncHandler(async (req, res) => {
+  console.log("🎵 Fetch lyrics endpoint hit!");
+
+  const { title, artist } = req.body;
+
+  console.log(`🎵 Fetching lyrics for: "${title}" by "${artist}"`);
+
+  if (!title || !artist) {
+    res.status(400).json({
+      message: "Song title and artist are required",
+      success: false,
+    });
+    return;
+  }
+
+  try {
+    // חיפוש מילות השיר
+    const lyrics = await fetchLyricsFromGenius(title, artist);
+
+    if (lyrics) {
+      // חילוץ מילות מפתח מהמילות
+      const lyricsKeywords = extractKeywordsFromLyrics(lyrics);
+
+      console.log(
+        `✅ Found lyrics for: "${title}" by "${artist}" (${lyrics.length} characters, ${lyricsKeywords.length} keywords)`
+      );
+
+      res.json({
+        success: true,
+        lyrics: lyrics,
+        lyricsKeywords: lyricsKeywords,
+        message: "Lyrics found successfully",
+      });
+    } else {
+      console.log(`❌ No lyrics found for: "${title}" by "${artist}"`);
+
+      res.json({
+        success: false,
+        lyrics: null,
+        lyricsKeywords: [],
+        message: "No lyrics found for this song",
+      });
+    }
+  } catch (error) {
+    console.error(
+      `❌ Error fetching lyrics for "${title}" by "${artist}":`,
+      error.message
+    );
+
+    res.status(500).json({
+      success: false,
+      lyrics: null,
+      lyricsKeywords: [],
+      message: "Error fetching lyrics",
+      error: error.message,
+    });
+  }
+});

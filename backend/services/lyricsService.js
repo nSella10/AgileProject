@@ -1,5 +1,7 @@
+import { fetchLyricsWithWebScraping } from "./webScrapingService.js";
+
 /**
- * קבלת מילות שיר מ-APIs שונים
+ * קבלת מילות שיר מ-APIs שונים ו-Web Scraping
  * @param {string} title - שם השיר
  * @param {string} artist - שם הזמר
  * @returns {Promise<string|null>} - מילות השיר או null אם לא נמצא
@@ -8,7 +10,16 @@ export async function fetchLyricsFromGenius(title, artist) {
   try {
     console.log(`🎵 Searching lyrics for: "${title}" by "${artist}"`);
 
-    // ניסיון ראשון: Lyrics.ovh API
+    // ניסיון ראשון: Web Scraping (שירונט לעברית, Genius לאנגלית)
+    const webScrapingResult = await fetchLyricsWithWebScraping(title, artist);
+    if (webScrapingResult) {
+      console.log(
+        `✅ Found lyrics via Web Scraping for: "${title}" by "${artist}"`
+      );
+      return webScrapingResult;
+    }
+
+    // ניסיון שני: Lyrics.ovh API (fallback)
     const lyricsOvhResult = await fetchFromLyricsOvh(title, artist);
     if (lyricsOvhResult) {
       console.log(
@@ -17,7 +28,7 @@ export async function fetchLyricsFromGenius(title, artist) {
       return lyricsOvhResult;
     }
 
-    // ניסיון שני: Musixmatch API (fallback)
+    // ניסיון שלישי: Musixmatch API (fallback)
     const musixmatchResult = await fetchFromMusixmatch(title, artist);
     if (musixmatchResult) {
       console.log(
@@ -26,7 +37,7 @@ export async function fetchLyricsFromGenius(title, artist) {
       return musixmatchResult;
     }
 
-    // ניסיון שלישי: שירים מוכרים מוכנים מראש
+    // ניסיון רביעי: שירים מוכרים מוכנים מראש
     const fallbackResult = tryFallbackSongs(title, artist);
     if (fallbackResult) {
       console.log(`✅ Found lyrics in fallback for: "${title}" by "${artist}"`);

@@ -325,6 +325,7 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
 
   // State for lyrics fetching
   const [fetchingLyricsFor, setFetchingLyricsFor] = useState(null);
+  const [lyricsMessage, setLyricsMessage] = useState(null); // הודעה על מצב חיפוש מילות השיר
 
   const [searchSongs, { isLoading }] = useLazySearchSongsQuery();
   const [fetchSongLyrics, { isLoading: isFetchingLyrics }] =
@@ -506,6 +507,16 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
           };
         } else {
           console.log(`❌ No lyrics found for: "${title}" by "${artist}"`);
+          // הצגת הודעה למשתמש אם יש הודעה מהשרת
+          if (result.message && result.userAction === "manual_input_required") {
+            setLyricsMessage({
+              type: "warning",
+              text: result.message,
+              songTitle: `${title} - ${artist}`,
+            });
+            // הסתרת ההודעה אחרי 8 שניות
+            setTimeout(() => setLyricsMessage(null), 8000);
+          }
           return null;
         }
       } catch (error) {
@@ -513,6 +524,26 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
           `❌ Error fetching lyrics for "${title}" by "${artist}":`,
           error
         );
+        // הצגת הודעת שגיאה למשתמש
+        if (
+          error.data &&
+          error.data.message &&
+          error.data.userAction === "manual_input_required"
+        ) {
+          setLyricsMessage({
+            type: "error",
+            text: error.data.message,
+            songTitle: `${title} - ${artist}`,
+          });
+        } else {
+          setLyricsMessage({
+            type: "error",
+            text: "Error searching for lyrics. Please try again or paste the lyrics manually.",
+            songTitle: `${title} - ${artist}`,
+          });
+        }
+        // הסתרת ההודעה אחרי 8 שניות
+        setTimeout(() => setLyricsMessage(null), 8000);
         return null;
       } finally {
         setFetchingLyricsFor(null);
@@ -943,6 +974,43 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
         </div>
       )}
 
+      {/* הודעה על מצב חיפוש מילות השיר */}
+      {lyricsMessage && (
+        <div
+          className={`mb-4 p-4 rounded-lg border ${
+            lyricsMessage.type === "error"
+              ? "bg-red-50 border-red-200 text-red-800"
+              : "bg-yellow-50 border-yellow-200 text-yellow-800"
+          }`}
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <span className="text-lg mr-2">
+                  {lyricsMessage.type === "error" ? "❌" : "⚠️"}
+                </span>
+                <span className="font-semibold text-sm">
+                  {lyricsMessage.songTitle}
+                </span>
+              </div>
+              <p className="text-sm leading-relaxed">{lyricsMessage.text}</p>
+              <p className="text-xs mt-2 opacity-75">
+                💡 Click the{" "}
+                <FaFileAlt className="inline mx-1 text-green-600" /> button next
+                to the song to paste the lyrics manually
+              </p>
+            </div>
+            <button
+              onClick={() => setLyricsMessage(null)}
+              className="text-gray-500 hover:text-gray-700 p-1 ml-2"
+              title="Close message"
+            >
+              <FaTimes size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* תוצאות חיפוש */}
       {showResults && (
         <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
@@ -1054,10 +1122,13 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
             </h3>
             <p className="text-sm text-gray-500">
               💡 Drag <FaGripVertical className="inline mx-1" /> to reorder •
-              Click <FaEdit className="inline mx-1" /> to edit title • Click{" "}
-              <FaUser className="inline mx-1" /> to edit artist • Click{" "}
-              <FaFileAlt className="inline mx-1" /> to edit lyrics • Click{" "}
-              <FaSearch className="inline mx-1" /> to auto-fetch lyrics
+              Click <FaEdit className="inline mx-1 text-blue-600" /> to edit
+              title • Click <FaUser className="inline mx-1 text-purple-600" />{" "}
+              to edit artist • Click{" "}
+              <FaFileAlt className="inline mx-1 text-green-600" /> to edit
+              lyrics • Click{" "}
+              <FaSearch className="inline mx-1 text-purple-600" /> to auto-fetch
+              lyrics
             </p>
           </div>
 
@@ -1144,7 +1215,7 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
               </button>
               <button
                 onClick={saveLyrics}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
                 Save Lyrics
               </button>

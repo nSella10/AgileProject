@@ -24,6 +24,8 @@ const CreateGamePage = () => {
   const [guessTimeLimit, setGuessTimeLimit] = useState(15);
   const [guessInputMethod, setGuessInputMethod] = useState("freeText");
   const [error, setError] = useState("");
+  const [songsWithoutLyrics, setSongsWithoutLyrics] = useState([]);
+  const [showLyricsPopup, setShowLyricsPopup] = useState(false);
 
   const navigate = useNavigate();
   const { createGame, isLoading } = useCreateGameWithState();
@@ -39,12 +41,32 @@ const CreateGamePage = () => {
     }
   };
 
+  // פונקציה לבדיקת שירים ללא מילות שיר
+  const checkSongsWithoutLyrics = () => {
+    const songsWithoutLyricsArray = selectedSongs.filter(
+      (song) => !song.lyrics || song.lyrics.trim().length === 0
+    );
+    setSongsWithoutLyrics(songsWithoutLyricsArray);
+    return songsWithoutLyricsArray;
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     setError("");
 
     if (!title || selectedSongs.length === 0) {
       setError("Please provide a title and select at least one song.");
+      return;
+    }
+
+    // בדיקת שירים ללא מילות שיר
+    const songsWithoutLyricsArray = checkSongsWithoutLyrics();
+    if (songsWithoutLyricsArray.length > 0) {
+      setShowLyricsPopup(true);
+      // הסתרת הפופ-אפ אוטומטית אחרי 5 שניות
+      setTimeout(() => {
+        setShowLyricsPopup(false);
+      }, 5000);
       return;
     }
 
@@ -437,6 +459,82 @@ const CreateGamePage = () => {
           </form>
         </div>
       </div>
+
+      {/* Pop-up for missing lyrics */}
+      {showLyricsPopup && (
+        <div className="fixed inset-0 bg-gradient-to-br from-black/60 via-purple-900/30 to-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-gradient-to-br from-white via-purple-50 to-pink-50 rounded-3xl p-8 max-w-lg w-full shadow-2xl border border-purple-200/50 transform animate-slideUp">
+            {/* Header with animated icon */}
+            <div className="text-center mb-6">
+              <div className="relative inline-block">
+                <div className="text-6xl mb-4 animate-bounce">🎵</div>
+                <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+              </div>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
+                Missing Lyrics Alert!
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Some songs need lyrics before you can create your amazing game
+              </p>
+            </div>
+
+            {/* Songs list with beautiful cards */}
+            <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
+              {songsWithoutLyrics.map((song, index) => (
+                <div
+                  key={index}
+                  className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-4 transform hover:scale-105 transition-all duration-300 shadow-md"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                      🎶
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold text-gray-800 text-lg">
+                        "{song.title}"
+                      </div>
+                      <div className="text-sm text-gray-600 font-medium">
+                        by {song.artist}
+                      </div>
+                    </div>
+                    <div className="text-yellow-600 text-2xl animate-pulse">
+                      ⚠️
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Instructions with beautiful styling */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-4 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="text-2xl">💡</div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    Click the{" "}
+                    <span className="inline-flex items-center gap-1 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md transform hover:scale-105 transition-transform">
+                      📝 Green Button
+                    </span>{" "}
+                    next to each song to add lyrics manually
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action button with amazing styling */}
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowLyricsPopup(false)}
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              >
+                <span>👍</span>
+                Got It!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </PageLayout>
   );
 };

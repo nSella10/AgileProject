@@ -702,7 +702,9 @@ export const fetchSongLyrics = asyncHandler(async (req, res) => {
         success: false,
         lyrics: null,
         lyricsKeywords: [],
-        message: "No lyrics found for this song",
+        message:
+          "No lyrics found on the internet. Please copy and paste the lyrics from the internet manually.",
+        userAction: "manual_input_required",
       });
     }
   } catch (error) {
@@ -715,7 +717,9 @@ export const fetchSongLyrics = asyncHandler(async (req, res) => {
       success: false,
       lyrics: null,
       lyricsKeywords: [],
-      message: "Error fetching lyrics",
+      message:
+        "Error searching for lyrics. Please try again or paste the lyrics manually.",
+      userAction: "manual_input_required",
       error: error.message,
     });
   }

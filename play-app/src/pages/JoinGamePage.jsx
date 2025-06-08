@@ -51,137 +51,140 @@ const JoinGamePage = () => {
   const lastCheckTimeRef = useRef(0); // זמן הבדיקה האחרונה
 
   // פונקציה לבדיקת משחק קודם
-  const checkPreviousGame = useCallback((skipDebouncing = false) => {
-    console.log(
-      "🚀 checkPreviousGame called with skipDebouncing:",
-      skipDebouncing
-    );
-    console.log("🔍 Current state:", {
-      isCheckingRef: isCheckingRef.current,
-      showRejoinModal,
-      checkingPreviousGame,
-    });
+  const checkPreviousGame = useCallback(
+    (skipDebouncing = false) => {
+      console.log(
+        "🚀 checkPreviousGame called with skipDebouncing:",
+        skipDebouncing
+      );
+      console.log("🔍 Current state:", {
+        isCheckingRef: isCheckingRef.current,
+        showRejoinModal,
+        checkingPreviousGame,
+      });
 
-    // בדיקה אם כבר בתהליך בדיקה
-    if (isCheckingRef.current) {
-      console.log("🔍 Already checking, skipping...");
-      return;
-    }
+      // בדיקה אם כבר בתהליך בדיקה
+      if (isCheckingRef.current) {
+        console.log("🔍 Already checking, skipping...");
+        return;
+      }
 
-    // סימון שאנחנו בתהליך בדיקה
-    isCheckingRef.current = true;
-    setCheckingPreviousGame(true);
+      // סימון שאנחנו בתהליך בדיקה
+      isCheckingRef.current = true;
+      setCheckingPreviousGame(true);
 
-    // debouncing - מניעת בדיקות מהירות מדי (פחות מ-2 שניות)
-    // אבל רק אם לא דילגנו על זה במפורש
-    if (!skipDebouncing) {
-      const now = Date.now();
-      if (now - lastCheckTimeRef.current < 2000) {
-        console.log("🔍 Too soon since last check, skipping...");
+      // debouncing - מניעת בדיקות מהירות מדי (פחות מ-2 שניות)
+      // אבל רק אם לא דילגנו על זה במפורש
+      if (!skipDebouncing) {
+        const now = Date.now();
+        if (now - lastCheckTimeRef.current < 2000) {
+          console.log("🔍 Too soon since last check, skipping...");
+          isCheckingRef.current = false;
+          setCheckingPreviousGame(false);
+          return;
+        }
+        lastCheckTimeRef.current = now;
+      }
+
+      // בדיקת localStorage
+      const lastGameSession = localStorage.getItem("lastGameSession");
+      console.log("🔍 Checking for previous game session:", lastGameSession);
+
+      // אם אין נתונים ב-localStorage, אין צורך לבדוק
+      if (!lastGameSession) {
+        console.log("📭 No previous game session found");
         isCheckingRef.current = false;
         setCheckingPreviousGame(false);
         return;
       }
-      lastCheckTimeRef.current = now;
-    }
 
-    // בדיקת localStorage
-    const lastGameSession = localStorage.getItem("lastGameSession");
-    console.log("🔍 Checking for previous game session:", lastGameSession);
+      console.log("🔍 Starting previous game check...");
+      isCheckingRef.current = true;
+      setCheckingPreviousGame(true);
 
-    // אם אין נתונים ב-localStorage, אין צורך לבדוק
-    if (!lastGameSession) {
-      console.log("📭 No previous game session found");
-      isCheckingRef.current = false;
-      setCheckingPreviousGame(false);
-      return;
-    }
+      if (lastGameSession) {
+        try {
+          const gameData = JSON.parse(lastGameSession);
+          console.log("🔍 Found previous game session:", gameData);
 
-    console.log("🔍 Starting previous game check...");
-    isCheckingRef.current = true;
-    setCheckingPreviousGame(true);
+          // בדיקה אם המשחק לא ישן מדי (למשל, לא יותר מ-24 שעות)
+          const hoursSinceJoined =
+            (Date.now() - gameData.joinedAt) / (1000 * 60 * 60);
+          console.log("⏰ Hours since joined:", hoursSinceJoined);
 
-    if (lastGameSession) {
-      try {
-        const gameData = JSON.parse(lastGameSession);
-        console.log("🔍 Found previous game session:", gameData);
+          if (hoursSinceJoined > 24) {
+            console.log("🗑️ Previous game session too old, removing");
+            localStorage.removeItem("lastGameSession");
+            isCheckingRef.current = false;
+            setCheckingPreviousGame(false);
+            return;
+          }
 
-        // בדיקה אם המשחק לא ישן מדי (למשל, לא יותר מ-24 שעות)
-        const hoursSinceJoined =
-          (Date.now() - gameData.joinedAt) / (1000 * 60 * 60);
-        console.log("⏰ Hours since joined:", hoursSinceJoined);
+          // בדיקה עם השרת אם המשחק עדיין פעיל
+          console.log("📡 Checking with server for previous game:", {
+            roomCode: gameData.roomCode,
+            username: gameData.username,
+            timestamp: new Date().toISOString(),
+          });
 
-        if (hoursSinceJoined > 24) {
-          console.log("🗑️ Previous game session too old, removing");
+          const socket = getSocket();
+          console.log("📡 Socket connected?", socket.connected);
+          console.log("📡 Socket ID:", socket.id);
+
+          // בדיקה נוספת שהסוקט קיים ותקין
+          if (!socket) {
+            console.log("❌ Socket not available, skipping check");
+            isCheckingRef.current = false;
+            setCheckingPreviousGame(false);
+            return;
+          }
+
+          const checkWithServer = () => {
+            console.log("📤 About to emit checkPreviousGame with data:", {
+              roomCode: gameData.roomCode,
+              username: gameData.username,
+              socketId: socket.id,
+              socketConnected: socket.connected,
+            });
+            socket.emit("checkPreviousGame", {
+              roomCode: gameData.roomCode,
+              username: gameData.username,
+            });
+            console.log("✅ checkPreviousGame event emitted to server");
+          };
+
+          if (socket.connected) {
+            // הסוקט כבר מחובר
+            checkWithServer();
+          } else {
+            // נחכה לחיבור הסוקט
+            console.log("⏳ Waiting for socket to connect...");
+            socket.once("connect", () => {
+              console.log("🔗 Socket connected, now checking previous game");
+              checkWithServer();
+            });
+          }
+
+          // timeout אם השרת לא עונה תוך 5 שניות
+          setTimeout(() => {
+            if (isCheckingRef.current) {
+              console.log(
+                "⏰ Timeout waiting for server response, proceeding normally"
+              );
+              isCheckingRef.current = false;
+              setCheckingPreviousGame(false);
+            }
+          }, 5000);
+        } catch (error) {
+          console.error("❌ Error parsing previous game session:", error);
           localStorage.removeItem("lastGameSession");
           isCheckingRef.current = false;
           setCheckingPreviousGame(false);
-          return;
         }
-
-        // בדיקה עם השרת אם המשחק עדיין פעיל
-        console.log("📡 Checking with server for previous game:", {
-          roomCode: gameData.roomCode,
-          username: gameData.username,
-          timestamp: new Date().toISOString(),
-        });
-
-        const socket = getSocket();
-        console.log("📡 Socket connected?", socket.connected);
-        console.log("📡 Socket ID:", socket.id);
-
-        // בדיקה נוספת שהסוקט קיים ותקין
-        if (!socket) {
-          console.log("❌ Socket not available, skipping check");
-          isCheckingRef.current = false;
-          setCheckingPreviousGame(false);
-          return;
-        }
-
-        const checkWithServer = () => {
-          console.log("📤 About to emit checkPreviousGame with data:", {
-            roomCode: gameData.roomCode,
-            username: gameData.username,
-            socketId: socket.id,
-            socketConnected: socket.connected,
-          });
-          socket.emit("checkPreviousGame", {
-            roomCode: gameData.roomCode,
-            username: gameData.username,
-          });
-          console.log("✅ checkPreviousGame event emitted to server");
-        };
-
-        if (socket.connected) {
-          // הסוקט כבר מחובר
-          checkWithServer();
-        } else {
-          // נחכה לחיבור הסוקט
-          console.log("⏳ Waiting for socket to connect...");
-          socket.once("connect", () => {
-            console.log("🔗 Socket connected, now checking previous game");
-            checkWithServer();
-          });
-        }
-
-        // timeout אם השרת לא עונה תוך 5 שניות
-        setTimeout(() => {
-          if (isCheckingRef.current) {
-            console.log(
-              "⏰ Timeout waiting for server response, proceeding normally"
-            );
-            isCheckingRef.current = false;
-            setCheckingPreviousGame(false);
-          }
-        }, 5000);
-      } catch (error) {
-        console.error("❌ Error parsing previous game session:", error);
-        localStorage.removeItem("lastGameSession");
-        isCheckingRef.current = false;
-        setCheckingPreviousGame(false);
       }
-    }
-  }, []);
+    },
+    [checkingPreviousGame, showRejoinModal]
+  );
 
   // בדיקת משחק קודם כשהעמוד נטען - בדיקה מיידית אם יש localStorage
   useEffect(() => {
@@ -952,7 +955,17 @@ const JoinGamePage = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       if (timerInterval.current) clearInterval(timerInterval.current);
     };
-  }, []);
+  }, [
+    checkingPreviousGame,
+    gameStarted,
+    isGamePaused,
+    joined,
+    previousGameData,
+    roomCode,
+    showRejoinModal,
+    timeLeft,
+    username,
+  ]);
 
   // פונקציות לטיפול בהצעת חזרה למשחק
   const handleAcceptRejoin = () => {

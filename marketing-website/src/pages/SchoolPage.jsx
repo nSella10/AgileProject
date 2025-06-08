@@ -2,17 +2,16 @@
 import React from "react";
 import PageLayout from "../components/PageLayout";
 import { useNavigate } from "react-router-dom";
-import { 
-  FaGraduationCap, 
-  FaUsers, 
-  FaChalkboardTeacher, 
+import {
+  FaUsers,
+  FaChalkboardTeacher,
   FaBookOpen,
   FaMusic,
   FaTrophy,
   FaArrowRight,
   FaPlay,
   FaUserGraduate,
-  FaSchool
+  FaSchool,
 } from "react-icons/fa";
 
 const SchoolPage = () => {
@@ -22,23 +21,27 @@ const SchoolPage = () => {
     {
       icon: FaChalkboardTeacher,
       title: "Interactive Learning",
-      description: "Transform traditional music lessons into engaging, interactive experiences that students love."
+      description:
+        "Transform traditional music lessons into engaging, interactive experiences that students love.",
     },
     {
       icon: FaUsers,
       title: "Classroom Collaboration",
-      description: "Foster teamwork and collaboration through group music challenges and competitions."
+      description:
+        "Foster teamwork and collaboration through group music challenges and competitions.",
     },
     {
       icon: FaBookOpen,
       title: "Educational Content",
-      description: "Curated music content that aligns with educational standards and learning objectives."
+      description:
+        "Curated music content that aligns with educational standards and learning objectives.",
     },
     {
       icon: FaTrophy,
       title: "Progress Tracking",
-      description: "Monitor student progress and engagement with detailed analytics and reports."
-    }
+      description:
+        "Monitor student progress and engagement with detailed analytics and reports.",
+    },
   ];
 
   const benefits = [
@@ -47,7 +50,7 @@ const SchoolPage = () => {
     "Encourage collaborative learning",
     "Make music theory fun and accessible",
     "Support diverse learning styles",
-    "Build confidence in musical abilities"
+    "Build confidence in musical abilities",
   ];
 
   return (
@@ -67,7 +70,8 @@ const SchoolPage = () => {
                 🎵 Guessify! at School
               </h1>
               <p className="text-xl lg:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
-                Transform classroom learning with interactive music education that engages students and enhances their musical journey.
+                Transform classroom learning with interactive music education
+                that engages students and enhances their musical journey.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
@@ -95,7 +99,8 @@ const SchoolPage = () => {
                 Revolutionize Music Education
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Discover how Guessify! transforms traditional music lessons into dynamic, interactive learning experiences.
+                Discover how Guessify! transforms traditional music lessons into
+                dynamic, interactive learning experiences.
               </p>
             </div>
 
@@ -113,9 +118,7 @@ const SchoolPage = () => {
                     <h3 className="text-xl font-bold text-gray-900 mb-3">
                       {feature.title}
                     </h3>
-                    <p className="text-gray-600">
-                      {feature.description}
-                    </p>
+                    <p className="text-gray-600">{feature.description}</p>
                   </div>
                 );
               })}
@@ -132,7 +135,8 @@ const SchoolPage = () => {
                   Educational Benefits
                 </h2>
                 <p className="text-xl text-gray-600 mb-8">
-                  Guessify! provides measurable educational outcomes that enhance student learning and engagement.
+                  Guessify! provides measurable educational outcomes that
+                  enhance student learning and engagement.
                 </p>
                 <div className="space-y-4">
                   {benefits.map((benefit, index) => (
@@ -140,7 +144,9 @@ const SchoolPage = () => {
                       <div className="bg-green-500 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
                         <FaPlay className="text-white text-xs" />
                       </div>
-                      <span className="text-gray-700 font-medium">{benefit}</span>
+                      <span className="text-gray-700 font-medium">
+                        {benefit}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -152,7 +158,8 @@ const SchoolPage = () => {
                     Ready to Get Started?
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    Join thousands of educators who are already using Guessify! to enhance their music programs.
+                    Join thousands of educators who are already using Guessify!
+                    to enhance their music programs.
                   </p>
                   <button
                     onClick={() => navigate("/register")}
@@ -175,7 +182,8 @@ const SchoolPage = () => {
               Transform Your Music Classroom Today
             </h2>
             <p className="text-xl text-blue-100 mb-8">
-              Give your students the engaging, interactive music education they deserve.
+              Give your students the engaging, interactive music education they
+              deserve.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button

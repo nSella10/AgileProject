@@ -3,11 +3,9 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaHome,
-  FaUsers,
   FaHeart,
   FaBirthdayCake,
   FaMusic,
-  FaTrophy,
   FaArrowRight,
   FaPlay,
   FaUserFriends,

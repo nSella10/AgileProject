@@ -92,8 +92,7 @@ const LetterClickInput = ({
     }
     if (!firstEmptyDash) return;
 
-    // עדכון המקפים - שמירה על האות המקורית
-    const originalChar = firstEmptyDash.char;
+    // עדכון המקפים
     const letterToPlace = letter.letter;
 
     const newDashes = songDashes.map((dash) =>

@@ -26,7 +26,9 @@ jobs:
 
       - name: Build project
         working-directory: ./play-app
-        run: CI='' npm run build
+        env:
+          CI: false
+        run: npm run build
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1

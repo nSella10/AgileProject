@@ -41,7 +41,6 @@ import socketManager from "./sockets/index.js";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
-import fs from "fs";
 
 // 🛠 הגדרת __dirname ל-ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -88,21 +87,23 @@ app.use("/api/games", gameRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/lyrics", lyricsRoutes);
 
-// 🧱 Serve React frontend if build exists
-const staticPath = path.join(__dirname, "../frontend/build");
-
-if (fs.existsSync(staticPath)) {
-  console.log("✅ Static build folder found at:", staticPath);
-  app.use(express.static(staticPath));
-  app.get("*", (req, res) =>
-    res.sendFile(path.resolve(staticPath, "index.html"))
-  );
-} else {
-  console.warn("⚠️ No frontend build found – skipping frontend serving.");
-  app.get("/", (req, res) => {
-    res.send("🎵 Music Game API is running (no frontend build)");
+// 🧱 API-only server - Frontend apps are served separately from S3
+// No longer serving static files - apps are deployed to:
+// - create.guessifyapp.com (S3)
+// - play.guessifyapp.com (S3)
+// - guessifyapp.com (S3)
+app.get("/", (_req, res) => {
+  res.json({
+    message: "🎵 Guessify API Server",
+    status: "running",
+    version: "2.0.0",
+    apps: {
+      create: "https://create.guessifyapp.com",
+      play: "https://play.guessifyapp.com",
+      marketing: "https://guessifyapp.com",
+    },
   });
-}
+});
 
 // ❗ Error handlers
 app.use(notFound);

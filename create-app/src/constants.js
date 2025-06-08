@@ -1,4 +1,4 @@
-// src/constants.js - Create App Constants.
+// src/constants.js - Create App Constants
 export const BASE_URL =
   process.env.NODE_ENV === "development"
     ? "http://localhost:8000"

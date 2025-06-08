@@ -26,7 +26,7 @@ jobs:
 
       - name: Build project
         working-directory: ./marketing-website
-        run: npm run build
+        run: CI='' npm run build
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1

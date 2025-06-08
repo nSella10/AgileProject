@@ -25,7 +25,7 @@ jobs:
         working-directory: create-app
         run: |
           npm install
-          npm run build
+          CI='' npm run build
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master

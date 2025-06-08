@@ -7,6 +7,8 @@ const socketManager = (io) => {
   io.on("connection", (socket) => {
     console.log(`📡 New client connected: ${socket.id}`);
     console.log(`🔗 Total connected clients: ${io.engine.clientsCount}`);
+    console.log(`🔍 Socket auth:`, socket.handshake.auth);
+    console.log(`🔍 Socket query:`, socket.handshake.query);
 
     handleRoomEvents(io, socket);
     handlePlayerEvents(io, socket);

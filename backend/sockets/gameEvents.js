@@ -489,31 +489,16 @@ function startRound(io, roomCode) {
     },
   });
 
-  // נתחיל טיימר מיד עם השהיה של משך האודיו
+  // לא נתחיל טיימר מיד - נחכה לאירוע audioEnded מהקליינט
   console.log(
-    `📤 Starting timer with delay for audio duration: ${duration}ms, then guessTimeLimit: ${room.game.guessTimeLimit}s`
+    `📤 Audio sent to client, waiting for audioEnded event to start timer`
+  );
+  console.log(
+    `⏱️ Duration: ${duration}ms, then guessTimeLimit: ${room.game.guessTimeLimit}s`
   );
 
-  // נתחיל טיימר שיתחיל לספור רק אחרי שהאודיו נגמר
-  const totalTime = duration + room.game.guessTimeLimit * 1000;
-  const timerDeadline = Date.now() + totalTime;
-
-  // הגדרת זמן התחלת הסיבוב לחישוב ניקוד - יתחיל אחרי האודיו
-  room.roundStartTime = Date.now() + duration;
-  room.roundDeadline = timerDeadline;
-
-  // שליחת טיימר שיתחיל לספור אחרי שהאודיו נגמר
-  setTimeout(() => {
-    io.to(roomCode).emit("timerStarted", {
-      roundDeadline: Date.now() + room.game.guessTimeLimit * 1000,
-      guessTimeLimit: room.game.guessTimeLimit,
-    });
-  }, duration);
-
-  // התחלת הטיימר בשרת - יסתיים אחרי האודיו + זמן הניחוש
-  room.currentTimeout = setTimeout(() => {
-    finishRound(io, roomCode);
-  }, totalTime);
+  // לא נגדיר טיימר כאן - נחכה לאירוע audioEnded
+  // הטיימר יתחיל רק כשהקליינט ישלח audioEnded
 }
 
 export function finishRound(io, roomCode) {

@@ -1,15 +1,9 @@
+// This file will be replaced with three separate App.jsx files for each application
+// This is a temporary placeholder during the architecture split
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
-import CreateGamePage from "./pages/CreateGamePage";
-import EditGamePage from "./pages/EditGamePage";
-import MyGamesPage from "./pages/MyGamesPage";
-import LaunchGamePage from "./pages/LaunchGamePage";
-import AnalyticsPage from "./pages/AnalyticsPage";
-import FinalLeaderboardPage from "./pages/FinalLeaderboardPage";
 import AboutPage from "./pages/AboutPage";
 import HelpPage from "./pages/HelpPage";
 import BlogPage from "./pages/BlogPage";
@@ -24,22 +18,17 @@ import WorkPage from "./pages/WorkPage";
 import HomePage2 from "./pages/HomePage2";
 import CommunityPage from "./pages/CommunityPage";
 
-import PrivateRoute from "./components/PrivateRoute";
-import RedirectIfLoggedIn from "./components/RedirectIfLoggedIn";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFoundPage from "./pages/NotFoundPage";
-import JoinGamePage from "./pages/JoinGamePage";
 
+// Marketing Website App - Static content only
 function App() {
   return (
     <Router>
       <ScrollToTop />
       <Routes>
-        {/* Public */}
-        <Route element={<RedirectIfLoggedIn />}>
-          <Route path="/" element={<HomePage />} />
-        </Route>
-        <Route path="/join" element={<JoinGamePage />} />
+        {/* Marketing Website Routes */}
+        <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/help" element={<HelpPage />} />
         <Route path="/blog" element={<BlogPage />} />
@@ -53,25 +42,6 @@ function App() {
         <Route path="/work" element={<WorkPage />} />
         <Route path="/home" element={<HomePage2 />} />
         <Route path="/community" element={<CommunityPage />} />
-        <Route element={<RedirectIfLoggedIn />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-        </Route>
-
-        {/* Protected */}
-        <Route element={<PrivateRoute />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/create" element={<CreateGamePage />} />
-          <Route path="/edit-game/:gameId" element={<EditGamePage />} />
-          <Route path="/mygames" element={<MyGamesPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/launch/:gameId" element={<LaunchGamePage />} />
-          <Route
-            path="/final-leaderboard"
-            element={<FinalLeaderboardPage />}
-          />{" "}
-          {/* ✅ חדש */}
-        </Route>
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

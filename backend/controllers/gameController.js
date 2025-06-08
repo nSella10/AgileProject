@@ -1,9 +1,7 @@
 import asyncHandler from "../middlewares/asyncHandler.js";
 import Game from "../models/Game.js";
-import {
-  fetchLyricsFromGenius,
-  extractKeywordsFromLyrics,
-} from "../services/lyricsService.js";
+import { fetchLyricsFromGenius } from "../services/lyricsService.js";
+import { extractKeywordsFromLyrics } from "../services/lyricsDatabaseService.js";
 
 // @desc    Create a new game (with song data from iTunes API)
 // @route   POST /api/games
@@ -82,6 +80,7 @@ export const createGame = asyncHandler(async (req, res) => {
       // ניסיון לקבל מילות שיר מ-Genius API
       try {
         const lyrics = await fetchLyricsFromGenius(
+          songData.trackId,
           songData.title,
           songData.artist
         );
@@ -285,6 +284,7 @@ export const updateGame = asyncHandler(async (req, res) => {
           if (!songData.lyrics || songData.lyrics.length === 0) {
             try {
               const lyrics = await fetchLyricsFromGenius(
+                songData.trackId,
                 songData.title,
                 songData.artist
               );

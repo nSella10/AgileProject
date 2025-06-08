@@ -1,23 +1,83 @@
-# 🎵 Guessify - Music Guessing Game
+# 🎵 Guessify - Music Guessing Game Platform
 
-Guessify is a real-time multiplayer music quiz web application, inspired by Kahoot, where a host can create custom games based on song snippets. Players join via mobile and try to guess the song being played.
+Guessify is a real-time multiplayer music quiz platform split into three separate applications for optimal user experience and scalability.
 
-## 🧠 Features
+## 🏗️ New Architecture
 
-- 🎧 Custom game creation with MP3 uploads
-- 📲 Players join via mobile and guess songs in real-time
-- 🕹️ Host controls the game and sees live updates
-- 🔒 JWT-based authentication & protected routes
-- 🔊 WebSocket communication for synchronization
+The platform is now divided into three separate applications:
 
-## 📂 Folder Structure
+### 🌐 Marketing Website (`marketing-website/`)
 
+- Static marketing content and landing pages
+- Company information, pricing, contact
+- Redirects users to Create and Play apps
+- **URL:** `guessifyapp.com` (production) | `localhost:3000` (dev)
+
+### ⚙️ Create App (`create-app/`)
+
+- Game creation and management platform
+- User authentication and dashboard
+- Analytics and game hosting
+- **URL:** `create.guessifyapp.com` (production) | `localhost:3001` (dev)
+
+### 🎮 Play App (`play-app/`)
+
+- Game participation platform
+- No authentication required
+- Mobile-optimized for players
+- **URL:** `play.guessifyapp.com` (production) | `localhost:3002` (dev)
+
+### 🔧 Backend (`backend/`)
+
+- Shared API server for all applications
+- MongoDB database and WebSocket server
+- **URL:** `api.guessifyapp.com` (production) | `localhost:8000` (dev)
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 16+
+- MongoDB
+- npm or yarn
+
+### Run All Applications
+
+```bash
+# Make the script executable
+chmod +x start-all-apps.sh
+
+# Start all applications
+./start-all-apps.sh
 ```
-/frontend        → React frontend
-/backend         → Node/Express backend
-/backend/models  → MongoDB schemas
-/backend/uploads → MP3 song uploads
-/backend/sockets → WebSocket logic
+
+This will start:
+
+- Backend server on port 8000
+- Marketing website on port 3000
+- Create app on port 3001
+- Play app on port 3002
+
+### Manual Setup
+
+```bash
+# Install dependencies for all apps
+cd marketing-website && npm install && cd ..
+cd create-app && npm install && cd ..
+cd play-app && npm install && cd ..
+cd backend && npm install && cd ..
+
+# Start backend
+cd backend && npm run dev &
+
+# Start marketing website
+cd marketing-website && npm start &
+
+# Start create app
+cd create-app && npm start &
+
+# Start play app
+cd play-app && npm start &
 ```
 
 ## 🛠 Getting Started

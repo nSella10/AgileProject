@@ -1,50 +1,33 @@
-import { fetchLyricsWithWebScraping } from "./webScrapingService.js";
+import {
+  findLyricsInDatabase,
+  addLyricsToDatabase,
+  extractKeywordsFromLyrics,
+} from "./lyricsDatabaseService.js";
 
 /**
- * קבלת מילות שיר מ-APIs שונים ו-Web Scraping
+ * קבלת מילות שיר ממאגר הנתונים
  * @param {string} title - שם השיר
  * @param {string} artist - שם הזמר
- * @returns {Promise<string|null>} - מילות השיר או null אם לא נמצא
+ * @returns {Promise<Object|null>} - מילות השיר או null אם לא נמצא
  */
-export async function fetchLyricsFromGenius(title, artist) {
+export async function fetchLyricsFromGenius(trackId, title, artist) {
   try {
-    console.log(`🎵 Searching lyrics for: "${title}" by "${artist}"`);
+    console.log(
+      `🎵 Searching lyrics for: "${title}" by "${artist}" (trackId: ${trackId})`
+    );
 
-    // ניסיון ראשון: Web Scraping (שירונט לעברית, Genius לאנגלית)
-    const webScrapingResult = await fetchLyricsWithWebScraping(title, artist);
-    if (webScrapingResult) {
-      console.log(
-        `✅ Found lyrics via Web Scraping for: "${title}" by "${artist}"`
-      );
-      return webScrapingResult;
+    // ניסיון ראשון: חיפוש במאגר הנתונים שלנו
+    const databaseResult = await findLyricsInDatabase(trackId, title, artist);
+    if (databaseResult) {
+      console.log(`✅ Found lyrics in database for: "${title}" by "${artist}"`);
+      return databaseResult.lyrics;
     }
 
-    // ניסיון שני: Lyrics.ovh API (fallback)
-    const lyricsOvhResult = await fetchFromLyricsOvh(title, artist);
-    if (lyricsOvhResult) {
-      console.log(
-        `✅ Found lyrics via Lyrics.ovh for: "${title}" by "${artist}"`
-      );
-      return lyricsOvhResult;
-    }
-
-    // ניסיון שלישי: Musixmatch API (fallback)
-    const musixmatchResult = await fetchFromMusixmatch(title, artist);
-    if (musixmatchResult) {
-      console.log(
-        `✅ Found lyrics via Musixmatch for: "${title}" by "${artist}"`
-      );
-      return musixmatchResult;
-    }
-
-    // ניסיון רביעי: שירים מוכרים מוכנים מראש
-    const fallbackResult = tryFallbackSongs(title, artist);
-    if (fallbackResult) {
-      console.log(`✅ Found lyrics in fallback for: "${title}" by "${artist}"`);
-      return fallbackResult;
-    }
-
-    console.log(`❌ No lyrics found anywhere for: "${title}" by "${artist}"`);
+    // אם לא נמצא במאגר - נחזיר null כדי שהמשתמש יוכל להוסיף ידנית
+    console.log(
+      `❌ No lyrics found in database for: "${title}" by "${artist}"`
+    );
+    console.log(`💡 User will be prompted to add lyrics manually`);
     return null;
   } catch (error) {
     console.error(
@@ -174,245 +157,58 @@ function tryFallbackSongs(title, artist) {
 }
 
 /**
- * חילוץ מילות מפתח ממילות השיר
- * @param {string} lyrics - מילות השיר המלאות
- * @returns {Array<string>} - מערך של מילות מפתח
+ * הוספת מילות שיר חדשות למאגר על ידי משתמש
+ * @param {string} title - שם השיר
+ * @param {string} artist - שם הזמר
+ * @param {string} lyrics - מילות השיר
+ * @param {string} userId - מזהה המשתמש
+ * @param {string} language - שפת השיר (hebrew/english/other)
+ * @returns {Promise<Object>} - השיר שנוסף עם מילות מפתח
  */
-export function extractKeywordsFromLyrics(lyrics) {
-  if (!lyrics || typeof lyrics !== "string") {
-    return [];
-  }
-
+export async function addUserLyrics(
+  trackId,
+  title,
+  artist,
+  lyrics,
+  userId,
+  language = "hebrew",
+  previewUrl = null,
+  artworkUrl = null
+) {
   try {
-    // ניקוי מילות השיר מתגיות HTML ותווים מיוחדים
-    const cleanLyrics = lyrics
-      .replace(/\[.*?\]/g, "") // הסרת תגיות כמו [Verse 1], [Chorus]
-      .replace(/\(.*?\)/g, "") // הסרת הערות בסוגריים
-      .replace(/[^\w\s\u0590-\u05FF]/g, " ") // השארת רק אותיות, מספרים ורווחים (כולל עברית)
-      .replace(/\s+/g, " ") // החלפת רווחים מרובים ברווח יחיד
-      .trim()
-      .toLowerCase();
+    console.log(
+      `📝 User adding lyrics for: "${title}" by "${artist}" (trackId: ${trackId})`
+    );
 
-    // פיצול למילים
-    const words = cleanLyrics.split(/\s+/);
-
-    // סינון מילים
-    const filteredWords = words.filter((word) => {
-      // מילים באורך 2+ תווים
-      if (word.length < 2) return false;
-
-      // הסרת מילות עזר נפוצות באנגלית
-      const englishStopWords = [
-        "the",
-        "and",
-        "or",
-        "but",
-        "in",
-        "on",
-        "at",
-        "to",
-        "for",
-        "of",
-        "with",
-        "by",
-        "is",
-        "are",
-        "was",
-        "were",
-        "be",
-        "been",
-        "have",
-        "has",
-        "had",
-        "do",
-        "does",
-        "did",
-        "will",
-        "would",
-        "could",
-        "should",
-        "may",
-        "might",
-        "can",
-        "must",
-        "shall",
-        "this",
-        "that",
-        "these",
-        "those",
-        "i",
-        "you",
-        "he",
-        "she",
-        "it",
-        "we",
-        "they",
-        "me",
-        "him",
-        "her",
-        "us",
-        "them",
-        "my",
-        "your",
-        "his",
-        "her",
-        "its",
-        "our",
-        "their",
-        "a",
-        "an",
-        "as",
-        "if",
-        "when",
-        "where",
-        "why",
-        "how",
-        "what",
-        "who",
-        "which",
-        "than",
-        "so",
-        "too",
-        "very",
-        "just",
-        "now",
-        "then",
-        "here",
-        "there",
-        "up",
-        "down",
-        "out",
-        "off",
-        "over",
-        "under",
-        "again",
-        "further",
-        "once",
-        "more",
-        "most",
-        "other",
-        "some",
-        "any",
-        "each",
-        "every",
-        "all",
-        "both",
-        "few",
-        "many",
-        "much",
-        "several",
-        "own",
-        "same",
-        "such",
-        "only",
-        "first",
-        "last",
-        "next",
-        "previous",
-        "new",
-        "old",
-        "good",
-        "bad",
-        "big",
-        "small",
-        "long",
-        "short",
-        "high",
-        "low",
-        "right",
-        "left",
-        "yes",
-        "no",
-        "not",
-        "never",
-        "always",
-        "sometimes",
-        "often",
-        "usually",
-        "maybe",
-        "perhaps",
-      ];
-
-      // הסרת מילות עזר נפוצות בעברית
-      const hebrewStopWords = [
-        "את",
-        "של",
-        "על",
-        "אל",
-        "מן",
-        "עם",
-        "בין",
-        "לפני",
-        "אחרי",
-        "תחת",
-        "מעל",
-        "ליד",
-        "אצל",
-        "כמו",
-        "בלי",
-        "זה",
-        "זו",
-        "זאת",
-        "הוא",
-        "היא",
-        "הם",
-        "הן",
-        "אני",
-        "אתה",
-        "את",
-        "אנחנו",
-        "אתם",
-        "אתן",
-        "שלי",
-        "שלך",
-        "שלו",
-        "שלה",
-        "שלנו",
-        "שלכם",
-        "שלהם",
-        "כל",
-        "כמה",
-        "הרבה",
-        "מעט",
-        "יותר",
-        "פחות",
-        "גם",
-        "רק",
-        "אבל",
-        "או",
-        "כי",
-        "אם",
-        "מתי",
-        "איך",
-        "למה",
-        "מה",
-        "מי",
-        "איפה",
-        "כן",
-        "לא",
-        "אולי",
-        "בטח",
-        "אמת",
-        "שקר",
-      ];
-
-      if (englishStopWords.includes(word) || hebrewStopWords.includes(word)) {
-        return false;
-      }
-
-      return true;
+    // הוספה למאגר
+    const newSong = await addLyricsToDatabase({
+      trackId,
+      title,
+      artist,
+      lyrics,
+      userId,
+      language,
+      previewUrl,
+      artworkUrl,
     });
 
-    // הסרת כפילויות והחזרת מילות מפתח ייחודיות
-    const uniqueKeywords = [...new Set(filteredWords)];
+    // חילוץ מילות מפתח
+    const keywords = extractKeywordsFromLyrics(lyrics);
 
-    // מגבלה של 50 מילות מפתח מקסימום (למניעת עומס)
-    const limitedKeywords = uniqueKeywords.slice(0, 50);
+    console.log(`✅ Successfully added lyrics to database: ${newSong._id}`);
+    console.log(`🔑 Extracted ${keywords.length} keywords from lyrics`);
 
-    console.log(`🔑 Extracted ${limitedKeywords.length} keywords from lyrics`);
-    return limitedKeywords;
+    return {
+      lyrics,
+      keywords,
+      source: "user_added",
+      songId: newSong._id,
+      message: "Lyrics added successfully to database",
+    };
   } catch (error) {
-    console.error("❌ Error extracting keywords from lyrics:", error.message);
-    return [];
+    console.error(`❌ Error adding user lyrics:`, error.message);
+    throw error;
   }
 }
+
+// הפונקציה extractKeywordsFromLyrics מיובאת מ-lyricsDatabaseService.js

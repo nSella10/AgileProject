@@ -16,6 +16,19 @@ const PlayerAnswersScreen = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
+    // עצירת כל השמע הקיים מיד כשנכנסים לקומפוננטה
+    console.log(
+      "🛑 PlayerAnswers - Stopping all existing audio immediately on mount"
+    );
+
+    // עצירת השמע המשותף אם הוא מתנגן
+    if (sharedAudioRef && !sharedAudioRef.paused) {
+      console.log("🛑 PlayerAnswers - Stopping shared audio on mount");
+      sharedAudioRef.onended = null;
+      sharedAudioRef.pause();
+      sharedAudioRef.currentTime = 0;
+    }
+
     // השמעת הפזמון ברקע כשמציגים את התשובות
     if (songPreviewUrl) {
       console.log(

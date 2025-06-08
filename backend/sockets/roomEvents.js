@@ -4,9 +4,12 @@ import rooms from "./roomStore.js"; // ✅ שימוש במפה גלובלית מ
 
 const handleRoomEvents = (io, socket) => {
   socket.on("createRoom", async ({ gameId }) => {
+    console.log("🎮 Received createRoom request with gameId:", gameId);
+    console.log("🎮 Socket ID:", socket.id);
     try {
       const game = await Game.findById(gameId);
       if (!game) {
+        console.log("❌ Game not found for gameId:", gameId);
         socket.emit("roomJoinError", "Game not found");
         return;
       }
@@ -47,6 +50,9 @@ const handleRoomEvents = (io, socket) => {
       socket.join(roomCode);
 
       // שולח למארגן את הקוד
+      console.log(
+        `🎮 About to emit roomCreated with roomCode: ${roomCode} to socket: ${socket.id}`
+      );
       socket.emit("roomCreated", { roomCode });
       console.log(`🎮 Room created: ${roomCode} by ${socket.id}`);
     } catch (err) {

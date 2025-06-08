@@ -65,10 +65,16 @@ const InterimLeaderboardScreen = ({
       }
     }
 
-    // ניקוי כשיוצאים מהקומפוננטה - לא עוצרים את השמע כי הוא משותף
+    // ניקוי כשיוצאים מהקומפוננטה - עוצרים את השמע כדי למנוע חפיפה
     return () => {
-      // לא עוצרים את השמע כי הוא עובר לקומפוננטה הבאה
-      console.log("🔄 Leaderboard cleanup - keeping audio for next component");
+      console.log("🔄 Leaderboard cleanup - stopping audio to prevent overlap");
+      // עצירת השמע המקומי
+      if (audioRef.current) {
+        audioRef.current.onended = null;
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      // לא עוצרים את sharedAudioRef כי הוא עובר לקומפוננטה הבאה
     };
   }, [songPreviewUrl, sharedAudioRef, setSharedAudioRef]);
 

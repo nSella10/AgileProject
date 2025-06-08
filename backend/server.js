@@ -35,6 +35,7 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import gameRoutes from "./routes/gameRoutes.js";
 import lessonRoutes from "./routes/lessonRoutes.js";
+import lyricsRoutes from "./routes/lyricsRoutes.js";
 import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 import socketManager from "./sockets/index.js";
 import cookieParser from "cookie-parser";
@@ -56,8 +57,16 @@ const PORT = process.env.PORT || 8000;
 // 🌐 CORS לפי סביבה
 const allowedOrigins =
   process.env.NODE_ENV === "production"
-    ? ["https://www.guessifyapp.com"]
-    : ["http://localhost:3000"];
+    ? [
+        "https://www.guessifyapp.com",
+        "https://create.guessifyapp.com",
+        "https://play.guessifyapp.com",
+      ]
+    : [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+      ];
 
 const corsOptions = {
   origin: allowedOrigins,
@@ -77,6 +86,7 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api/games", gameRoutes);
 app.use("/api/lessons", lessonRoutes);
+app.use("/api/lyrics", lyricsRoutes);
 
 // 🧱 Serve React frontend if build exists
 const staticPath = path.join(__dirname, "../frontend/build");

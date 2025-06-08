@@ -1,18 +1,36 @@
 {
-  "name": "music-app",
-  "version": "1.0.0",
+  "name": "guessify-platform",
+  "version": "2.0.0",
+  "description": "Music guessing game platform - Multi-app architecture",
   "main": "index.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "npm run dev --prefix backend",
-    "client": "npm start --prefix frontend",
-    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend"
+    "start": "./start-all-apps.sh",
+    "install-all": "npm run install-marketing && npm run install-create && npm run install-play && npm run install-backend",
+    "install-marketing": "cd marketing-website && npm install",
+    "install-create": "cd create-app && npm install",
+    "install-play": "cd play-app && npm install",
+    "install-backend": "cd backend && npm install",
+    "dev-frontend": "concurrently \"npm run dev-marketing\" \"npm run dev-create\" \"npm run dev-play\"",
+    "dev-marketing": "cd marketing-website && npm start",
+    "dev-create": "cd create-app && npm start",
+    "dev-play": "cd play-app && npm start",
+    "dev-backend": "cd backend && npm run dev",
+    "build-all": "npm run build-marketing && npm run build-create && npm run build-play",
+    "build-marketing": "cd marketing-website && npm run build",
+    "build-create": "cd create-app && npm run build",
+    "build-play": "cd play-app && npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "music",
+    "game",
+    "quiz",
+    "react",
+    "node",
+    "microservices",
+    "multi-app"
+  ],
+  "author": "Guessify Team",
+  "license": "MIT",
   "devDependencies": {
     "concurrently": "^9.1.2"
   }

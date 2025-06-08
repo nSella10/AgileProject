@@ -1,12 +1,12 @@
 // src/socket.js - Play App Socket Connection
 import { io } from "socket.io-client";
-import { SOCKET_URL } from "./constants";
+import { BASE_URL } from "./constants";
 
 let socket = null;
 
 export const getSocket = ({ userId = null } = {}) => {
   if (!socket) {
-    socket = io(SOCKET_URL, {
+    socket = io(BASE_URL, {
       withCredentials: true,
       auth: { userId }, // תמיד שלח auth עם userId (גם null)
     });

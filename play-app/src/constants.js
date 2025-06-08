@@ -1,4 +1,5 @@
-// src/constants.js - Play App Constants.
+// src/constants.js - Play App Constants
+// Updated: Fixed backend URL for production deployment.
 export const BASE_URL =
   process.env.NODE_ENV === "development"
     ? "http://localhost:8000"

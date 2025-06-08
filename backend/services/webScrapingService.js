@@ -1,9 +1,126 @@
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
+import {
+  getCurrentConfig,
+  getRandomUserAgent,
+  getRandomDelay,
+  logCurrentConfig,
+} from "../config/webScraping.js";
 
 /**
  * שירות לחילוץ מילות שיר מאתרים שונים
+ * עם הגנה מפני זיהוי בוטים ב-production
  */
+
+// User-Agent strings are now managed in the configuration file
+
+/**
+ * יצירת headers מציאותיים לבקשות HTTP
+ */
+function createRealisticHeaders(referer = null) {
+  const userAgent = getRandomUserAgent();
+  const isChrome = userAgent.includes("Chrome");
+  const isFirefox = userAgent.includes("Firefox");
+  const isSafari =
+    userAgent.includes("Safari") && !userAgent.includes("Chrome");
+
+  const headers = {
+    "User-Agent": userAgent,
+    Accept:
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "gzip, deflate, br",
+    DNT: "1",
+    Connection: "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Cache-Control": "max-age=0",
+  };
+
+  // הוספת headers ספציפיים לדפדפן
+  if (isChrome) {
+    headers["Sec-Fetch-Dest"] = "document";
+    headers["Sec-Fetch-Mode"] = "navigate";
+    headers["Sec-Fetch-Site"] = referer ? "same-origin" : "none";
+    headers["Sec-Fetch-User"] = "?1";
+    headers["sec-ch-ua"] =
+      '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"';
+    headers["sec-ch-ua-mobile"] = "?0";
+    headers["sec-ch-ua-platform"] = '"Windows"';
+  }
+
+  if (referer) {
+    headers["Referer"] = referer;
+  }
+
+  return headers;
+}
+
+/**
+ * השהיה אקראית למניעת זיהוי בוט
+ */
+async function randomDelay(minMs = null, maxMs = null) {
+  const config = getCurrentConfig();
+
+  // אם לא הופעלה הגנה מפני בוטים, לא נחכה
+  if (!config.enableAntiBotProtection) {
+    return;
+  }
+
+  const delay = getRandomDelay(minMs, maxMs);
+
+  if (delay > 0) {
+    console.log(
+      `⏳ Waiting ${delay}ms to avoid bot detection (${
+        config.isProduction ? "PRODUCTION" : "DEV"
+      } mode)...`
+    );
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+}
+
+/**
+ * ביצוע בקשת HTTP עם retry logic
+ */
+async function fetchWithRetry(url, options = {}, maxRetries = null) {
+  const config = getCurrentConfig();
+  const actualMaxRetries = maxRetries || config.retries;
+  for (let attempt = 1; attempt <= actualMaxRetries; attempt++) {
+    try {
+      console.log(`📡 Attempt ${attempt}/${actualMaxRetries}: ${url}`);
+
+      const response = await fetch(url, {
+        ...options,
+        timeout: config.timeout,
+      });
+
+      if (response.ok) {
+        return response;
+      }
+
+      console.log(`❌ HTTP ${response.status} on attempt ${attempt}`);
+
+      // אם זה 403/429, נחכה יותר זמן
+      if (response.status === 403 || response.status === 429) {
+        const waitTime = Math.pow(2, attempt) * 2000; // Exponential backoff
+        console.log(
+          `🚫 Bot detected (${response.status}), waiting ${waitTime}ms...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
+      }
+    } catch (error) {
+      console.log(`❌ Network error on attempt ${attempt}: ${error.message}`);
+
+      if (attempt === actualMaxRetries) {
+        throw error;
+      }
+
+      // חכה לפני ניסיון נוסף
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+    }
+  }
+
+  throw new Error(`Failed after ${actualMaxRetries} attempts`);
+}
 
 /**
  * פונקציה פשוטה לחילוץ מילות שיר מ-Shironet
@@ -13,11 +130,14 @@ import * as cheerio from "cheerio";
  */
 export async function fetchLyricsFromShironetSimple(title, artist) {
   try {
-    console.log(`🎵 Simple Shironet search for: "${title}" by "${artist}"`);
+    console.log(`🎵 Enhanced Shironet search for: "${title}" by "${artist}"`);
 
     // ניקוי שם השיר והזמר לחיפוש
     const cleanTitle = cleanSearchTerm(title);
     const cleanArtist = cleanSearchTerm(artist);
+
+    // השהיה ראשונית למניעת זיהוי בוט
+    await randomDelay(500, 1500);
 
     // נסיון ראשון - חיפוש רק עם שם השיר
     let searchUrl = `https://shironet.mako.co.il/search?q=${encodeURIComponent(
@@ -25,14 +145,8 @@ export async function fetchLyricsFromShironetSimple(title, artist) {
     )}`;
     console.log(`📡 Searching Shironet (title only): ${searchUrl}`);
 
-    const searchResponse = await fetch(searchUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7",
-      },
+    const searchResponse = await fetchWithRetry(searchUrl, {
+      headers: createRealisticHeaders(),
     });
 
     if (!searchResponse.ok) {
@@ -64,28 +178,20 @@ export async function fetchLyricsFromShironetSimple(title, artist) {
     if (!firstResult.length) {
       console.log(`❌ No results found with title only, trying with artist...`);
 
+      // השהיה לפני ניסיון שני
+      await randomDelay(1000, 2000);
+
       // נסיון שני - חיפוש עם שם השיר והזמר
       searchUrl = `https://shironet.mako.co.il/search?q=${encodeURIComponent(
         cleanTitle + " " + cleanArtist
       )}`;
       console.log(`📡 Searching Shironet (title + artist): ${searchUrl}`);
 
-      const searchResponse2 = await fetch(searchUrl, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          Accept:
-            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7",
-        },
+      const searchResponse2 = await fetchWithRetry(searchUrl, {
+        headers: createRealisticHeaders(searchUrl),
       });
 
-      if (!searchResponse2.ok) {
-        console.log(
-          `❌ Second Shironet search failed: ${searchResponse2.status}`
-        );
-        return null;
-      }
+      // searchResponse2 is already validated by fetchWithRetry
 
       const searchHtml2 = await searchResponse2.text();
       const $2 = cheerio.load(searchHtml2);
@@ -133,22 +239,13 @@ export async function fetchLyricsFromShironetSimple(title, artist) {
       : `https://shironet.mako.co.il${songUrl}`;
     console.log(`📡 Fetching lyrics from: ${fullSongUrl}`);
 
-    // קבלת דף השיר
-    const songResponse = await fetch(fullSongUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7",
-        Referer: searchUrl,
-      },
-    });
+    // השהיה לפני בקשת דף השיר
+    await randomDelay(1500, 3000);
 
-    if (!songResponse.ok) {
-      console.log(`❌ Failed to fetch song page: ${songResponse.status}`);
-      return null;
-    }
+    // קבלת דף השיר
+    const songResponse = await fetchWithRetry(fullSongUrl, {
+      headers: createRealisticHeaders(searchUrl),
+    });
 
     const songHtml = await songResponse.text();
     const songPage = cheerio.load(songHtml);
@@ -560,20 +657,12 @@ export async function fetchLyricsFromGoogleSearch(title, artist) {
     )}`;
     console.log(`📡 Searching Google: ${searchUrl}`);
 
-    const searchResponse = await fetch(searchUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7",
-      },
-    });
+    // השהיה למניעת זיהוי בוט
+    await randomDelay(1500, 3000);
 
-    if (!searchResponse.ok) {
-      console.log(`❌ Google search failed: ${searchResponse.status}`);
-      return null;
-    }
+    const searchResponse = await fetchWithRetry(searchUrl, {
+      headers: createRealisticHeaders(),
+    });
 
     const searchHtml = await searchResponse.text();
     const $ = cheerio.load(searchHtml);
@@ -613,23 +702,12 @@ export async function fetchLyricsFromGoogleSearch(title, artist) {
 
     console.log(`📡 Found potential lyrics URL: ${songUrl}`);
 
-    // הוספת delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // השהיה לפני בקשת דף השיר
+    await randomDelay(2000, 4000);
 
-    const songResponse = await fetch(songUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        Referer: "https://www.google.com/",
-      },
+    const songResponse = await fetchWithRetry(songUrl, {
+      headers: createRealisticHeaders("https://www.google.com/"),
     });
-
-    if (!songResponse.ok) {
-      console.log(`❌ Failed to fetch lyrics page: ${songResponse.status}`);
-      return null;
-    }
 
     const songHtml = await songResponse.text();
     const songPage = cheerio.load(songHtml);
@@ -895,52 +973,60 @@ export async function fetchLyricsFromShironet(title, artist) {
 }
 
 /**
- * חיפוש מילות שיר ב-Genius (לשירים באנגלית)
+ * חיפוש מילות שיר ב-Genius באמצעות Google (לשירים באנגלית)
  * @param {string} title - שם השיר
  * @param {string} artist - שם הזמר
  * @returns {Promise<string|null>} - מילות השיר או null אם לא נמצא
  */
 export async function fetchLyricsFromGenius(title, artist) {
   try {
-    console.log(`🎵 Searching Genius for: "${title}" by "${artist}"`);
+    console.log(
+      `🎵 Enhanced Genius search via Google for: "${title}" by "${artist}"`
+    );
 
     // ניקוי שם השיר והזמר לחיפוש
     const cleanTitle = cleanSearchTerm(title);
     const cleanArtist = cleanSearchTerm(artist);
 
-    // חיפוש ב-Genius
-    const searchUrl = `https://genius.com/search?q=${encodeURIComponent(
-      cleanArtist + " " + cleanTitle
+    // השהיה ראשונית למניעת זיהוי בוט
+    await randomDelay(1000, 2500);
+
+    // חיפוש ב-Google עם site:genius.com
+    const searchQuery = `site:genius.com "${cleanArtist}" "${cleanTitle}" lyrics`;
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(
+      searchQuery
     )}`;
-    console.log(`📡 Searching Genius: ${searchUrl}`);
+    console.log(`📡 Searching Google for Genius: ${searchUrl}`);
 
-    const searchResponse = await fetch(searchUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-      },
+    const searchResponse = await fetchWithRetry(searchUrl, {
+      headers: createRealisticHeaders(),
     });
-
-    if (!searchResponse.ok) {
-      console.log(`❌ Genius search failed: ${searchResponse.status}`);
-      return null;
-    }
 
     const searchHtml = await searchResponse.text();
     const $ = cheerio.load(searchHtml);
 
-    // חיפוש קישור לשיר הראשון בתוצאות
-    const firstResult = $(".mini_card a, .search_result a").first();
-    if (!firstResult.length) {
+    // חיפוש קישורים ל-Genius בתוצאות Google
+    const geniusLinks = $("a[href*='genius.com']").filter((i, el) => {
+      const href = $(el).attr("href");
+      return href && href.includes("/lyrics/") && !href.includes("search");
+    });
+
+    if (!geniusLinks.length) {
       console.log(
-        `❌ No results found in Genius for: "${title}" by "${artist}"`
+        `❌ No Genius lyrics links found for: "${title}" by "${artist}"`
       );
       return null;
     }
 
-    const songUrl = firstResult.attr("href");
+    let songUrl = geniusLinks.first().attr("href");
+
+    // אם זה קישור Google redirect, נחלץ את ה-URL האמיתי
+    if (songUrl && songUrl.includes("/url?q=")) {
+      songUrl = decodeURIComponent(songUrl.split("/url?q=")[1].split("&")[0]);
+    }
+
     if (!songUrl) {
-      console.log(`❌ No song URL found in Genius`);
+      console.log(`❌ No valid Genius URL found`);
       return null;
     }
 
@@ -950,18 +1036,13 @@ export async function fetchLyricsFromGenius(title, artist) {
       : `https://genius.com${songUrl}`;
     console.log(`📡 Fetching lyrics from: ${fullSongUrl}`);
 
-    // קבלת דף השיר
-    const songResponse = await fetch(fullSongUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-      },
-    });
+    // השהיה לפני בקשת דף השיר
+    await randomDelay(2000, 4000);
 
-    if (!songResponse.ok) {
-      console.log(`❌ Failed to fetch song page: ${songResponse.status}`);
-      return null;
-    }
+    // קבלת דף השיר
+    const songResponse = await fetchWithRetry(fullSongUrl, {
+      headers: createRealisticHeaders(searchUrl),
+    });
 
     const songHtml = await songResponse.text();
     const songPage = cheerio.load(songHtml);
@@ -1027,8 +1108,11 @@ export function detectLanguage(title, artist) {
 export async function fetchLyricsWithWebScraping(title, artist) {
   try {
     console.log(
-      `🎵 Starting web scraping search for: "${title}" by "${artist}"`
+      `🎵 Starting enhanced web scraping search for: "${title}" by "${artist}"`
     );
+
+    // הצגת הגדרות נוכחיות
+    logCurrentConfig();
 
     // זיהוי שפת השיר
     const language = detectLanguage(title, artist);

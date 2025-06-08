@@ -51,7 +51,7 @@ connectDB();
 
 const app = express();
 const server = http.createServer(app);
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 80;
 
 // 🌐 CORS לפי סביבה
 const allowedOrigins =

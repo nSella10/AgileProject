@@ -21,11 +21,11 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        working-directory: ./marketing-website
+        working-directory: marketing-website
         run: npm install
 
       - name: Build project
-        working-directory: ./marketing-website
+        working-directory: marketing-website
         env:
           CI: false
         run: npm run build
@@ -35,7 +35,8 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # שנה אם צריך
+          aws-region: us-east-1
 
       - name: Deploy to S3
-        run: aws s3 sync ./marketing-website/build s3://guessifyapp.com --delete
+        working-directory: marketing-website
+        run: aws s3 sync build s3://guessifyapp.com --delete

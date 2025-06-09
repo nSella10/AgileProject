@@ -43,7 +43,7 @@ const LoginPage = () => {
         <div className="text-white space-y-6 text-center lg:text-left">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-              Welcome Back! 🎶
+              Welcome Back Musician! 🎶
             </h1>
             <p className="text-xl text-purple-100">
               Ready to create amazing music experiences? Sign in to continue

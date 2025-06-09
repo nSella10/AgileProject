@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import HelpPage from "./pages/HelpPage";
@@ -18,47 +20,57 @@ import CommunityPage from "./pages/CommunityPage";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFoundPage from "./pages/NotFoundPage";
 
-// Marketing Website App - Static content only
 function App() {
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "he";
+
+  useEffect(() => {
+    // Update the <html> tag attributes
+    document.documentElement.lang = i18n.language;
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+  }, [i18n.language]);
+
   return (
     <Router>
-      <ScrollToTop />
-      <Routes>
-        {/* Marketing Website Routes - Each page handles its own layout */}
-        <Route path="/" element={<HomePage />} />
+      <div dir={isRTL ? "rtl" : "ltr"}>
+        <ScrollToTop />
+        <Routes>
+          {/* Marketing Website Routes - Each page handles its own layout */}
+          <Route path="/" element={<HomePage />} />
 
-        {/* English Routes */}
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/help" element={<HelpPage />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/solutions" element={<SolutionsPage />} />
-        <Route path="/careers" element={<CareersPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/school" element={<SchoolPage />} />
-        <Route path="/work" element={<WorkPage />} />
-        <Route path="/home" element={<HomePage2 />} />
-        <Route path="/community" element={<CommunityPage />} />
+          {/* English Routes */}
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/solutions" element={<SolutionsPage />} />
+          <Route path="/careers" element={<CareersPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/school" element={<SchoolPage />} />
+          <Route path="/work" element={<WorkPage />} />
+          <Route path="/home" element={<HomePage2 />} />
+          <Route path="/community" element={<CommunityPage />} />
 
-        {/* Hebrew Routes */}
-        <Route path="/אודות" element={<AboutPage />} />
-        <Route path="/עזרה" element={<HelpPage />} />
-        <Route path="/בלוג" element={<BlogPage />} />
-        <Route path="/מחירים" element={<PricingPage />} />
-        <Route path="/פתרונות" element={<SolutionsPage />} />
-        <Route path="/קריירה" element={<CareersPage />} />
-        <Route path="/צור-קשר" element={<ContactPage />} />
-        <Route path="/תנאים" element={<TermsPage />} />
-        <Route path="/פרטיות" element={<PrivacyPage />} />
-        <Route path="/בית-ספר" element={<SchoolPage />} />
-        <Route path="/עבודה" element={<WorkPage />} />
-        <Route path="/קהילה" element={<CommunityPage />} />
-        <Route path="/בבית" element={<HomePage2 />} />
+          {/* Hebrew Routes */}
+          <Route path="/אודות" element={<AboutPage />} />
+          <Route path="/עזרה" element={<HelpPage />} />
+          <Route path="/בלוג" element={<BlogPage />} />
+          <Route path="/מחירים" element={<PricingPage />} />
+          <Route path="/פתרונות" element={<SolutionsPage />} />
+          <Route path="/קריירה" element={<CareersPage />} />
+          <Route path="/צור-קשר" element={<ContactPage />} />
+          <Route path="/תנאים" element={<TermsPage />} />
+          <Route path="/פרטיות" element={<PrivacyPage />} />
+          <Route path="/בית-ספר" element={<SchoolPage />} />
+          <Route path="/עבודה" element={<WorkPage />} />
+          <Route path="/קהילה" element={<CommunityPage />} />
+          <Route path="/בבית" element={<HomePage2 />} />
 
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

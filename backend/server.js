@@ -94,7 +94,7 @@ app.use("/api/lyrics", lyricsRoutes);
 // - guessifyapp.com (S3)
 app.get("/", (_req, res) => {
   res.json({
-    message: "🎵 Guessify API Backend Server Hi",
+    message: "🎵 Guessify API Backend Server take 3",
     status: "running",
     version: "2.0.0",
     apps: {

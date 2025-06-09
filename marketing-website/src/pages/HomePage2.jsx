@@ -1,5 +1,6 @@
 // src/pages/HomePage2.jsx (Guessify! at home)
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
   FaHome,
@@ -14,6 +15,7 @@ import {
 import PageLayout from "../components/PageLayout";
 
 const HomePage2 = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const features = [
@@ -87,24 +89,23 @@ const HomePage2 = () => {
                 </div>
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">
-                🎵 Guessify! at Home
+                {t("home.title")}
               </h1>
               <p className="text-xl lg:text-2xl mb-8 text-green-100 max-w-3xl mx-auto">
-                Create memorable family moments with music games that bring
-                everyone together, from grandparents to grandchildren.
+                {t("home.subtitle")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => navigate("/register")}
                   className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl"
                 >
-                  Start Family Fun
+                  {t("home.start_family_fun")}
                 </button>
                 <button
                   onClick={() => navigate("/join")}
                   className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300"
                 >
-                  Join a Game
+                  {t("home.join_game")}
                 </button>
               </div>
             </div>

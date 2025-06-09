@@ -1,8 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 
 const BlogPage = () => {
-  const blogPosts = [
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "he";
+
+  const blogPosts = t("blog.posts", { returnObjects: true }) || [
     {
       id: 1,
       title: "5 Ways Music Games Enhance Learning in the Classroom",
@@ -66,33 +70,37 @@ const BlogPage = () => {
   ];
 
   const categories = [
-    "All",
-    "Education",
-    "Workplace",
-    "Research",
-    "Accessibility",
-    "Tips",
-    "Technology",
+    t("blog.categories.all"),
+    t("blog.categories.education"),
+    t("blog.categories.workplace"),
+    t("blog.categories.research"),
+    t("blog.categories.accessibility"),
+    t("blog.categories.tips"),
+    t("blog.categories.technology"),
   ];
 
   return (
     <PageLayout>
-      <div className="bg-gradient-to-b from-green-600 to-green-800 py-16 text-white">
+      <div
+        className="bg-gradient-to-b from-green-600 to-green-800 py-16 text-white"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Guessify! Blog
+            {t("blog.title")}
           </h1>
           <p className="text-xl text-green-200 max-w-3xl mx-auto">
-            Insights, tips, and stories about music education and interactive
-            learning
+            {t("blog.subtitle")}
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-16">
+      <div className="max-w-7xl mx-auto px-4 py-16" dir={isRTL ? "rtl" : "ltr"}>
         {/* Category Filter */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Browse by Category</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            {t("blog.browse_category")}
+          </h2>
           <div className="flex flex-wrap gap-3">
             {categories.map((category) => (
               <button
@@ -109,7 +117,7 @@ const BlogPage = () => {
         <div className="mb-16">
           <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-8 text-white">
             <span className="bg-white text-purple-600 px-3 py-1 rounded-full text-sm font-medium">
-              Featured
+              {t("blog.featured")}
             </span>
             <h2 className="text-3xl font-bold mt-4 mb-4">
               {blogPosts[0].title}
@@ -151,7 +159,7 @@ const BlogPage = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">{post.date}</span>
                   <button className="text-green-600 hover:text-green-700 font-medium text-sm">
-                    Read More →
+                    {t("blog.read_more")}
                   </button>
                 </div>
               </div>
@@ -161,20 +169,24 @@ const BlogPage = () => {
 
         {/* Newsletter Signup */}
         <div className="mt-16 bg-gray-50 p-8 rounded-lg text-center">
-          <h2 className="text-2xl font-bold mb-4">Stay Updated</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            {t("blog.newsletter.title")}
+          </h2>
           <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-            Subscribe to our newsletter to get the latest insights on music
-            education, new features, and tips for creating engaging learning
-            experiences.
+            {t("blog.newsletter.description")}
           </p>
-          <div className="flex flex-col md:flex-row max-w-md mx-auto gap-3">
+          <div
+            className={`flex flex-col md:flex-row max-w-md mx-auto gap-3 ${
+              isRTL ? "md:flex-row-reverse" : ""
+            }`}
+          >
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder={t("blog.newsletter.placeholder")}
               className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
             <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
-              Subscribe
+              {t("blog.newsletter.subscribe")}
             </button>
           </div>
         </div>

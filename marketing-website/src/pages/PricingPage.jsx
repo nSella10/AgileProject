@@ -1,103 +1,64 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 
 const PricingPage = () => {
   const [isAnnual, setIsAnnual] = useState(false);
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "he";
 
   const plans = [
     {
-      name: "Free",
+      name: t("pricing.plans.free.name"),
       price: { monthly: 0, annual: 0 },
-      description: "Perfect for trying out Guessify!",
-      features: [
-        "Up to 3 games per month",
-        "Maximum 10 players per game",
-        "Basic song library access",
-        "Standard support",
-        "Basic analytics",
-      ],
-      buttonText: "Get Started",
+      description: t("pricing.plans.free.description"),
+      features: t("pricing.plans.free.features", { returnObjects: true }),
+      buttonText: t("pricing.plans.free.button"),
       buttonStyle: "border border-gray-300 text-gray-700 hover:bg-gray-50",
       popular: false,
     },
     {
-      name: "Educator",
+      name: t("pricing.plans.educator.name"),
       price: { monthly: 9.99, annual: 99.99 },
-      description: "Ideal for teachers and small classrooms",
-      features: [
-        "Unlimited games",
-        "Up to 50 players per game",
-        "Full song library access",
-        "Priority support",
-        "Advanced analytics",
-        "Custom game templates",
-        "Student progress tracking",
-        "Classroom management tools",
-      ],
-      buttonText: "Start Free Trial",
+      description: t("pricing.plans.educator.description"),
+      features: t("pricing.plans.educator.features", { returnObjects: true }),
+      buttonText: t("pricing.plans.educator.button"),
       buttonStyle: "bg-blue-600 text-white hover:bg-blue-700",
       popular: true,
     },
     {
-      name: "Institution",
+      name: t("pricing.plans.institution.name"),
       price: { monthly: 29.99, annual: 299.99 },
-      description: "For schools and large organizations",
-      features: [
-        "Everything in Educator",
-        "Unlimited players per game",
-        "Multi-classroom management",
-        "Advanced reporting",
-        "Custom branding",
-        "API access",
-        "Dedicated account manager",
-        "Training and onboarding",
-        "Single sign-on (SSO)",
-      ],
-      buttonText: "Contact Sales",
+      description: t("pricing.plans.institution.description"),
+      features: t("pricing.plans.institution.features", {
+        returnObjects: true,
+      }),
+      buttonText: t("pricing.plans.institution.button"),
       buttonStyle: "bg-purple-600 text-white hover:bg-purple-700",
       popular: false,
     },
   ];
 
-  const faqs = [
-    {
-      question: "Can I change my plan at any time?",
-      answer:
-        "Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.",
-    },
-    {
-      question: "Is there a free trial available?",
-      answer:
-        "Yes, we offer a 14-day free trial for all paid plans. No credit card required to start.",
-    },
-    {
-      question: "What payment methods do you accept?",
-      answer:
-        "We accept all major credit cards, PayPal, and bank transfers for institutional customers.",
-    },
-    {
-      question: "Do you offer discounts for non-profits?",
-      answer:
-        "Yes, we offer special pricing for qualified educational institutions and non-profit organizations. Contact us for details.",
-    },
-  ];
+  const faqs = t("pricing.faq.questions", { returnObjects: true });
 
   return (
     <PageLayout>
-      <div className="bg-gradient-to-b from-blue-600 to-purple-700 py-16 text-white">
+      <div
+        className="bg-gradient-to-b from-blue-600 to-purple-700 py-16 text-white"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Simple, Transparent Pricing
+            {t("pricing.title")}
           </h1>
           <p className="text-xl text-blue-200 max-w-3xl mx-auto mb-8">
-            Choose the perfect plan for your needs. Start free and upgrade as
-            you grow.
+            {t("pricing.subtitle")}
           </p>
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-4 mb-8">
             <span className={`${!isAnnual ? "text-white" : "text-blue-200"}`}>
-              Monthly
+              {t("pricing.monthly")}
             </span>
             <button
               onClick={() => setIsAnnual(!isAnnual)}
@@ -112,9 +73,13 @@ const PricingPage = () => {
               />
             </button>
             <span className={`${isAnnual ? "text-white" : "text-blue-200"}`}>
-              Annual
-              <span className="ml-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs">
-                Save 17%
+              {t("pricing.annual")}
+              <span
+                className={`${
+                  isRTL ? "mr-2" : "ml-2"
+                } bg-green-500 text-white px-2 py-1 rounded-full text-xs`}
+              >
+                {t("pricing.save_percent")}
               </span>
             </span>
           </div>
@@ -123,7 +88,12 @@ const PricingPage = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div
+          className={`grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 ${
+            isRTL ? "rtl" : ""
+          }`}
+          dir={isRTL ? "rtl" : "ltr"}
+        >
           {plans.map((plan, idx) => (
             <div
               key={idx}
@@ -134,7 +104,7 @@ const PricingPage = () => {
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                    Most Popular
+                    {t("pricing.most_popular")}
                   </span>
                 </div>
               )}
@@ -158,9 +128,16 @@ const PricingPage = () => {
 
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature, featureIdx) => (
-                  <li key={featureIdx} className="flex items-center">
+                  <li
+                    key={featureIdx}
+                    className={`flex items-center ${
+                      isRTL ? "flex-row-reverse" : ""
+                    }`}
+                  >
                     <svg
-                      className="w-5 h-5 text-green-500 mr-3"
+                      className={`w-5 h-5 text-green-500 ${
+                        isRTL ? "ml-3" : "mr-3"
+                      }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -185,24 +162,31 @@ const PricingPage = () => {
         </div>
 
         {/* Enterprise Section */}
-        <div className="bg-gray-50 rounded-lg p-8 text-center mb-16">
-          <h2 className="text-2xl font-bold mb-4">Need Something Custom?</h2>
+        <div
+          className="bg-gray-50 rounded-lg p-8 text-center mb-16"
+          dir={isRTL ? "rtl" : "ltr"}
+        >
+          <h2 className="text-2xl font-bold mb-4">
+            {t("pricing.enterprise.title")}
+          </h2>
           <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-            For large enterprises, school districts, or organizations with
-            specific needs, we offer custom solutions tailored to your
-            requirements.
+            {t("pricing.enterprise.description")}
           </p>
           <button className="bg-gray-800 text-white px-8 py-3 rounded-lg hover:bg-gray-900 transition-colors">
-            Contact Enterprise Sales
+            {t("pricing.enterprise.button")}
           </button>
         </div>
 
         {/* FAQ Section */}
-        <div>
+        <div dir={isRTL ? "rtl" : "ltr"}>
           <h2 className="text-3xl font-bold text-center mb-12">
-            Frequently Asked Questions
+            {t("pricing.faq.title")}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${
+              isRTL ? "rtl" : ""
+            }`}
+          >
             {faqs.map((faq, idx) => (
               <div key={idx} className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold mb-3">{faq.question}</h3>

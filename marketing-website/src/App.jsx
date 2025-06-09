@@ -26,6 +26,8 @@ function App() {
       <Routes>
         {/* Marketing Website Routes - Each page handles its own layout */}
         <Route path="/" element={<HomePage />} />
+
+        {/* English Routes */}
         <Route path="/about" element={<AboutPage />} />
         <Route path="/help" element={<HelpPage />} />
         <Route path="/blog" element={<BlogPage />} />
@@ -39,6 +41,21 @@ function App() {
         <Route path="/work" element={<WorkPage />} />
         <Route path="/home" element={<HomePage2 />} />
         <Route path="/community" element={<CommunityPage />} />
+
+        {/* Hebrew Routes */}
+        <Route path="/אודות" element={<AboutPage />} />
+        <Route path="/עזרה" element={<HelpPage />} />
+        <Route path="/בלוג" element={<BlogPage />} />
+        <Route path="/מחירים" element={<PricingPage />} />
+        <Route path="/פתרונות" element={<SolutionsPage />} />
+        <Route path="/קריירה" element={<CareersPage />} />
+        <Route path="/צור-קשר" element={<ContactPage />} />
+        <Route path="/תנאים" element={<TermsPage />} />
+        <Route path="/פרטיות" element={<PrivacyPage />} />
+        <Route path="/בית-ספר" element={<SchoolPage />} />
+        <Route path="/עבודה" element={<WorkPage />} />
+        <Route path="/קהילה" element={<CommunityPage />} />
+        <Route path="/בבית" element={<HomePage2 />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

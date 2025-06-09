@@ -1,9 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
+import { getRoute } from "../utils/routes";
 
 const Homepage = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+
+  const isRTL = i18n.language === "he";
 
   // Handle Create button click - redirect to create app
   const handleCreateClick = () => {
@@ -24,13 +29,23 @@ const Homepage = () => {
   };
 
   const handleCardButtonClick = (buttonText) => {
+    // Get translated button texts
+    const tryNowText = t("homepage.cards.friends_family.button");
+    const joinNowText = t("homepage.cards.students.button");
+    const createGameText = t("homepage.cards.teachers.button");
+    const startCreatingText = t("homepage.cards.creators.button");
+
     switch (buttonText) {
       case "Try now":
       case "Join now":
+      case tryNowText:
+      case joinNowText:
         handlePlayClick();
         break;
       case "Create game":
       case "Start creating":
+      case createGameText:
+      case startCreatingText:
         handleCreateClick();
         break;
       default:
@@ -46,39 +61,52 @@ const Homepage = () => {
     navigate("/about");
   };
 
-  const handleFooterClick = (section, item) => {
-    const routes = {
-      About: {
-        Company: "/about",
-        Leadership: "/about",
-        Careers: "/careers",
-        "Open positions": "/careers",
-        Press: "/about",
-        "Company events": "/about",
-        "Contact us": "/contact",
-      },
-      Solutions: {
-        "At home": "/home",
-        "At school": "/school",
-        "At work": "/work",
-        Community: "/community",
-        Marketplace: "/solutions",
-      },
-      Resources: {
-        "Explore Content": "/solutions",
-        Blog: "/blog",
-        Webinars: "/blog",
-        "Trust Center": "/help",
-        "Help Center": "/help",
-      },
-      "Terms and conditions": {
-        "Terms and conditions": "/terms",
-        "Privacy policy": "/privacy",
-        "Cookie notice": "/privacy",
-      },
+  const handleFooterClick = (item) => {
+    // Create mapping for both English and Hebrew
+    const routeMapping = {
+      // About section
+      [t("homepage.footer.about.company")]: getRoute("about", i18n.language),
+      [t("homepage.footer.about.careers")]: getRoute("careers", i18n.language),
+      [t("homepage.footer.about.contact_us")]: getRoute(
+        "contact",
+        i18n.language
+      ),
+
+      // Solutions section
+      [t("homepage.footer.solutions.at_home")]: "/",
+      [t("homepage.footer.solutions.at_school")]: getRoute(
+        "school",
+        i18n.language
+      ),
+      [t("homepage.footer.solutions.at_work")]: getRoute("work", i18n.language),
+      [t("homepage.footer.solutions.community")]: getRoute(
+        "community",
+        i18n.language
+      ),
+      [t("homepage.footer.solutions.marketplace")]: getRoute(
+        "solutions",
+        i18n.language
+      ),
+
+      // Resources section
+      [t("homepage.footer.resources.blog")]: getRoute("blog", i18n.language),
+      [t("homepage.footer.resources.help_center")]: getRoute(
+        "help",
+        i18n.language
+      ),
+
+      // Terms section
+      [t("homepage.footer.terms.terms_conditions")]: getRoute(
+        "terms",
+        i18n.language
+      ),
+      [t("homepage.footer.terms.privacy_policy")]: getRoute(
+        "privacy",
+        i18n.language
+      ),
     };
 
-    const route = routes[section]?.[item];
+    const route = routeMapping[item];
     if (route) {
       navigate(route);
     }
@@ -86,7 +114,10 @@ const Homepage = () => {
 
   return (
     <PageLayout>
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+      <div
+        className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
         {/* Hero Section */}
         <div className="relative overflow-hidden">
           {/* Background decorations */}
@@ -97,54 +128,76 @@ const Homepage = () => {
           </div>
 
           {/* Hero Content */}
-          <div className="relative w-full px-6 py-20 text-center">
+          <div
+            className="relative w-full px-6 py-20 text-center"
+            dir={isRTL ? "rtl" : "ltr"}
+          >
             <div className="max-w-6xl mx-auto">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight">
-                Make Music Games
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight text-center">
+                {t("homepage.hero.title")}
                 <span className="bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
                   {" "}
-                  Magical
+                  {t("homepage.hero.title_highlight")}
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl lg:text-3xl text-purple-200 mb-12 max-w-5xl mx-auto leading-relaxed">
-                Create engaging music quiz games that bring people together
-                through the universal language of music. Perfect for classrooms,
-                families, and friends!
+              <p className="text-xl md:text-2xl lg:text-3xl text-purple-200 mb-12 max-w-5xl mx-auto leading-relaxed text-center">
+                {t("homepage.hero.subtitle")}
               </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+              <div
+                className={`flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 ${
+                  isRTL ? "sm:flex-row-reverse" : ""
+                }`}
+                dir={isRTL ? "rtl" : "ltr"}
+              >
                 <button
                   onClick={handleCreateClick}
-                  className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-12 py-5 rounded-full font-bold text-xl hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-2xl hover:shadow-pink-500/25"
+                  className={`bg-gradient-to-r from-pink-500 to-purple-600 text-white px-12 py-5 rounded-full font-bold text-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-2xl hover:shadow-pink-500/25 text-center ${
+                    isRTL ? "" : "transform hover:scale-105"
+                  }`}
+                  dir={isRTL ? "rtl" : "ltr"}
                 >
-                  🎵 Start Creating Now
+                  {t("homepage.hero.start_creating")}
                 </button>
                 <button
                   onClick={handlePlayClick}
-                  className="bg-white bg-opacity-20 backdrop-blur-sm text-white border-2 border-white border-opacity-30 px-12 py-5 rounded-full font-bold text-xl hover:bg-opacity-30 transform hover:scale-105 transition-all duration-200"
+                  className={`bg-white bg-opacity-20 backdrop-blur-sm text-white border-2 border-white border-opacity-30 px-12 py-5 rounded-full font-bold text-xl hover:bg-opacity-30 transition-all duration-200 text-center ${
+                    isRTL ? "" : "transform hover:scale-105"
+                  }`}
+                  dir={isRTL ? "rtl" : "ltr"}
                 >
-                  🎯 Join a Game
+                  {t("homepage.hero.join_game")}
                 </button>
               </div>
 
               {/* Stats Section */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              <div
+                className={`grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto ${
+                  isRTL ? "rtl" : ""
+                }`}
+              >
                 <div className="text-center bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 border border-white border-opacity-20">
                   <div className="text-4xl md:text-5xl font-bold text-white mb-2">
                     10K+
                   </div>
-                  <div className="text-purple-200 text-lg">Games Created</div>
+                  <div className="text-purple-200 text-lg">
+                    {t("homepage.stats.games_created")}
+                  </div>
                 </div>
                 <div className="text-center bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 border border-white border-opacity-20">
                   <div className="text-4xl md:text-5xl font-bold text-white mb-2">
                     50K+
                   </div>
-                  <div className="text-purple-200 text-lg">Happy Players</div>
+                  <div className="text-purple-200 text-lg">
+                    {t("homepage.stats.happy_players")}
+                  </div>
                 </div>
                 <div className="text-center bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 border border-white border-opacity-20">
                   <div className="text-4xl md:text-5xl font-bold text-white mb-2">
                     500+
                   </div>
-                  <div className="text-purple-200 text-lg">Schools Using</div>
+                  <div className="text-purple-200 text-lg">
+                    {t("homepage.stats.schools_using")}
+                  </div>
                 </div>
               </div>
             </div>
@@ -155,61 +208,88 @@ const Homepage = () => {
         <div className="w-full px-6 py-20 bg-gradient-to-b from-purple-900 to-indigo-900">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">
-              Perfect for Every Occasion
+              {t("homepage.cards.title")}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 ${
+                isRTL ? "rtl" : ""
+              }`}
+            >
               {[
                 {
-                  title: "For Friends & Family",
+                  title: t("homepage.cards.friends_family.title"),
                   color: "from-emerald-500 to-teal-600",
                   icon: "👨‍👩‍👧‍👦",
-                  description:
-                    "Create memorable moments with loved ones through interactive music games",
-                  btn: "Try now",
+                  description: t("homepage.cards.friends_family.description"),
+                  btn: t("homepage.cards.friends_family.button"),
                 },
                 {
-                  title: "For Students",
+                  title: t("homepage.cards.students.title"),
                   color: "from-orange-500 to-red-500",
                   icon: "🎓",
-                  description:
-                    "Make learning music theory fun and engaging in the classroom",
-                  btn: "Join now",
+                  description: t("homepage.cards.students.description"),
+                  btn: t("homepage.cards.students.button"),
                 },
                 {
-                  title: "For Teachers",
+                  title: t("homepage.cards.teachers.title"),
                   color: "from-red-500 to-pink-600",
                   icon: "👩‍🏫",
-                  description:
-                    "Transform your music lessons with interactive quiz games",
-                  btn: "Create game",
+                  description: t("homepage.cards.teachers.description"),
+                  btn: t("homepage.cards.teachers.button"),
                 },
                 {
-                  title: "For Creators",
+                  title: t("homepage.cards.creators.title"),
                   color: "from-blue-500 to-indigo-600",
                   icon: "🎨",
-                  description:
-                    "Build custom music experiences and share them with the world",
-                  btn: "Start creating",
+                  description: t("homepage.cards.creators.description"),
+                  btn: t("homepage.cards.creators.button"),
                 },
               ].map((card) => (
                 <div
                   key={card.title}
-                  className={`relative rounded-2xl bg-gradient-to-br ${card.color} text-white p-8 shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 group overflow-hidden`}
+                  className={`relative rounded-2xl bg-gradient-to-br ${
+                    card.color
+                  } text-white p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 ${
+                    isRTL ? "hebrew-homepage-card" : ""
+                  }`}
+                  dir={isRTL ? "rtl" : "ltr"}
                 >
-                  {/* Background decoration */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full transform translate-x-16 -translate-y-16 group-hover:scale-150 transition-transform duration-500"></div>
-
-                  <div className="relative z-10">
-                    <div className="text-4xl mb-4">{card.icon}</div>
-                    <h3 className="text-xl font-bold mb-3">{card.title}</h3>
-                    <p className="text-sm opacity-90 mb-6 leading-relaxed">
+                  <div
+                    className={`${
+                      isRTL ? "hebrew-card-content" : "text-center"
+                    }`}
+                  >
+                    {isRTL ? (
+                      <div className="w-full flex justify-end mb-6">
+                        <span className="text-5xl">{card.icon}</span>
+                      </div>
+                    ) : (
+                      <div className="text-5xl mb-6 text-center">
+                        {card.icon}
+                      </div>
+                    )}
+                    <h3
+                      className={`text-xl lg:text-2xl font-bold mb-4 ${
+                        isRTL ? "hebrew-homepage-card-title" : ""
+                      }`}
+                    >
+                      {card.title}
+                    </h3>
+                    <p
+                      className={`text-base opacity-95 mb-8 leading-relaxed ${
+                        isRTL ? "hebrew-homepage-card-description" : ""
+                      }`}
+                    >
                       {card.description}
                     </p>
                     <button
-                      className="bg-white bg-opacity-20 backdrop-blur-sm text-white border border-white border-opacity-30 rounded-full px-6 py-3 font-semibold hover:bg-opacity-30 transform hover:scale-105 transition-all duration-200"
+                      className={`bg-white bg-opacity-20 backdrop-blur-sm text-white border border-white border-opacity-30 rounded-xl px-8 py-3 font-semibold hover:bg-opacity-30 transition-colors duration-200 ${
+                        isRTL ? "hebrew-homepage-card-button" : ""
+                      }`}
                       onClick={() => handleCardButtonClick(card.btn)}
+                      dir={isRTL ? "rtl" : "ltr"}
                     >
-                      {card.btn} →
+                      {card.btn}
                     </button>
                   </div>
                 </div>
@@ -222,136 +302,264 @@ const Homepage = () => {
         <div className="bg-gradient-to-r from-slate-50 to-blue-50 py-20">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
-              Trusted by Educational Institutions & Enterprises
+              {t("homepage.enterprise.title")}
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white shadow-2xl rounded-2xl p-8 hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <div
+                className={`bg-white shadow-lg rounded-2xl p-8 hover:shadow-xl transition-shadow duration-300 ${
+                  isRTL ? "hebrew-enterprise-card" : ""
+                }`}
+                dir={isRTL ? "rtl" : "ltr"}
+              >
+                <div
+                  className={`flex items-center mb-6 ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
+                >
+                  <div
+                    className={`w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center ${
+                      isRTL ? "ml-4" : "mr-4"
+                    }`}
+                  >
                     <span className="text-2xl">🎓</span>
                   </div>
-                  <h4 className="text-2xl font-bold text-gray-800">
-                    FOR HIGHER EDUCATION
+                  <h4
+                    className={`text-2xl font-bold text-gray-800 ${
+                      isRTL ? "hebrew-enterprise-title" : ""
+                    }`}
+                  >
+                    {t("homepage.enterprise.education.title")}
                   </h4>
                 </div>
-                <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-                  Transform your music curriculum with interactive learning
-                  experiences. Inspire your students with Guessify!+ premium
-                  features designed for academic excellence.
+                <p
+                  className={`text-gray-600 mb-6 text-lg leading-relaxed ${
+                    isRTL ? "hebrew-enterprise-description text-right" : ""
+                  }`}
+                >
+                  {t("homepage.enterprise.education.description")}
                 </p>
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center text-gray-600">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Unlimited student accounts
+                <div
+                  className={`space-y-3 mb-6 ${
+                    isRTL ? "hebrew-enterprise-features" : ""
+                  }`}
+                >
+                  <div
+                    className={`flex items-center text-gray-600 ${
+                      isRTL
+                        ? "flex-row-reverse justify-start text-right"
+                        : "space-x-2"
+                    }`}
+                  >
+                    <span className="text-green-500">✓</span>
+                    <span className={isRTL ? "mr-2" : ""}>
+                      {t(
+                        "homepage.enterprise.education.features.unlimited_accounts"
+                      )}
+                    </span>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Advanced analytics & reporting
+                  <div
+                    className={`flex items-center text-gray-600 ${
+                      isRTL
+                        ? "flex-row-reverse justify-start text-right"
+                        : "space-x-2"
+                    }`}
+                  >
+                    <span className="text-green-500">✓</span>
+                    <span className={isRTL ? "mr-2" : ""}>
+                      {t("homepage.enterprise.education.features.analytics")}
+                    </span>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Curriculum integration tools
+                  <div
+                    className={`flex items-center text-gray-600 ${
+                      isRTL
+                        ? "flex-row-reverse justify-start text-right"
+                        : "space-x-2"
+                    }`}
+                  >
+                    <span className="text-green-500">✓</span>
+                    <span className={isRTL ? "mr-2" : ""}>
+                      {t("homepage.enterprise.education.features.curriculum")}
+                    </span>
                   </div>
                 </div>
                 <button
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl px-8 py-4 font-semibold hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                  className={`bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl px-8 py-4 font-semibold hover:from-blue-700 hover:to-indigo-700 transition-colors duration-200 shadow-lg ${
+                    isRTL ? "hebrew-enterprise-button" : ""
+                  }`}
                   onClick={handleEducationClick}
                 >
-                  View Pricing Plans →
+                  {t("homepage.enterprise.education.button")}
                 </button>
               </div>
 
-              <div className="bg-white shadow-2xl rounded-2xl p-8 hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+              <div
+                className={`bg-white shadow-lg rounded-2xl p-8 hover:shadow-xl transition-shadow duration-300 ${
+                  isRTL ? "hebrew-enterprise-card" : ""
+                }`}
+                dir={isRTL ? "rtl" : "ltr"}
+              >
+                <div
+                  className={`flex items-center mb-6 ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
+                >
+                  <div
+                    className={`w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center ${
+                      isRTL ? "ml-4" : "mr-4"
+                    }`}
+                  >
                     <span className="text-2xl">🏢</span>
                   </div>
-                  <h4 className="text-2xl font-bold text-gray-800">
-                    FOR ENTERPRISES
+                  <h4
+                    className={`text-2xl font-bold text-gray-800 ${
+                      isRTL ? "hebrew-enterprise-title" : ""
+                    }`}
+                  >
+                    {t("homepage.enterprise.enterprise.title")}
                   </h4>
                 </div>
-                <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-                  Drive business growth and team engagement with custom music
-                  experiences. Perfect for team building, training, and
-                  corporate events.
+                <p
+                  className={`text-gray-600 mb-6 text-lg leading-relaxed ${
+                    isRTL ? "hebrew-enterprise-description text-right" : ""
+                  }`}
+                >
+                  {t("homepage.enterprise.enterprise.description")}
                 </p>
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center text-gray-600">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Custom branding & themes
+                <div
+                  className={`space-y-3 mb-6 ${
+                    isRTL ? "hebrew-enterprise-features" : ""
+                  }`}
+                >
+                  <div
+                    className={`flex items-center text-gray-600 ${
+                      isRTL
+                        ? "flex-row-reverse justify-start text-right"
+                        : "space-x-2"
+                    }`}
+                  >
+                    <span className="text-green-500">✓</span>
+                    <span className={isRTL ? "mr-2" : ""}>
+                      {t("homepage.enterprise.enterprise.features.branding")}
+                    </span>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Enterprise-grade security
+                  <div
+                    className={`flex items-center text-gray-600 ${
+                      isRTL
+                        ? "flex-row-reverse justify-start text-right"
+                        : "space-x-2"
+                    }`}
+                  >
+                    <span className="text-green-500">✓</span>
+                    <span className={isRTL ? "mr-2" : ""}>
+                      {t("homepage.enterprise.enterprise.features.security")}
+                    </span>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <span className="text-green-500 mr-2">✓</span>
-                    Dedicated account manager
+                  <div
+                    className={`flex items-center text-gray-600 ${
+                      isRTL
+                        ? "flex-row-reverse justify-start text-right"
+                        : "space-x-2"
+                    }`}
+                  >
+                    <span className="text-green-500">✓</span>
+                    <span className={isRTL ? "mr-2" : ""}>
+                      {t("homepage.enterprise.enterprise.features.manager")}
+                    </span>
                   </div>
                 </div>
                 <button
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl px-8 py-4 font-semibold hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                  className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl px-8 py-4 font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors duration-200 shadow-lg ${
+                    isRTL ? "hebrew-enterprise-button" : ""
+                  }`}
                   onClick={handleEnterpriseClick}
                 >
-                  Learn More →
+                  {t("homepage.enterprise.enterprise.button")}
                 </button>
               </div>
             </div>
           </div>
           <div className="max-w-7xl mx-auto px-4 mt-16">
             <h3 className="text-2xl font-bold text-center text-gray-800 mb-8">
-              Explore Our Solutions
+              {t("homepage.solutions.title")}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${
+                isRTL ? "rtl" : ""
+              }`}
+            >
               {[
                 {
-                  title: "Guessify! at school",
+                  title: t("homepage.solutions.school.title"),
                   icon: "🏫",
-                  description:
-                    "Transform classroom learning with interactive music education",
+                  description: t("homepage.solutions.school.description"),
                   color: "border-blue-500",
                 },
                 {
-                  title: "Guessify! at work",
+                  title: t("homepage.solutions.work.title"),
                   icon: "💼",
-                  description:
-                    "Build stronger teams through engaging music activities",
+                  description: t("homepage.solutions.work.description"),
                   color: "border-green-500",
                 },
                 {
-                  title: "Guessify! at home",
+                  title: t("homepage.solutions.home.title"),
                   icon: "🏠",
-                  description:
-                    "Create memorable family moments with music games",
+                  description: t("homepage.solutions.home.description"),
                   color: "border-purple-500",
                 },
                 {
-                  title: "Guessify! community",
+                  title: t("homepage.solutions.community.title"),
                   icon: "🌍",
-                  description:
-                    "Connect with music lovers worldwide through shared experiences",
+                  description: t("homepage.solutions.community.description"),
                   color: "border-pink-500",
                 },
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className={`bg-white shadow-lg rounded-xl p-6 border-t-4 ${item.color} hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 group`}
+                  className={`bg-white shadow-lg rounded-xl p-6 border-t-4 ${
+                    item.color
+                  } hover:shadow-xl transition-shadow duration-300 ${
+                    isRTL ? "hebrew-solutions-card" : ""
+                  }`}
+                  dir={isRTL ? "rtl" : "ltr"}
                 >
-                  <div className="text-3xl mb-3">{item.icon}</div>
-                  <h4 className="font-bold text-gray-800 mb-3 text-lg">
+                  <div
+                    className={`text-3xl mb-3 ${isRTL ? "text-center" : ""}`}
+                  >
+                    {item.icon}
+                  </div>
+                  <h4
+                    className={`font-bold text-gray-800 mb-3 text-lg ${
+                      isRTL ? "hebrew-solutions-title text-center" : ""
+                    }`}
+                  >
                     {item.title}
                   </h4>
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                  <p
+                    className={`text-gray-600 text-sm mb-4 leading-relaxed ${
+                      isRTL ? "hebrew-solutions-description text-center" : ""
+                    }`}
+                  >
                     {item.description}
                   </p>
                   <button
-                    className="text-blue-600 font-semibold text-sm hover:text-blue-800 transition-colors group-hover:translate-x-1 transform duration-200"
+                    className={`text-blue-600 font-semibold text-sm hover:text-blue-800 transition-colors duration-200 ${
+                      isRTL ? "hebrew-solutions-button" : ""
+                    }`}
                     onClick={() => {
                       const routes = {
-                        "Guessify! at school": "/school",
-                        "Guessify! at work": "/work",
-                        "Guessify! at home": "/home",
-                        "Guessify! community": "/community",
+                        [t("homepage.solutions.school.title")]: getRoute(
+                          "school",
+                          i18n.language
+                        ),
+                        [t("homepage.solutions.work.title")]: getRoute(
+                          "work",
+                          i18n.language
+                        ),
+                        [t("homepage.solutions.home.title")]: "/",
+                        [t("homepage.solutions.community.title")]: getRoute(
+                          "community",
+                          i18n.language
+                        ),
                       };
                       const route = routes[item.title];
                       if (route) {
@@ -359,7 +567,7 @@ const Homepage = () => {
                       }
                     }}
                   >
-                    Learn more →
+                    {t("homepage.solutions.learn_more")}
                   </button>
                 </div>
               ))}
@@ -368,79 +576,121 @@ const Homepage = () => {
         </div>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-gray-300 py-8">
-          <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6">
+        <footer
+          className="bg-gray-900 text-gray-300 py-8"
+          dir={isRTL ? "rtl" : "ltr"}
+        >
+          <div
+            className={`max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 ${
+              isRTL ? "rtl text-right" : ""
+            }`}
+          >
             <div>
-              <h5 className="font-semibold mb-4">About</h5>
+              <h5 className={`font-semibold mb-4 ${isRTL ? "text-right" : ""}`}>
+                {t("homepage.footer.about.title")}
+              </h5>
               {[
-                "Company",
-                "Leadership",
-                "Careers",
-                "Open positions",
-                "Press",
-                "Company events",
-                "Contact us",
+                { key: "company", label: t("homepage.footer.about.company") },
+                { key: "careers", label: t("homepage.footer.about.careers") },
+                {
+                  key: "contact_us",
+                  label: t("homepage.footer.about.contact_us"),
+                },
               ].map((item) => (
                 <p
-                  key={item}
-                  className="text-sm mb-2 cursor-pointer hover:text-white transition-colors"
-                  onClick={() => handleFooterClick("About", item)}
+                  key={item.key}
+                  className={`text-sm mb-2 cursor-pointer hover:text-white transition-colors ${
+                    isRTL ? "text-right" : ""
+                  }`}
+                  onClick={() => handleFooterClick(item.label)}
                 >
-                  {item}
+                  {item.label}
                 </p>
               ))}
             </div>
             <div>
-              <h5 className="font-semibold mb-4">Solutions</h5>
+              <h5 className={`font-semibold mb-4 ${isRTL ? "text-right" : ""}`}>
+                {t("homepage.footer.solutions.title")}
+              </h5>
               {[
-                "At home",
-                "At school",
-                "At work",
-                "Community",
-                "Marketplace",
+                {
+                  key: "at_home",
+                  label: t("homepage.footer.solutions.at_home"),
+                },
+                {
+                  key: "at_school",
+                  label: t("homepage.footer.solutions.at_school"),
+                },
+                {
+                  key: "at_work",
+                  label: t("homepage.footer.solutions.at_work"),
+                },
+                {
+                  key: "community",
+                  label: t("homepage.footer.solutions.community"),
+                },
+                {
+                  key: "marketplace",
+                  label: t("homepage.footer.solutions.marketplace"),
+                },
               ].map((item) => (
                 <p
-                  key={item}
-                  className="text-sm mb-2 cursor-pointer hover:text-white transition-colors"
-                  onClick={() => handleFooterClick("Solutions", item)}
+                  key={item.key}
+                  className={`text-sm mb-2 cursor-pointer hover:text-white transition-colors ${
+                    isRTL ? "text-right" : ""
+                  }`}
+                  onClick={() => handleFooterClick(item.label)}
                 >
-                  {item}
+                  {item.label}
                 </p>
               ))}
             </div>
             <div>
-              <h5 className="font-semibold mb-4">Resources</h5>
+              <h5 className={`font-semibold mb-4 ${isRTL ? "text-right" : ""}`}>
+                {t("homepage.footer.resources.title")}
+              </h5>
               {[
-                "Explore Content",
-                "Blog",
-                "Webinars",
-                "Trust Center",
-                "Help Center",
+                { key: "blog", label: t("homepage.footer.resources.blog") },
+                {
+                  key: "help_center",
+                  label: t("homepage.footer.resources.help_center"),
+                },
               ].map((item) => (
                 <p
-                  key={item}
-                  className="text-sm mb-2 cursor-pointer hover:text-white transition-colors"
-                  onClick={() => handleFooterClick("Resources", item)}
+                  key={item.key}
+                  className={`text-sm mb-2 cursor-pointer hover:text-white transition-colors ${
+                    isRTL ? "text-right" : ""
+                  }`}
+                  onClick={() => handleFooterClick(item.label)}
                 >
-                  {item}
+                  {item.label}
                 </p>
               ))}
             </div>
             <div>
-              <h5 className="font-semibold mb-4">Terms and conditions</h5>
-              {["Terms and conditions", "Privacy policy", "Cookie notice"].map(
-                (item) => (
-                  <p
-                    key={item}
-                    className="text-sm mb-2 cursor-pointer hover:text-white transition-colors"
-                    onClick={() =>
-                      handleFooterClick("Terms and conditions", item)
-                    }
-                  >
-                    {item}
-                  </p>
-                )
-              )}
+              <h5 className={`font-semibold mb-4 ${isRTL ? "text-right" : ""}`}>
+                {t("homepage.footer.terms.title")}
+              </h5>
+              {[
+                {
+                  key: "terms_conditions",
+                  label: t("homepage.footer.terms.terms_conditions"),
+                },
+                {
+                  key: "privacy_policy",
+                  label: t("homepage.footer.terms.privacy_policy"),
+                },
+              ].map((item) => (
+                <p
+                  key={item.key}
+                  className={`text-sm mb-2 cursor-pointer hover:text-white transition-colors ${
+                    isRTL ? "text-right" : ""
+                  }`}
+                  onClick={() => handleFooterClick(item.label)}
+                >
+                  {item.label}
+                </p>
+              ))}
             </div>
           </div>
         </footer>

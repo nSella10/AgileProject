@@ -1,0 +1,966 @@
+{
+  "navbar": {
+    "home": "Home",
+    "about": "About",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "login": "Login",
+    "play": "Play",
+    "language_toggle": "HEB"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Make Music Games",
+      "title_highlight": "Magical",
+      "subtitle": "Create engaging music quiz games that bring people together through the universal language of music. Perfect for classrooms, families, and friends!",
+      "start_creating": "🎵 Start Creating Now",
+      "join_game": "🎯 Join a Game"
+    },
+    "stats": {
+      "games_created": "Games Created",
+      "happy_players": "Happy Players",
+      "schools_using": "Schools Using"
+    },
+    "cards": {
+      "title": "Perfect for Every Occasion",
+      "friends_family": {
+        "title": "For Friends & Family",
+        "description": "Create memorable moments with loved ones through interactive music games",
+        "button": "Try now"
+      },
+      "students": {
+        "title": "For Students",
+        "description": "Make learning music theory fun and engaging in the classroom",
+        "button": "Join now"
+      },
+      "teachers": {
+        "title": "For Teachers",
+        "description": "Transform your music lessons with interactive quiz games",
+        "button": "Create game"
+      },
+      "creators": {
+        "title": "For Creators",
+        "description": "Build custom music experiences and share them with the world",
+        "button": "Start creating"
+      }
+    },
+    "enterprise": {
+      "title": "Trusted by Educational Institutions & Enterprises",
+      "education": {
+        "title": "FOR HIGHER EDUCATION",
+        "description": "Transform your music curriculum with interactive learning experiences. Inspire your students with Guessify!+ premium features designed for academic excellence.",
+        "features": {
+          "unlimited_accounts": "Unlimited student accounts",
+          "analytics": "Advanced analytics & reporting",
+          "curriculum": "Curriculum integration tools"
+        },
+        "button": "View Pricing Plans →"
+      },
+      "enterprise": {
+        "title": "FOR ENTERPRISES",
+        "description": "Drive business growth and team engagement with custom music experiences. Perfect for team building, training, and corporate events.",
+        "features": {
+          "branding": "Custom branding & themes",
+          "security": "Enterprise-grade security",
+          "manager": "Dedicated account manager"
+        },
+        "button": "Learn More →"
+      }
+    },
+    "solutions": {
+      "title": "Explore Our Solutions",
+      "school": {
+        "title": "Guessify! at school",
+        "description": "Transform classroom learning with interactive music education"
+      },
+      "work": {
+        "title": "Guessify! at work",
+        "description": "Build stronger teams through engaging music activities"
+      },
+      "home": {
+        "title": "Guessify! at home",
+        "description": "Create memorable family moments with music games"
+      },
+      "community": {
+        "title": "Guessify! community",
+        "description": "Connect with music lovers worldwide through shared experiences"
+      },
+      "learn_more": "Learn more →"
+    },
+    "footer": {
+      "about": {
+        "title": "About",
+        "company": "Company",
+        "careers": "Careers",
+        "contact_us": "Contact us"
+      },
+      "solutions": {
+        "title": "Solutions",
+        "at_home": "At home",
+        "at_school": "At school",
+        "at_work": "At work",
+        "community": "Community",
+        "marketplace": "Marketplace"
+      },
+      "resources": {
+        "title": "Resources",
+        "blog": "Blog",
+        "help_center": "Help Center"
+      },
+      "terms": {
+        "title": "Terms and conditions",
+        "terms_conditions": "Terms and conditions",
+        "privacy_policy": "Privacy policy"
+      }
+    }
+  },
+  "about": {
+    "title": "About Guessify",
+    "subtitle": "Revolutionizing music education and entertainment",
+    "content": "Learn more about our mission and team",
+    "our_story": "Our Story",
+    "story_text_1": "Guessify! was born from a simple idea: to make music learning fun and interactive. Our team of music educators and technology enthusiasts came together to create a platform that connects people through the universal language of music.",
+    "story_text_2": "Whether you're a teacher looking to engage your students, a family wanting to bond through music, or friends competing for bragging rights, Guessify! provides the perfect platform for musical discovery and fun.",
+    "our_mission": "Our Mission",
+    "mission_text": "To make music education accessible, engaging, and enjoyable for everyone, while fostering connections through shared musical experiences.",
+    "leadership_team": "Leadership Team",
+    "team": {
+      "omri": {
+        "name": "Omri Peer",
+        "role": "Senior Fullstack Developer, DevOps, DBA",
+        "bio": "Expert in full-stack development with extensive experience in DevOps and database administration"
+      },
+      "ori": {
+        "name": "Ori Katz",
+        "role": "Scrum Master, UX/UI Designer",
+        "bio": "Passionate about creating intuitive user experiences and leading agile development processes"
+      },
+      "robert": {
+        "name": "Robert Ifraimov",
+        "role": "Product Owner, QA Engineer",
+        "bio": "Focused on product strategy and ensuring the highest quality standards in our applications"
+      },
+      "noam": {
+        "name": "Noam Sella",
+        "role": "Technical Writer, System Architect",
+        "bio": "Specializes in system architecture design and creating comprehensive technical documentation"
+      }
+    },
+    "our_values": "Our Values",
+    "values": {
+      "innovation": {
+        "title": "Innovation",
+        "description": "Constantly pushing the boundaries of educational technology"
+      },
+      "accessibility": {
+        "title": "Accessibility",
+        "description": "Making music education available to everyone, everywhere"
+      },
+      "community": {
+        "title": "Community",
+        "description": "Building connections through shared musical experiences"
+      },
+      "excellence": {
+        "title": "Excellence",
+        "description": "Delivering the highest quality educational content and experiences"
+      }
+    },
+    "get_in_touch": "Get in Touch",
+    "contact_text": "Have questions or want to learn more about Guessify!? We'd love to hear from you.",
+    "contact_us": "Contact Us",
+    "join_team": "Join Our Team"
+  },
+  "pricing": {
+    "title": "Pricing Plans",
+    "subtitle": "Choose the perfect plan for your needs",
+    "content": "Flexible pricing options for everyone"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Get in touch with our team",
+    "content": "We'd love to hear from you"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Latest news and updates",
+    "content": "Stay updated with Guessify"
+  },
+  "help": {
+    "title": "Help Center",
+    "subtitle": "Find answers to your questions",
+    "content": "Get support when you need it"
+  },
+  "careers": {
+    "title": "Join Our Mission",
+    "subtitle": "Help us revolutionize music education and create meaningful learning experiences for people around the world",
+    "content": "Build the future of music education with us",
+    "why_work": "Why Work at Guessify!",
+    "why_work_reasons": [
+      {
+        "title": "Meaningful Impact",
+        "description": "Work on a product that truly changes how people learn and enjoy music"
+      },
+      {
+        "title": "Amazing Team",
+        "description": "Join a group of talented and passionate people who share your enthusiasm"
+      },
+      {
+        "title": "Professional Growth",
+        "description": "Opportunities to learn, grow, and lead in the educational technology field"
+      },
+      {
+        "title": "Flexibility",
+        "description": "Hybrid work with flexibility in hours and location"
+      }
+    ],
+    "benefits_perks": "Benefits & Perks",
+    "benefits_list": [
+      "Comprehensive health insurance",
+      "Unlimited vacation days",
+      "Professional development budget",
+      "Top-tier work equipment",
+      "Company lunches",
+      "Team events and celebrations",
+      "Stock options",
+      "Creative and inspiring work environment"
+    ],
+    "open_positions": "Open Positions",
+    "positions": [
+      {
+        "title": "Senior Frontend Developer",
+        "department": "Engineering",
+        "location": "Tel Aviv / Remote",
+        "type": "Full-time",
+        "description": "Lead the development of our platform's user interface with React and TypeScript",
+        "requirements": [
+          "5+ years experience with React and JavaScript",
+          "Experience with TypeScript and modern CSS",
+          "Deep understanding of UX/UI principles",
+          "Experience with testing frameworks",
+          "High level English"
+        ]
+      },
+      {
+        "title": "Senior Backend Developer",
+        "department": "Engineering",
+        "location": "Tel Aviv / Remote",
+        "type": "Full-time",
+        "description": "Build and improve the technological infrastructure behind our platform",
+        "requirements": [
+          "5+ years experience with Node.js and Python",
+          "Experience with databases (MongoDB, PostgreSQL)",
+          "Understanding of cloud platforms (AWS, GCP)",
+          "Experience with microservices and APIs",
+          "High level English"
+        ]
+      },
+      {
+        "title": "UX/UI Designer",
+        "department": "Design",
+        "location": "Tel Aviv",
+        "type": "Full-time",
+        "description": "Design amazing user experiences that make learning fun and intuitive",
+        "requirements": [
+          "3+ years experience in UX/UI design",
+          "Proficiency in Figma, Sketch or similar tools",
+          "Understanding of design systems and accessibility",
+          "Experience with user research and testing",
+          "Impressive portfolio"
+        ]
+      },
+      {
+        "title": "Product Manager",
+        "department": "Product",
+        "location": "Tel Aviv",
+        "type": "Full-time",
+        "description": "Lead the strategy and development of new platform features",
+        "requirements": [
+          "3+ years experience in product management",
+          "Technical understanding of software development",
+          "Experience with agile methodologies",
+          "Analytical and strategic thinking skills",
+          "Background in education or EdTech - advantage"
+        ]
+      }
+    ],
+    "hiring_process": "Our Hiring Process",
+    "process_steps": [
+      {
+        "step": "1",
+        "title": "Application",
+        "description": "Send us your resume and cover letter"
+      },
+      {
+        "step": "2",
+        "title": "Initial Phone Call",
+        "description": "Brief conversation with our HR team for initial introduction"
+      },
+      {
+        "step": "3",
+        "title": "Technical Assignment",
+        "description": "Short assignment relevant to the role (for technical positions)"
+      },
+      {
+        "step": "4",
+        "title": "Interviews",
+        "description": "Interviews with relevant team members and managers"
+      },
+      {
+        "step": "5",
+        "title": "Decision and Offer",
+        "description": "We'll get back to you with a decision within a week"
+      }
+    ],
+    "apply_now": "Apply Now",
+    "requirements": "Requirements:",
+    "dont_see_role": "Don't see the right role?",
+    "contact_description": "We're always looking for talented people who share our passion for music and education. Send us your resume and tell us how you'd like to contribute.",
+    "meet_team": "Meet our current team:",
+    "team_members": [
+      {
+        "name": "Omri Peer",
+        "role": "Senior Fullstack Developer, DevOps, DBA",
+        "description": "Leads technical development and cloud infrastructure"
+      },
+      {
+        "name": "Ori Katz",
+        "role": "Scrum Master, UX/UI",
+        "description": "Manages development processes and experience design"
+      },
+      {
+        "name": "Robert Ifraimov",
+        "role": "Product Owner, QA Engineer",
+        "description": "Defines product vision and ensures quality"
+      },
+      {
+        "name": "Noam Sella",
+        "role": "Technical Writer, System Architect",
+        "description": "Designs architecture and documents the system"
+      }
+    ],
+    "get_in_touch": "Get in Touch",
+    "contact_email": "careers@guessify.com",
+    "join_us": "Join us and help change the world of music education!"
+  },
+  "community": {
+    "title": "🌍 Guessify! Community",
+    "subtitle": "Connect with music lovers worldwide through shared musical experiences and exciting competitions",
+    "content": "Join our vibrant community",
+    "join_community": "Join Community",
+    "explore_games": "Explore Games",
+    "global_community": "Global Community",
+    "global_subtitle": "Join a community of thousands of music lovers from around the world who share a passion for music and learning.",
+    "community_features": {
+      "title": "What awaits you in the community",
+      "features": [
+        {
+          "title": "Public Games",
+          "description": "Join open games that take place daily on various topics",
+          "icon": "🎮"
+        },
+        {
+          "title": "Weekly Competitions",
+          "description": "Participate in musical competitions and compete for first place",
+          "icon": "🏆"
+        },
+        {
+          "title": "Leaderboards",
+          "description": "Track your performance and compare yourself to other players",
+          "icon": "📊"
+        },
+        {
+          "title": "Forums and Discussions",
+          "description": "Share tips, music recommendations and insights with community members",
+          "icon": "💬"
+        }
+      ]
+    },
+    "popular_challenges": {
+      "title": "Popular Challenges",
+      "challenges": [
+        {
+          "title": "Classic Rock Challenge",
+          "description": "Test your knowledge of classic rock from the 70s and 80s",
+          "participants": "2,847 participants",
+          "difficulty": "Medium"
+        },
+        {
+          "title": "Israeli Music",
+          "description": "From classic Israeli singers to modern pop",
+          "participants": "1,523 participants",
+          "difficulty": "Easy"
+        },
+        {
+          "title": "Jazz Challenge",
+          "description": "For jazz experts - from the genre's masters",
+          "participants": "892 participants",
+          "difficulty": "Hard"
+        },
+        {
+          "title": "World Pop",
+          "description": "Hits from around the world in different languages",
+          "participants": "3,156 participants",
+          "difficulty": "Medium"
+        }
+      ]
+    },
+    "leaderboards": {
+      "title": "Leaderboards",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "all_time": "All Time",
+      "top_players": [
+        {
+          "rank": 1,
+          "name": "MusicMaster2024",
+          "score": "15,847",
+          "country": "Israel"
+        },
+        {
+          "rank": 2,
+          "name": "RockLegend",
+          "score": "14,923",
+          "country": "USA"
+        },
+        {
+          "rank": 3,
+          "name": "JazzQueen",
+          "score": "14,156",
+          "country": "France"
+        }
+      ]
+    },
+    "events": {
+      "title": "Community Events",
+      "upcoming": "Upcoming Events",
+      "event_list": [
+        {
+          "title": "World Music Night",
+          "date": "April 15, 2024",
+          "time": "8:00 PM",
+          "description": "Special evening with music from around the world",
+          "participants": "Limited to 100 participants"
+        },
+        {
+          "title": "The Great Rock Competition",
+          "date": "April 22, 2024",
+          "time": "7:30 PM",
+          "description": "Huge rock competition with amazing prizes",
+          "participants": "Unlimited"
+        },
+        {
+          "title": "Classical Music Challenge",
+          "date": "April 29, 2024",
+          "time": "6:00 PM",
+          "description": "For classical music and opera lovers",
+          "participants": "Limited to 50 participants"
+        }
+      ]
+    },
+    "user_stories": {
+      "title": "User Stories",
+      "stories": [
+        {
+          "name": "Dana Cohen",
+          "location": "Tel Aviv",
+          "quote": "The Guessify! community helped me discover new music styles and meet wonderful friends from around the world.",
+          "avatar": "👩"
+        },
+        {
+          "name": "Michael Rosen",
+          "location": "Haifa",
+          "quote": "The weekly competitions have become the most fun part of my week. I'm always looking forward to the next challenge!",
+          "avatar": "👨"
+        },
+        {
+          "name": "Sarah Levy",
+          "location": "Jerusalem",
+          "quote": "As a music teacher, the community gives me inspiration and new ideas for my lessons.",
+          "avatar": "👩‍🏫"
+        }
+      ]
+    },
+    "how_to_join": {
+      "title": "How to Join?",
+      "steps": [
+        {
+          "step": "1",
+          "title": "Sign Up for Free",
+          "description": "Create a free account on Guessify!"
+        },
+        {
+          "step": "2",
+          "title": "Complete Your Profile",
+          "description": "Tell us about your musical taste"
+        },
+        {
+          "step": "3",
+          "title": "Join a Game",
+          "description": "Choose a game or competition and start playing"
+        },
+        {
+          "step": "4",
+          "title": "Connect with Community",
+          "description": "Share, discuss and make new friends"
+        }
+      ]
+    },
+    "community_guidelines": {
+      "title": "Community Guidelines",
+      "description": "To maintain a positive and respectful environment for everyone:",
+      "rules": [
+        "Treat all community members with respect",
+        "Don't share offensive or inappropriate content",
+        "Help new members integrate",
+        "Share knowledge and advice generously",
+        "Report inappropriate behavior to moderators"
+      ]
+    },
+    "ready_to_join": "Ready to Join?",
+    "join_description": "Join thousands of music lovers and start your musical journey today!",
+    "join_now": "Join Now",
+    "browse_games": "Browse Games"
+  },
+  "school": {
+    "title": "🎵 Guessify! at School",
+    "subtitle": "Transform classroom learning with interactive music education that engages students and enhances their musical journey.",
+    "content": "Engage students with interactive music learning",
+    "start_free_trial": "Start Free Trial",
+    "contact_education_team": "Contact Education Team",
+    "revolutionize_title": "Revolutionize Music Education",
+    "revolutionize_subtitle": "Discover how Guessify! transforms traditional music lessons into dynamic, interactive learning experiences.",
+    "educational_benefits": "Educational Benefits",
+    "benefits_description": "Guessify! provides measurable educational outcomes that improve student learning and engagement.",
+    "ready_to_start": "Ready to Start?",
+    "ready_description": "Join thousands of educators already using Guessify! to enhance their music programs.",
+    "start_your_free_trial": "Start Your Free Trial",
+    "transform_classroom": "Transform Your Music Classroom Today",
+    "transform_description": "Give your students the engaging, interactive music education they deserve.",
+    "get_started_free": "Get Started Free",
+    "schedule_demo": "Schedule Demo"
+  },
+  "work": {
+    "title": "🎵 Guessify! at Work",
+    "subtitle": "Build stronger teams through engaging music activities that connect employees and improve team morale.",
+    "content": "Perfect for team building and corporate events",
+    "start_team_building": "Start Team Building",
+    "schedule_demo": "Schedule Demo",
+    "transform_workplace": "Transform Your Workplace",
+    "transform_subtitle": "Discover how Guessify! turns regular company events into unforgettable experiences that strengthen bonds between employees.",
+    "workplace_benefits": "Workplace Benefits",
+    "benefits_description": "Guessify! provides proven solutions for improving employee engagement, team building, and strengthening organizational culture.",
+    "benefits": [
+      {
+        "title": "Improve Employee Engagement",
+        "description": "Interactive activities that increase participation and engagement",
+        "icon": "👥"
+      },
+      {
+        "title": "Strengthen Team Bonds",
+        "description": "Create personal connections through shared musical experiences",
+        "icon": "🤝"
+      },
+      {
+        "title": "Stress Relief and Fun",
+        "description": "Enjoyable break from daily routine that reduces stress",
+        "icon": "😄"
+      },
+      {
+        "title": "Enhanced Communication",
+        "description": "Activities that encourage open communication and collaboration",
+        "icon": "💬"
+      }
+    ],
+    "use_cases": {
+      "title": "Popular Use Cases",
+      "cases": [
+        {
+          "title": "Team Building Events",
+          "description": "Music games that connect employees from different departments",
+          "features": [
+            "Custom games",
+            "Team competitions",
+            "Prizes and rewards"
+          ]
+        },
+        {
+          "title": "Company Fun Days",
+          "description": "Quality entertainment for annual company events",
+          "features": [
+            "Large group games",
+            "Custom themes",
+            "Professional management"
+          ]
+        },
+        {
+          "title": "Remote Team Activities",
+          "description": "Connect employees working from home or different offices",
+          "features": ["Virtual platform", "Interactive games", "Easy to use"]
+        },
+        {
+          "title": "Training and Learning",
+          "description": "Combine learning and fun in training programs",
+          "features": [
+            "Educational content",
+            "Progress tracking",
+            "Detailed analytics"
+          ]
+        }
+      ]
+    },
+    "success_stories": {
+      "title": "Success Stories",
+      "stories": [
+        {
+          "company": "TechCorp Inc.",
+          "quote": "Our team building events with Guessify! were a huge success. Team morale and collaboration have never been better.",
+          "author": "Mike Chen, HR Manager",
+          "results": "85% improvement in employee engagement"
+        },
+        {
+          "company": "Creative Agency Ltd.",
+          "quote": "The games helped us get to know our team members better and created a great atmosphere in the office.",
+          "author": "Sarah Johnson, Project Manager",
+          "results": "90% of employees want more events"
+        }
+      ]
+    },
+    "features": {
+      "title": "Special Features for Business",
+      "list": [
+        {
+          "title": "Custom Branding",
+          "description": "Add your company logo and colors to games"
+        },
+        {
+          "title": "Advanced Management",
+          "description": "Management tools for event organizers and HR managers"
+        },
+        {
+          "title": "Reporting and Analytics",
+          "description": "Engagement metrics and detailed activity reports"
+        },
+        {
+          "title": "Professional Support",
+          "description": "Close support and technical assistance throughout the event"
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Business Pricing",
+      "description": "Flexible plans tailored to your organization size and specific needs",
+      "contact_sales": "Contact Sales",
+      "custom_quote": "Get Custom Quote"
+    },
+    "ready_to_start": "Ready to Start?",
+    "ready_description": "Join hundreds of companies already using Guessify! to strengthen their teams and improve work culture.",
+    "get_started": "Get Started Now",
+    "book_demo": "Book Demo"
+  },
+  "solutions": {
+    "title": "Solutions for Every Environment",
+    "subtitle": "Discover how Guessify! can enhance learning, team building, and entertainment in schools, workplaces, homes, and communities.",
+    "content": "Tailored solutions for every need",
+    "key_features": "Key Features",
+    "benefits": "Benefits",
+    "learn_more": "Learn More",
+    "popular_use_cases": "Popular Use Cases",
+    "success_stories": "Success Stories",
+    "ready_to_start": "Ready to Start?",
+    "cta_description": "Join thousands of educators, teams, and families already using Guessify! to create unforgettable musical experiences.",
+    "start_free_trial": "Start Free Trial",
+    "schedule_demo": "Schedule Demo",
+    "solutions_data": [
+      {
+        "title": "Guessify! at School",
+        "icon": "🏫",
+        "description": "Transform your classroom with interactive music education",
+        "features": [
+          "Curriculum-aligned content",
+          "Student progress tracking",
+          "Classroom management tools",
+          "Multi-grade level support"
+        ],
+        "benefits": [
+          "Increased student engagement",
+          "Improved music knowledge retention",
+          "Fun and interactive learning experience",
+          "Easy lesson plan integration"
+        ]
+      },
+      {
+        "title": "Guessify! at Work",
+        "icon": "💼",
+        "description": "Build stronger teams through music-based activities",
+        "features": [
+          "Team building games",
+          "Virtual event hosting",
+          "Custom corporate playlists",
+          "Employee engagement metrics"
+        ],
+        "benefits": [
+          "Enhanced team collaboration",
+          "Improved workplace morale",
+          "Stress relief and fun",
+          "Remote team connection"
+        ]
+      },
+      {
+        "title": "Guessify! at Home",
+        "icon": "🏠",
+        "description": "Connect families through musical fun",
+        "features": [
+          "Family-friendly content",
+          "Multi-generational playlists",
+          "Easy setup and play",
+          "Offline mode available"
+        ],
+        "benefits": [
+          "Quality family time",
+          "Musical discovery for all ages",
+          "Educational screen time",
+          "Bonding through shared experiences"
+        ]
+      },
+      {
+        "title": "Guessify! Community",
+        "icon": "🌍",
+        "description": "Connect with music lovers worldwide",
+        "features": [
+          "Public game hosting",
+          "Community challenges",
+          "Global leaderboards",
+          "Cultural music exploration"
+        ],
+        "benefits": [
+          "Meet like-minded music lovers",
+          "Discover new genres and artists",
+          "Competitive gaming experience",
+          "Cultural exchange through music"
+        ]
+      }
+    ],
+    "use_cases_data": [
+      {
+        "category": "Education",
+        "examples": [
+          "Music theory lessons",
+          "Historical music period studies",
+          "Instrument identification training",
+          "Composer recognition games"
+        ]
+      },
+      {
+        "category": "Corporate",
+        "examples": [
+          "Team building events",
+          "Company party entertainment",
+          "Remote team connection",
+          "Client entertainment"
+        ]
+      },
+      {
+        "category": "Personal",
+        "examples": [
+          "Birthday party games",
+          "Family gatherings",
+          "Date night activities",
+          "Personal music knowledge testing"
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "subtitle": "Last updated: March 1, 2024",
+    "content": "Please read our terms carefully",
+    "sections": {
+      "acceptance": {
+        "title": "1. Acceptance of Terms",
+        "content": "By accessing and using Guessify! (\"the Service\"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service."
+      },
+      "service_description": {
+        "title": "2. Description of Service",
+        "content": "Guessify! is an interactive music quiz platform that allows users to create, host, and participate in music-based educational games. The service includes:",
+        "features": [
+          "Game creation and hosting tools",
+          "Music library access for educational purposes",
+          "Real-time multiplayer functionality",
+          "Analytics and progress tracking",
+          "Educational content and resources"
+        ]
+      },
+      "user_accounts": {
+        "title": "3. User Accounts",
+        "content": "To access certain features of the Service, you must register for an account. You agree to:",
+        "requirements": [
+          "Provide accurate and complete information",
+          "Maintain the security of your password",
+          "Accept responsibility for all activities under your account",
+          "Notify us immediately of any unauthorized use"
+        ]
+      },
+      "acceptable_use": {
+        "title": "4. Acceptable Use",
+        "content": "You agree not to use the Service to:",
+        "restrictions": [
+          "Violate any applicable laws or regulations",
+          "Infringe on intellectual property rights",
+          "Upload malicious code or content",
+          "Harass, abuse, or harm other users",
+          "Attempt to gain unauthorized access to the Service",
+          "Use the Service for commercial purposes without permission"
+        ]
+      },
+      "intellectual_property": {
+        "title": "5. Intellectual Property",
+        "content": "The Service and its original content, features, and functionality are owned by Guessify! and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.",
+        "music_content": "Music content is licensed for educational use only. Users may not download, distribute, or use music content outside of the platform."
+      },
+      "privacy_policy": {
+        "title": "6. Privacy Policy",
+        "content": "Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the Service, to understand our practices."
+      },
+      "subscription_payment": {
+        "title": "7. Subscription and Payment",
+        "content": "Some features of the Service require a paid subscription. By purchasing a subscription, you agree to:",
+        "terms": [
+          "Pay all fees associated with your subscription",
+          "Automatic renewal unless cancelled",
+          "Our refund policy as stated separately"
+        ]
+      },
+      "termination": {
+        "title": "8. Termination",
+        "content": "We may terminate or suspend your account and access to the Service immediately, without prior notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties."
+      },
+      "disclaimer": {
+        "title": "9. Disclaimer of Warranties",
+        "content": "The Service is provided \"as is\" and \"as available\" without any warranties of any kind, either express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, or non-infringement."
+      },
+      "limitation_liability": {
+        "title": "10. Limitation of Liability",
+        "content": "In no event shall Guessify!, its directors, employees, partners, agents, suppliers, or affiliates be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses."
+      },
+      "changes_terms": {
+        "title": "11. Changes to Terms",
+        "content": "We reserve the right to modify these terms at any time. We will notify users of any material changes via email or through the Service. Continued use of the Service after such modifications constitutes acceptance of the updated terms."
+      },
+      "contact_info": {
+        "title": "12. Contact Information",
+        "content": "If you have any questions about these Terms of Service, please contact us at:",
+        "email": "Email: legal@guessify.com",
+        "address": "Address: 123 Rothschild Blvd, Tel Aviv, Israel"
+      }
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "subtitle": "Last updated: March 1, 2024",
+    "content": "Your privacy is important to us",
+    "sections": {
+      "information_collect": {
+        "title": "1. Information We Collect",
+        "content": "We collect information you provide directly to us, such as when you create an account, use our services, or contact us for support.",
+        "personal_info": {
+          "title": "Personal Information",
+          "items": [
+            "Name and email address",
+            "Account credentials",
+            "Profile information",
+            "Communication preferences"
+          ]
+        },
+        "usage_info": {
+          "title": "Usage Information",
+          "items": [
+            "Game participation and scores",
+            "Learning progress and analytics",
+            "Device and browser information",
+            "IP address and location data"
+          ]
+        }
+      },
+      "how_we_use": {
+        "title": "2. How We Use Your Information",
+        "content": "We use the information we collect to:",
+        "purposes": [
+          "Provide and improve our services",
+          "Create and manage your account",
+          "Track learning progress and provide analytics",
+          "Send important updates and notifications",
+          "Provide customer support",
+          "Ensure security and prevent fraud",
+          "Comply with legal obligations"
+        ]
+      },
+      "information_sharing": {
+        "title": "3. Information Sharing",
+        "content": "We do not sell, trade, or otherwise transfer your personal information to third parties except in the following circumstances:",
+        "circumstances": [
+          "With your explicit consent",
+          "To service providers who assist in our operations",
+          "When required by law or legal process",
+          "To protect our rights and safety",
+          "In connection with a business transfer"
+        ]
+      },
+      "educational_data": {
+        "title": "4. Educational Data Protection",
+        "content": "We are committed to protecting student privacy and comply with applicable educational privacy laws, including FERPA and COPPA.",
+        "commitments": [
+          "Student data is used solely for educational purposes",
+          "We do not use student data for advertising",
+          "Schools maintain control over their student data",
+          "Parents can request access to their child's data"
+        ]
+      },
+      "data_security": {
+        "title": "5. Data Security",
+        "content": "We implement appropriate security measures to protect your information:",
+        "measures": [
+          "Encryption of data in transit and at rest",
+          "Regular security audits and updates",
+          "Access controls and authentication",
+          "Employee training on data protection"
+        ]
+      },
+      "your_rights": {
+        "title": "6. Your Rights and Choices",
+        "content": "You have the following rights regarding your personal information:",
+        "rights": [
+          "Access and review your data",
+          "Correct inaccurate information",
+          "Delete your account and data",
+          "Export your data",
+          "Opt out of marketing communications",
+          "Restrict processing of your data"
+        ]
+      }
+    }
+  },
+  "home": {
+    "title": "🏠 Guessify! at Home",
+    "subtitle": "Create unforgettable family moments with music games that bring everyone together, from grandparents to grandchildren.",
+    "start_family_fun": "Start Family Fun",
+    "join_game": "Join Game",
+    "perfect_for_family": "Perfect for Family Entertainment",
+    "perfect_subtitle": "Discover how Guessify! brings families closer together through the universal language of music.",
+    "perfect_for_occasions": "Perfect for Every Family Occasion",
+    "occasions_subtitle": "From everyday fun to special celebrations",
+    "family_benefits": "Family Benefits",
+    "benefits_description": "Strengthen family bonds and create lasting memories through shared musical experiences that everyone can enjoy.",
+    "ready_for_fun": "Ready for Family Fun?",
+    "ready_description": "Join thousands of families who are creating magical musical memories together.",
+    "start_playing_now": "Start Playing Now",
+    "bring_family_together": "Bring Your Family Together Today",
+    "bring_description": "Create magical moments and lasting memories through the joy of music.",
+    "get_started_free": "Get Started Free",
+    "join_game_now": "Join a Game Now"
+  },
+  "not_found": {
+    "title": "Page Not Found",
+    "subtitle": "The page you're looking for doesn't exist",
+    "back_home": "Back to Home"
+  }
+}

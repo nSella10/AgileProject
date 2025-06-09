@@ -56,10 +56,19 @@ const PricingPage = () => {
           </p>
 
           {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <span className={`${!isAnnual ? "text-white" : "text-blue-200"}`}>
+          <div
+            className={`flex items-center justify-center gap-4 mb-8 ${
+              isRTL ? "flex-row-reverse" : ""
+            }`}
+          >
+            <span
+              className={`${
+                !isAnnual ? "text-white" : "text-blue-200"
+              } flex items-center`}
+            >
               {t("pricing.monthly")}
             </span>
+
             <button
               onClick={() => setIsAnnual(!isAnnual)}
               className={`relative w-14 h-7 rounded-full transition-colors ${
@@ -67,13 +76,24 @@ const PricingPage = () => {
               }`}
             >
               <div
-                className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                  isAnnual ? "translate-x-8" : "translate-x-1"
+                className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all ${
+                  isRTL
+                    ? isAnnual
+                      ? "right-1"
+                      : "right-7"
+                    : isAnnual
+                    ? "left-7"
+                    : "left-1"
                 }`}
               />
             </button>
-            <span className={`${isAnnual ? "text-white" : "text-blue-200"}`}>
-              {t("pricing.annual")}
+
+            <span
+              className={`${
+                isAnnual ? "text-white" : "text-blue-200"
+              } flex items-center`}
+            >
+              <span>{t("pricing.annual")}</span>
               <span
                 className={`${
                   isRTL ? "mr-2" : "ml-2"

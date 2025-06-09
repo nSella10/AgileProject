@@ -94,7 +94,7 @@ const CareersPage = () => {
                 <div
                   className={`flex flex-col md:flex-row md:items-center md:justify-between mb-4`}
                 >
-                  <div className={isRTL ? "order-2" : "order-1"}>
+                  <div className={isRTL ? "order-1" : "order-1"}>
                     <h3 className="text-xl font-bold text-gray-800 mb-2">
                       {position.title}
                     </h3>
@@ -116,7 +116,7 @@ const CareersPage = () => {
                   </div>
                   <button
                     className={`mt-4 md:mt-0 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors ${
-                      isRTL ? "order-1 md:ml-4" : "order-2"
+                      isRTL ? "order-2 md:mr-4" : "order-2"
                     }`}
                   >
                     {t("careers.apply_now")}

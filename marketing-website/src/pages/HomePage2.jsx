@@ -15,69 +15,60 @@ import {
 import PageLayout from "../components/PageLayout";
 
 const HomePage2 = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const isRTL = i18n.language === "he";
 
   const features = [
     {
       icon: FaUserFriends,
-      title: "Family Fun",
-      description:
-        "Bring the whole family together with music games that span generations and musical tastes.",
+      title: t("home.features.family_fun.title"),
+      description: t("home.features.family_fun.description"),
     },
     {
       icon: FaBirthdayCake,
-      title: "Party Entertainment",
-      description:
-        "Perfect for birthday parties, family gatherings, and special celebrations that create lasting memories.",
+      title: t("home.features.party_entertainment.title"),
+      description: t("home.features.party_entertainment.description"),
     },
     {
       icon: FaHeart,
-      title: "Bonding Activities",
-      description:
-        "Strengthen family relationships through shared musical experiences and friendly competition.",
+      title: t("home.features.bonding_activities.title"),
+      description: t("home.features.bonding_activities.description"),
     },
     {
       icon: FaGift,
-      title: "Easy Setup",
-      description:
-        "Quick and simple setup means more time for fun and less time preparing activities.",
+      title: t("home.features.easy_setup.title"),
+      description: t("home.features.easy_setup.description"),
     },
   ];
 
-  const benefits = [
-    "Create memorable family moments",
-    "Bridge generational gaps through music",
-    "Encourage family interaction and communication",
-    "Discover new music together",
-    "Build lasting traditions and memories",
-    "Perfect for all ages and musical knowledge levels",
-  ];
+  const benefits = t("home.benefits", { returnObjects: true });
 
   const occasions = [
     {
-      title: "Family Game Night",
-      description: "Add musical excitement to your regular family game nights",
+      title: t("home.occasions.family_game_night.title"),
+      description: t("home.occasions.family_game_night.description"),
     },
     {
-      title: "Birthday Parties",
-      description:
-        "Entertainment that keeps guests of all ages engaged and happy",
+      title: t("home.occasions.birthday_parties.title"),
+      description: t("home.occasions.birthday_parties.description"),
     },
     {
-      title: "Holiday Gatherings",
-      description:
-        "Bring relatives together with fun activities everyone can enjoy",
+      title: t("home.occasions.holiday_gatherings.title"),
+      description: t("home.occasions.holiday_gatherings.description"),
     },
     {
-      title: "Weekend Fun",
-      description: "Turn ordinary weekends into special family bonding time",
+      title: t("home.occasions.weekend_fun.title"),
+      description: t("home.occasions.weekend_fun.description"),
     },
   ];
 
   return (
     <PageLayout>
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+      <div
+        className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white">
           <div className="absolute inset-0 bg-black/20"></div>
@@ -94,7 +85,11 @@ const HomePage2 = () => {
               <p className="text-xl lg:text-2xl mb-8 text-green-100 max-w-3xl mx-auto">
                 {t("home.subtitle")}
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div
+                className={`flex flex-col sm:flex-row gap-4 justify-center ${
+                  isRTL ? "sm:flex-row-reverse" : ""
+                }`}
+              >
                 <button
                   onClick={() => navigate("/register")}
                   className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl"
@@ -117,11 +112,10 @@ const HomePage2 = () => {
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Perfect for Family Entertainment
+                {t("home.perfect_for_family")}
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Discover how Guessify! brings families closer together through
-                the universal language of music.
+                {t("home.perfect_subtitle")}
               </p>
             </div>
 
@@ -152,10 +146,10 @@ const HomePage2 = () => {
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Perfect for Every Family Occasion
+                {t("home.perfect_for_occasions")}
               </h2>
               <p className="text-xl text-gray-600">
-                From everyday fun to special celebrations
+                {t("home.occasions_subtitle")}
               </p>
             </div>
 
@@ -186,21 +180,41 @@ const HomePage2 = () => {
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div>
                 <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-                  Family Benefits
+                  {t("home.family_benefits")}
                 </h2>
                 <p className="text-xl text-gray-600 mb-8">
-                  Strengthen family bonds and create lasting memories through
-                  shared musical experiences that everyone can enjoy.
+                  {t("home.benefits_description")}
                 </p>
                 <div className="space-y-4">
                   {benefits.map((benefit, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div className="bg-green-500 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
-                        <FaPlay className="text-white text-xs" />
-                      </div>
-                      <span className="text-gray-700 font-medium">
-                        {benefit}
-                      </span>
+                    <div
+                      key={index}
+                      className={`flex items-center ${
+                        isRTL ? "gap-4" : "space-x-3"
+                      }`}
+                      dir={isRTL ? "rtl" : "ltr"}
+                    >
+                      {isRTL ? (
+                        // Hebrew RTL: Icon on right pointing left, text on left
+                        <>
+                          <div className="bg-green-500 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                            <FaPlay className="text-white text-xs transform rotate-180" />
+                          </div>
+                          <span className="text-gray-700 font-medium text-right">
+                            {benefit}
+                          </span>
+                        </>
+                      ) : (
+                        // English LTR: Icon on left pointing right, text on right
+                        <>
+                          <div className="bg-green-500 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                            <FaPlay className="text-white text-xs" />
+                          </div>
+                          <span className="text-gray-700 font-medium">
+                            {benefit}
+                          </span>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -209,17 +223,18 @@ const HomePage2 = () => {
                 <div className="text-center">
                   <FaUserFriends className="text-6xl text-green-500 mx-auto mb-6" />
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Ready for Family Fun?
+                    {t("home.ready_for_fun")}
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    Join thousands of families who are creating magical musical
-                    memories together.
+                    {t("home.ready_description")}
                   </p>
                   <button
                     onClick={() => navigate("/register")}
-                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto"
+                    className={`bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center mx-auto ${
+                      isRTL ? "space-x-reverse space-x-2" : "space-x-2"
+                    }`}
                   >
-                    <span>Start Playing Now</span>
+                    <span>{t("home.start_playing_now")}</span>
                     <FaArrowRight />
                   </button>
                 </div>
@@ -233,13 +248,16 @@ const HomePage2 = () => {
           <div className="max-w-4xl mx-auto px-6 text-center">
             <FaMusic className="text-6xl mx-auto mb-6 text-green-200" />
             <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-              Bring Your Family Together Today
+              {t("home.bring_family_together")}
             </h2>
             <p className="text-xl text-green-100 mb-8">
-              Create magical moments and lasting memories through the joy of
-              music.
+              {t("home.bring_description")}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div
+              className={`flex flex-col sm:flex-row gap-4 justify-center ${
+                isRTL ? "sm:flex-row-reverse" : ""
+              }`}
+            >
               <button
                 onClick={() => {
                   window.scrollTo(0, 0);
@@ -247,7 +265,7 @@ const HomePage2 = () => {
                 }}
                 className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105"
               >
-                Get Started Free
+                {t("home.get_started_free")}
               </button>
               <button
                 onClick={() => {
@@ -256,7 +274,7 @@ const HomePage2 = () => {
                 }}
                 className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300"
               >
-                Join a Game Now
+                {t("home.join_game_now")}
               </button>
             </div>
           </div>

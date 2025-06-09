@@ -94,13 +94,13 @@ const WorkPage = () => {
                   {useCase.features?.map((feature, featureIdx) => (
                     <li
                       key={featureIdx}
-                      className={`text-sm text-gray-600 flex items-center ${
-                        isRTL ? "flex-row-reverse" : ""
+                      className={`text-sm text-gray-600 relative ${
+                        isRTL ? "text-right pr-4" : "text-left pl-4"
                       }`}
                     >
                       <span
-                        className={`w-2 h-2 bg-orange-400 rounded-full ${
-                          isRTL ? "ml-2" : "mr-2"
+                        className={`absolute w-2 h-2 bg-orange-400 rounded-full top-2 ${
+                          isRTL ? "right-0" : "left-0"
                         }`}
                       ></span>
                       {feature}

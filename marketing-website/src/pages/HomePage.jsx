@@ -73,7 +73,7 @@ const Homepage = () => {
       ),
 
       // Solutions section
-      [t("homepage.footer.solutions.at_home")]: "/",
+      [t("homepage.footer.solutions.at_home")]: getRoute("home", i18n.language),
       [t("homepage.footer.solutions.at_school")]: getRoute(
         "school",
         i18n.language
@@ -247,50 +247,45 @@ const Homepage = () => {
               ].map((card) => (
                 <div
                   key={card.title}
-                  className={`relative rounded-2xl bg-gradient-to-br ${
-                    card.color
-                  } text-white p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 ${
-                    isRTL ? "hebrew-homepage-card" : ""
-                  }`}
+                  className={`relative rounded-2xl bg-gradient-to-br ${card.color} text-white p-8 shadow-lg hover:shadow-xl transition-shadow duration-300`}
                   dir={isRTL ? "rtl" : "ltr"}
                 >
-                  <div
-                    className={`${
-                      isRTL ? "hebrew-card-content" : "text-center"
-                    }`}
-                  >
+                  <div className={isRTL ? "text-right" : "text-center"}>
                     {isRTL ? (
-                      <div className="w-full flex justify-end mb-6">
-                        <span className="text-5xl">{card.icon}</span>
+                      // Hebrew RTL: Icon on right, title on left
+                      <div className="flex items-center justify-end mb-6">
+                        <h3 className="text-xl lg:text-2xl font-bold mr-4">
+                          {card.title}
+                        </h3>
+                        <div className="text-5xl">{card.icon}</div>
                       </div>
                     ) : (
-                      <div className="text-5xl mb-6 text-center">
-                        {card.icon}
-                      </div>
+                      // English LTR: Icon centered, title below
+                      <>
+                        <div className="text-5xl mb-6 text-center">
+                          {card.icon}
+                        </div>
+                        <h3 className="text-xl lg:text-2xl font-bold mb-4 text-center">
+                          {card.title}
+                        </h3>
+                      </>
                     )}
-                    <h3
-                      className={`text-xl lg:text-2xl font-bold mb-4 ${
-                        isRTL ? "hebrew-homepage-card-title" : ""
-                      }`}
-                    >
-                      {card.title}
-                    </h3>
                     <p
                       className={`text-base opacity-95 mb-8 leading-relaxed ${
-                        isRTL ? "hebrew-homepage-card-description" : ""
+                        isRTL ? "text-right" : "text-center"
                       }`}
                     >
                       {card.description}
                     </p>
-                    <button
-                      className={`bg-white bg-opacity-20 backdrop-blur-sm text-white border border-white border-opacity-30 rounded-xl px-8 py-3 font-semibold hover:bg-opacity-30 transition-colors duration-200 ${
-                        isRTL ? "hebrew-homepage-card-button" : ""
-                      }`}
-                      onClick={() => handleCardButtonClick(card.btn)}
-                      dir={isRTL ? "rtl" : "ltr"}
-                    >
-                      {card.btn}
-                    </button>
+                    <div className={isRTL ? "text-right" : "text-center"}>
+                      <button
+                        className="bg-white bg-opacity-20 backdrop-blur-sm text-white border border-white border-opacity-30 rounded-xl px-8 py-3 font-semibold hover:bg-opacity-30 transition-colors duration-200"
+                        onClick={() => handleCardButtonClick(card.btn)}
+                        dir={isRTL ? "rtl" : "ltr"}
+                      >
+                        {card.btn}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -299,12 +294,24 @@ const Homepage = () => {
         </div>
 
         {/* Enterprise Section */}
-        <div className="bg-gradient-to-r from-slate-50 to-blue-50 py-20">
+        <div
+          className={`bg-gradient-to-r from-slate-50 to-blue-50 py-20 ${
+            isRTL ? "hebrew-enterprise-section" : ""
+          }`}
+        >
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
+            <h2
+              className={`text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12 ${
+                isRTL ? "text-right" : ""
+              }`}
+            >
               {t("homepage.enterprise.title")}
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div
+              className={`grid grid-cols-1 lg:grid-cols-2 gap-8 ${
+                isRTL ? "hebrew-enterprise-section" : ""
+              }`}
+            >
               <div
                 className={`bg-white shadow-lg rounded-2xl p-8 hover:shadow-xl transition-shadow duration-300 ${
                   isRTL ? "hebrew-enterprise-card" : ""
@@ -312,84 +319,122 @@ const Homepage = () => {
                 dir={isRTL ? "rtl" : "ltr"}
               >
                 <div
-                  className={`flex items-center mb-6 ${
-                    isRTL ? "flex-row-reverse" : ""
-                  }`}
+                  className="flex items-center mb-6"
+                  dir={isRTL ? "rtl" : "ltr"}
                 >
-                  <div
-                    className={`w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center ${
-                      isRTL ? "ml-4" : "mr-4"
-                    }`}
-                  >
-                    <span className="text-2xl">🎓</span>
-                  </div>
-                  <h4
-                    className={`text-2xl font-bold text-gray-800 ${
-                      isRTL ? "hebrew-enterprise-title" : ""
-                    }`}
-                  >
-                    {t("homepage.enterprise.education.title")}
-                  </h4>
+                  {isRTL ? (
+                    // Hebrew RTL: Icon first (right), then title (left) - using RTL direction
+                    <>
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-2xl">🎓</span>
+                      </div>
+                      <h4 className="text-2xl font-bold text-gray-800 mr-4">
+                        {t("homepage.enterprise.education.title")}
+                      </h4>
+                    </>
+                  ) : (
+                    // English LTR: Icon on left, title on right
+                    <>
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-2xl">🎓</span>
+                      </div>
+                      <h4 className="text-2xl font-bold text-gray-800">
+                        {t("homepage.enterprise.education.title")}
+                      </h4>
+                    </>
+                  )}
                 </div>
                 <p
                   className={`text-gray-600 mb-6 text-lg leading-relaxed ${
-                    isRTL ? "hebrew-enterprise-description text-right" : ""
+                    isRTL ? "text-right" : ""
                   }`}
                 >
                   {t("homepage.enterprise.education.description")}
                 </p>
-                <div
-                  className={`space-y-3 mb-6 ${
-                    isRTL ? "hebrew-enterprise-features" : ""
-                  }`}
-                >
+                <div className="space-y-3 mb-6">
                   <div
-                    className={`flex items-center text-gray-600 ${
-                      isRTL
-                        ? "flex-row-reverse justify-start text-right"
-                        : "space-x-2"
-                    }`}
+                    className="flex items-center text-gray-600"
+                    dir={isRTL ? "rtl" : "ltr"}
                   >
-                    <span className="text-green-500">✓</span>
-                    <span className={isRTL ? "mr-2" : ""}>
-                      {t(
-                        "homepage.enterprise.education.features.unlimited_accounts"
-                      )}
-                    </span>
+                    {isRTL ? (
+                      // Hebrew RTL: Checkmark on right, text on left with spacing
+                      <>
+                        <span className="text-green-500 ml-3">✓</span>
+                        <span className="text-right">
+                          {t(
+                            "homepage.enterprise.education.features.unlimited_accounts"
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      // English LTR: Checkmark on left, text on right
+                      <>
+                        <span className="text-green-500 mr-2">✓</span>
+                        <span>
+                          {t(
+                            "homepage.enterprise.education.features.unlimited_accounts"
+                          )}
+                        </span>
+                      </>
+                    )}
                   </div>
                   <div
-                    className={`flex items-center text-gray-600 ${
-                      isRTL
-                        ? "flex-row-reverse justify-start text-right"
-                        : "space-x-2"
-                    }`}
+                    className="flex items-center text-gray-600"
+                    dir={isRTL ? "rtl" : "ltr"}
                   >
-                    <span className="text-green-500">✓</span>
-                    <span className={isRTL ? "mr-2" : ""}>
-                      {t("homepage.enterprise.education.features.analytics")}
-                    </span>
+                    {isRTL ? (
+                      <>
+                        <span className="text-green-500 ml-3">✓</span>
+                        <span className="text-right">
+                          {t(
+                            "homepage.enterprise.education.features.analytics"
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-green-500 mr-2">✓</span>
+                        <span>
+                          {t(
+                            "homepage.enterprise.education.features.analytics"
+                          )}
+                        </span>
+                      </>
+                    )}
                   </div>
                   <div
-                    className={`flex items-center text-gray-600 ${
-                      isRTL
-                        ? "flex-row-reverse justify-start text-right"
-                        : "space-x-2"
-                    }`}
+                    className="flex items-center text-gray-600"
+                    dir={isRTL ? "rtl" : "ltr"}
                   >
-                    <span className="text-green-500">✓</span>
-                    <span className={isRTL ? "mr-2" : ""}>
-                      {t("homepage.enterprise.education.features.curriculum")}
-                    </span>
+                    {isRTL ? (
+                      <>
+                        <span className="text-green-500 ml-3">✓</span>
+                        <span className="text-right">
+                          {t(
+                            "homepage.enterprise.education.features.curriculum"
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-green-500 mr-2">✓</span>
+                        <span>
+                          {t(
+                            "homepage.enterprise.education.features.curriculum"
+                          )}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
-                <button
-                  className={`bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl px-8 py-4 font-semibold hover:from-blue-700 hover:to-indigo-700 transition-colors duration-200 shadow-lg ${
-                    isRTL ? "hebrew-enterprise-button" : ""
-                  }`}
-                  onClick={handleEducationClick}
-                >
-                  {t("homepage.enterprise.education.button")}
-                </button>
+                <div className={isRTL ? "text-right" : ""}>
+                  <button
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl px-8 py-4 font-semibold hover:from-blue-700 hover:to-indigo-700 transition-colors duration-200 shadow-lg"
+                    onClick={handleEducationClick}
+                  >
+                    {t("homepage.enterprise.education.button")}
+                  </button>
+                </div>
               </div>
 
               <div
@@ -399,93 +444,134 @@ const Homepage = () => {
                 dir={isRTL ? "rtl" : "ltr"}
               >
                 <div
-                  className={`flex items-center mb-6 ${
-                    isRTL ? "flex-row-reverse" : ""
-                  }`}
+                  className="flex items-center mb-6"
+                  dir={isRTL ? "rtl" : "ltr"}
                 >
-                  <div
-                    className={`w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center ${
-                      isRTL ? "ml-4" : "mr-4"
-                    }`}
-                  >
-                    <span className="text-2xl">🏢</span>
-                  </div>
-                  <h4
-                    className={`text-2xl font-bold text-gray-800 ${
-                      isRTL ? "hebrew-enterprise-title" : ""
-                    }`}
-                  >
-                    {t("homepage.enterprise.enterprise.title")}
-                  </h4>
+                  {isRTL ? (
+                    // Hebrew RTL: Icon first (right), then title (left) - using RTL direction
+                    <>
+                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <span className="text-2xl">🏢</span>
+                      </div>
+                      <h4 className="text-2xl font-bold text-gray-800 mr-4">
+                        {t("homepage.enterprise.enterprise.title")}
+                      </h4>
+                    </>
+                  ) : (
+                    // English LTR: Icon on left, title on right
+                    <>
+                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-2xl">🏢</span>
+                      </div>
+                      <h4 className="text-2xl font-bold text-gray-800">
+                        {t("homepage.enterprise.enterprise.title")}
+                      </h4>
+                    </>
+                  )}
                 </div>
                 <p
                   className={`text-gray-600 mb-6 text-lg leading-relaxed ${
-                    isRTL ? "hebrew-enterprise-description text-right" : ""
+                    isRTL ? "text-right" : ""
                   }`}
                 >
                   {t("homepage.enterprise.enterprise.description")}
                 </p>
-                <div
-                  className={`space-y-3 mb-6 ${
-                    isRTL ? "hebrew-enterprise-features" : ""
-                  }`}
-                >
+                <div className="space-y-3 mb-6">
                   <div
-                    className={`flex items-center text-gray-600 ${
-                      isRTL
-                        ? "flex-row-reverse justify-start text-right"
-                        : "space-x-2"
-                    }`}
+                    className="flex items-center text-gray-600"
+                    dir={isRTL ? "rtl" : "ltr"}
                   >
-                    <span className="text-green-500">✓</span>
-                    <span className={isRTL ? "mr-2" : ""}>
-                      {t("homepage.enterprise.enterprise.features.branding")}
-                    </span>
+                    {isRTL ? (
+                      // Hebrew RTL: Checkmark on right, text on left with spacing
+                      <>
+                        <span className="text-green-500 ml-3">✓</span>
+                        <span className="text-right">
+                          {t(
+                            "homepage.enterprise.enterprise.features.branding"
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      // English LTR: Checkmark on left, text on right
+                      <>
+                        <span className="text-green-500 mr-2">✓</span>
+                        <span>
+                          {t(
+                            "homepage.enterprise.enterprise.features.branding"
+                          )}
+                        </span>
+                      </>
+                    )}
                   </div>
                   <div
-                    className={`flex items-center text-gray-600 ${
-                      isRTL
-                        ? "flex-row-reverse justify-start text-right"
-                        : "space-x-2"
-                    }`}
+                    className="flex items-center text-gray-600"
+                    dir={isRTL ? "rtl" : "ltr"}
                   >
-                    <span className="text-green-500">✓</span>
-                    <span className={isRTL ? "mr-2" : ""}>
-                      {t("homepage.enterprise.enterprise.features.security")}
-                    </span>
+                    {isRTL ? (
+                      <>
+                        <span className="text-green-500 ml-3">✓</span>
+                        <span className="text-right">
+                          {t(
+                            "homepage.enterprise.enterprise.features.security"
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-green-500 mr-2">✓</span>
+                        <span>
+                          {t(
+                            "homepage.enterprise.enterprise.features.security"
+                          )}
+                        </span>
+                      </>
+                    )}
                   </div>
                   <div
-                    className={`flex items-center text-gray-600 ${
-                      isRTL
-                        ? "flex-row-reverse justify-start text-right"
-                        : "space-x-2"
-                    }`}
+                    className="flex items-center text-gray-600"
+                    dir={isRTL ? "rtl" : "ltr"}
                   >
-                    <span className="text-green-500">✓</span>
-                    <span className={isRTL ? "mr-2" : ""}>
-                      {t("homepage.enterprise.enterprise.features.manager")}
-                    </span>
+                    {isRTL ? (
+                      <>
+                        <span className="text-green-500 ml-3">✓</span>
+                        <span className="text-right">
+                          {t("homepage.enterprise.enterprise.features.manager")}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-green-500 mr-2">✓</span>
+                        <span>
+                          {t("homepage.enterprise.enterprise.features.manager")}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
-                <button
-                  className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl px-8 py-4 font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors duration-200 shadow-lg ${
-                    isRTL ? "hebrew-enterprise-button" : ""
-                  }`}
-                  onClick={handleEnterpriseClick}
-                >
-                  {t("homepage.enterprise.enterprise.button")}
-                </button>
+                <div className={isRTL ? "text-right" : ""}>
+                  <button
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl px-8 py-4 font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors duration-200 shadow-lg"
+                    onClick={handleEnterpriseClick}
+                  >
+                    {t("homepage.enterprise.enterprise.button")}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
           <div className="max-w-7xl mx-auto px-4 mt-16">
-            <h3 className="text-2xl font-bold text-center text-gray-800 mb-8">
+            <h3
+              className={`text-2xl font-bold text-center text-gray-800 mb-8 ${
+                isRTL ? "text-right" : ""
+              }`}
+            >
               {t("homepage.solutions.title")}
             </h3>
             <div
               className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${
                 isRTL ? "rtl" : ""
               }`}
+              dir={isRTL ? "rtl" : "ltr"}
             >
               {[
                 {

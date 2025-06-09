@@ -43,7 +43,16 @@ const SchoolPage = () => {
     },
   ];
 
-  const benefits = t("school.benefits_list", { returnObjects: true }) || [];
+  const benefitsFromBenefits = t("school.benefits", { returnObjects: true });
+  const benefitsFromBenefitsList = t("school.benefits_list", {
+    returnObjects: true,
+  });
+
+  console.log("benefitsFromBenefits:", benefitsFromBenefits);
+  console.log("benefitsFromBenefitsList:", benefitsFromBenefitsList);
+
+  const benefitsRaw = benefitsFromBenefits || benefitsFromBenefitsList || [];
+  const benefits = Array.isArray(benefitsRaw) ? benefitsRaw : [];
 
   return (
     <PageLayout>
@@ -141,7 +150,10 @@ const SchoolPage = () => {
                 isRTL ? "rtl" : ""
               }`}
             >
-              <div>
+              <div
+                className={isRTL ? "text-right" : ""}
+                dir={isRTL ? "rtl" : "ltr"}
+              >
                 <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
                   {t("school.educational_benefits")}
                 </h2>
@@ -150,14 +162,17 @@ const SchoolPage = () => {
                 </p>
                 <div className="space-y-4">
                   {benefits.map((benefit, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-center ${
-                        isRTL ? "space-x-reverse space-x-3" : "space-x-3"
-                      }`}
-                    >
-                      <div className="bg-green-500 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
-                        <FaPlay className="text-white text-xs" />
+                    <div key={index} className="flex items-center">
+                      <div
+                        className={`bg-green-500 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          isRTL ? "ml-4" : "mr-3"
+                        }`}
+                      >
+                        <FaPlay
+                          className={`text-white text-xs ${
+                            isRTL ? "transform rotate-180" : ""
+                          }`}
+                        />
                       </div>
                       <span className="text-gray-700 font-medium">
                         {benefit}

@@ -58,19 +58,24 @@ const SolutionsPage = () => {
             >
               <div
                 className={`flex items-center mb-8 ${
-                  isRTL ? "flex-row-reverse text-right" : ""
+                  isRTL ? "text-right" : ""
                 }`}
               >
-                <span className={`text-5xl ${isRTL ? "ml-6" : "mr-6"}`}>
-                  {solution.icon}
-                </span>
-                <h2
-                  className={`text-2xl lg:text-3xl font-bold text-gray-800 ${
-                    isRTL ? "hebrew-card-title" : ""
-                  }`}
-                >
-                  {solution.title}
-                </h2>
+                {isRTL ? (
+                  <>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 flex-1">
+                      {solution.title}
+                    </h2>
+                    <span className="text-5xl mr-6">{solution.icon}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-5xl mr-6">{solution.icon}</span>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-800">
+                      {solution.title}
+                    </h2>
+                  </>
+                )}
               </div>
 
               <p
@@ -99,29 +104,44 @@ const SolutionsPage = () => {
                       <li
                         key={featureIdx}
                         className={`flex items-start text-gray-600 ${
-                          isRTL ? "flex-row-reverse text-right" : ""
+                          isRTL ? "text-right" : ""
                         }`}
                       >
-                        <svg
-                          className={`w-5 h-5 text-green-500 flex-shrink-0 mt-0.5 ${
-                            isRTL ? "ml-3" : "mr-3"
-                          }`}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span
-                          className={`text-base leading-relaxed ${
-                            isRTL ? "hebrew-feature-text" : ""
-                          }`}
-                        >
-                          {feature}
-                        </span>
+                        {isRTL ? (
+                          <>
+                            <svg
+                              className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5 ml-3"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <span className="text-base leading-relaxed flex-1">
+                              {feature}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5 mr-3"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <span className="text-base leading-relaxed">
+                              {feature}
+                            </span>
+                          </>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -140,29 +160,44 @@ const SolutionsPage = () => {
                       <li
                         key={benefitIdx}
                         className={`flex items-start text-gray-600 ${
-                          isRTL ? "flex-row-reverse text-right" : ""
+                          isRTL ? "text-right" : ""
                         }`}
                       >
-                        <svg
-                          className={`w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5 ${
-                            isRTL ? "ml-3" : "mr-3"
-                          }`}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span
-                          className={`text-base leading-relaxed ${
-                            isRTL ? "hebrew-feature-text" : ""
-                          }`}
-                        >
-                          {benefit}
-                        </span>
+                        {isRTL ? (
+                          <>
+                            <svg
+                              className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5 ml-3"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <span className="text-base leading-relaxed flex-1">
+                              {benefit}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5 mr-3"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <span className="text-base leading-relaxed">
+                              {benefit}
+                            </span>
+                          </>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -219,17 +254,20 @@ const SolutionsPage = () => {
                     <li
                       key={exampleIdx}
                       className={`text-gray-700 flex items-start text-base leading-relaxed ${
-                        isRTL ? "flex-row-reverse text-right" : ""
+                        isRTL ? "text-right" : ""
                       }`}
                     >
-                      <span
-                        className={`w-3 h-3 bg-indigo-400 rounded-full flex-shrink-0 mt-2 ${
-                          isRTL ? "ml-4" : "mr-4"
-                        }`}
-                      ></span>
-                      <span className={isRTL ? "hebrew-example-text" : ""}>
-                        {example}
-                      </span>
+                      {isRTL ? (
+                        <>
+                          <span className="w-3 h-3 bg-indigo-400 rounded-full flex-shrink-0 mt-2 ml-4"></span>
+                          <span className="flex-1">{example}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="w-3 h-3 bg-indigo-400 rounded-full flex-shrink-0 mt-2 mr-4"></span>
+                          <span>{example}</span>
+                        </>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -266,22 +304,21 @@ const SolutionsPage = () => {
                   isRTL ? "text-center hebrew-story-title" : ""
                 }`}
               >
-                Lincoln Elementary School
+                {t("solutions.story1_title")}
               </h3>
               <p
                 className={`text-gray-600 mb-6 text-base leading-relaxed ${
                   isRTL ? "text-center hebrew-story-text" : ""
                 }`}
               >
-                "Guessify! has transformed our music classes. Student engagement
-                is up 85% and test scores have improved significantly."
+                {t("solutions.story1_quote")}
               </p>
               <p
                 className={`text-sm text-gray-500 font-medium ${
                   isRTL ? "text-center hebrew-story-author" : ""
                 }`}
               >
-                - Sarah Johnson, Music Teacher
+                {t("solutions.story1_author")}
               </p>
             </div>
             <div
@@ -294,22 +331,21 @@ const SolutionsPage = () => {
                   isRTL ? "text-center hebrew-story-title" : ""
                 }`}
               >
-                TechCorp Inc.
+                {t("solutions.story2_title")}
               </h3>
               <p
                 className={`text-gray-600 mb-6 text-base leading-relaxed ${
                   isRTL ? "text-center hebrew-story-text" : ""
                 }`}
               >
-                "Our remote team building events with Guessify! have been a huge
-                hit. Team morale and collaboration have never been better."
+                {t("solutions.story2_quote")}
               </p>
               <p
                 className={`text-sm text-gray-500 font-medium ${
                   isRTL ? "text-center hebrew-story-author" : ""
                 }`}
               >
-                - Mike Chen, HR Director
+                {t("solutions.story2_author")}
               </p>
             </div>
           </div>

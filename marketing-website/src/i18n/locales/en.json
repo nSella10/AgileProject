@@ -119,7 +119,7 @@
     "subtitle": "Revolutionizing music education and entertainment",
     "content": "Learn more about our mission and team",
     "our_story": "Our Story",
-    "story_text_1": "Guessify! was born from a simple idea: to make music learning fun and interactive. Our team of music educators and technology enthusiasts came together to create a platform that connects people through the universal language of music.",
+    "story_text_1": "The inspiration behind Guessify! stems from a simple truth — we all love playing musical guessing games with our friends. Whether it's trying to name a tune from just a few seconds of audio or shouting out lyrics we recognize, these games bring people together through the joy of music. But in today’s digital age, there was no streamlined tool or app that could manage these experiences in a fun, interactive, and effortless way. That’s where Guessify! was born — a modern solution designed to bring the magic of musical games into the tech era. With a sleek interface and smart features, Guessify! makes it easy to host, play, and enjoy music-based challenges anytime, anywhere.",
     "story_text_2": "Whether you're a teacher looking to engage your students, a family wanting to bond through music, or friends competing for bragging rights, Guessify! provides the perfect platform for musical discovery and fun.",
     "our_mission": "Our Mission",
     "mission_text": "To make music education accessible, engaging, and enjoyable for everyone, while fostering connections through shared musical experiences.",
@@ -181,9 +181,83 @@
     "content": "We'd love to hear from you"
   },
   "blog": {
-    "title": "Blog",
-    "subtitle": "Latest news and updates",
-    "content": "Stay updated with Guessify"
+    "title": "Guessify! Blog",
+    "subtitle": "Insights, tips, and stories about music education and interactive learning",
+    "content": "Stay updated with Guessify",
+    "browse_category": "Browse by Category",
+    "featured": "Featured",
+    "read_more": "Read More →",
+    "categories": {
+      "all": "All",
+      "education": "Education",
+      "workplace": "Workplace",
+      "research": "Research",
+      "accessibility": "Accessibility",
+      "tips": "Tips",
+      "technology": "Technology"
+    },
+    "posts": [
+      {
+        "id": 1,
+        "title": "5 Ways Music Games Enhance Learning in the Classroom",
+        "excerpt": "Discover how interactive music games can transform traditional education and engage students in new ways.",
+        "date": "March 15, 2024",
+        "category": "Education",
+        "readTime": "5 min read",
+        "image": "🎵"
+      },
+      {
+        "id": 2,
+        "title": "Building Team Spirit Through Music Trivia",
+        "excerpt": "Learn how companies are using music games to boost team morale and create stronger workplace connections.",
+        "date": "March 10, 2024",
+        "category": "Workplace",
+        "readTime": "4 min read",
+        "image": "🎤"
+      },
+      {
+        "id": 3,
+        "title": "The Science Behind Music and Memory",
+        "excerpt": "Exploring the cognitive benefits of music-based learning and how it improves retention and recall.",
+        "date": "March 5, 2024",
+        "category": "Research",
+        "readTime": "7 min read",
+        "image": "🧠"
+      },
+      {
+        "id": 4,
+        "title": "Creating Inclusive Music Experiences for All Ages",
+        "excerpt": "Tips for designing music games that are accessible and enjoyable for players of all backgrounds and abilities.",
+        "date": "February 28, 2024",
+        "category": "Accessibility",
+        "readTime": "6 min read",
+        "image": "🌍"
+      },
+      {
+        "id": 5,
+        "title": "Top 10 Music Genres for Educational Games",
+        "excerpt": "A comprehensive guide to selecting the best music genres for different learning objectives and age groups.",
+        "date": "February 20, 2024",
+        "category": "Tips",
+        "readTime": "8 min read",
+        "image": "🎼"
+      },
+      {
+        "id": 6,
+        "title": "Virtual Music Events: The Future of Remote Learning",
+        "excerpt": "How virtual music experiences are reshaping distance education and bringing students together online.",
+        "date": "February 15, 2024",
+        "category": "Technology",
+        "readTime": "5 min read",
+        "image": "💻"
+      }
+    ],
+    "newsletter": {
+      "title": "Stay Updated",
+      "description": "Get the latest insights, tips, and updates about music education delivered straight to your inbox.",
+      "placeholder": "Enter your email address",
+      "subscribe": "Subscribe"
+    }
   },
   "help": {
     "title": "Help Center",
@@ -223,6 +297,39 @@
       "Team events and celebrations",
       "Stock options",
       "Creative and inspiring work environment"
+    ],
+    "benefits_title": "Benefits & Perks",
+    "benefits": [
+      {
+        "icon": "💰",
+        "title": "Competitive Salary",
+        "description": "Competitive market salary with stock options"
+      },
+      {
+        "icon": "🏠",
+        "title": "Remote Work",
+        "description": "Work from anywhere with flexible hours"
+      },
+      {
+        "icon": "🏥",
+        "title": "Health & Wellness",
+        "description": "Comprehensive health insurance and wellness programs"
+      },
+      {
+        "icon": "📚",
+        "title": "Learning Budget",
+        "description": "Annual budget for courses, conferences and books"
+      },
+      {
+        "icon": "🌴",
+        "title": "Unlimited Vacation",
+        "description": "Take the time you need to refresh and recharge"
+      },
+      {
+        "icon": "🎵",
+        "title": "Music Perks",
+        "description": "Spotify Premium and concert ticket benefits"
+      }
     ],
     "open_positions": "Open Positions",
     "positions": [
@@ -283,8 +390,8 @@
         ]
       }
     ],
-    "hiring_process": "Our Hiring Process",
-    "process_steps": [
+    "hiring_process_title": "Our Hiring Process",
+    "hiring_process": [
       {
         "step": "1",
         "title": "Application",
@@ -314,6 +421,8 @@
     "apply_now": "Apply Now",
     "requirements": "Requirements:",
     "dont_see_role": "Don't see the right role?",
+    "no_right_role": "Don't see the right role?",
+    "looking_for_talent": "We're always looking for talented people who share our passion for music and education. Send us your resume and tell us how you'd like to contribute.",
     "contact_description": "We're always looking for talented people who share our passion for music and education. Send us your resume and tell us how you'd like to contribute.",
     "meet_team": "Meet our current team:",
     "team_members": [
@@ -531,6 +640,34 @@
     "revolutionize_subtitle": "Discover how Guessify! transforms traditional music lessons into dynamic, interactive learning experiences.",
     "educational_benefits": "Educational Benefits",
     "benefits_description": "Guessify! provides measurable educational outcomes that improve student learning and engagement.",
+    "benefits_list": [
+      "Increased student engagement and participation",
+      "Improved music knowledge retention",
+      "Fun and interactive learning experience",
+      "Easy lesson plan integration",
+      "Real-time progress tracking",
+      "Collaborative learning opportunities",
+      "Customizable content for different grade levels",
+      "Enhanced classroom management tools"
+    ],
+    "features": {
+      "interactive_learning": {
+        "title": "Interactive Learning",
+        "description": "Engage students with hands-on music activities that make learning fun and memorable"
+      },
+      "classroom_collaboration": {
+        "title": "Classroom Collaboration",
+        "description": "Foster teamwork and social learning through group music challenges and activities"
+      },
+      "educational_content": {
+        "title": "Educational Content",
+        "description": "Access curriculum-aligned content that supports music education standards and objectives"
+      },
+      "progress_tracking": {
+        "title": "Progress Tracking",
+        "description": "Monitor student progress with detailed analytics and assessment tools for educators"
+      }
+    },
     "ready_to_start": "Ready to Start?",
     "ready_description": "Join thousands of educators already using Guessify! to enhance their music programs.",
     "start_your_free_trial": "Start Your Free Trial",
@@ -666,6 +803,12 @@
     "learn_more": "Learn More",
     "popular_use_cases": "Popular Use Cases",
     "success_stories": "Success Stories",
+    "story1_title": "Lincoln Elementary School",
+    "story1_quote": "\"Guessify! has transformed our music classes. Student engagement is up 85% and test scores have improved significantly.\"",
+    "story1_author": "- Sarah Johnson, Music Teacher",
+    "story2_title": "TechCorp Inc.",
+    "story2_quote": "\"Our remote team building events with Guessify! have been a huge hit. Team morale and collaboration have never been better.\"",
+    "story2_author": "- Mike Chen, HR Director",
     "ready_to_start": "Ready to Start?",
     "cta_description": "Join thousands of educators, teams, and families already using Guessify! to create unforgettable musical experiences.",
     "start_free_trial": "Start Free Trial",
@@ -956,7 +1099,51 @@
     "bring_family_together": "Bring Your Family Together Today",
     "bring_description": "Create magical moments and lasting memories through the joy of music.",
     "get_started_free": "Get Started Free",
-    "join_game_now": "Join a Game Now"
+    "join_game_now": "Join a Game Now",
+    "features": {
+      "family_fun": {
+        "title": "Family Fun",
+        "description": "Bring the whole family together with music games that span generations and musical tastes."
+      },
+      "party_entertainment": {
+        "title": "Party Entertainment",
+        "description": "Perfect for birthday parties, family gatherings, and special celebrations that create lasting memories."
+      },
+      "bonding_activities": {
+        "title": "Bonding Activities",
+        "description": "Strengthen family relationships through shared musical experiences and friendly competition."
+      },
+      "easy_setup": {
+        "title": "Easy Setup",
+        "description": "Quick and simple setup means more time for fun and less time preparing activities."
+      }
+    },
+    "occasions": {
+      "family_game_night": {
+        "title": "Family Game Night",
+        "description": "Add musical excitement to your regular family game nights"
+      },
+      "birthday_parties": {
+        "title": "Birthday Parties",
+        "description": "Entertainment that keeps guests of all ages engaged and happy"
+      },
+      "holiday_gatherings": {
+        "title": "Holiday Gatherings",
+        "description": "Bring relatives together with fun activities everyone can enjoy"
+      },
+      "weekend_fun": {
+        "title": "Weekend Fun",
+        "description": "Turn ordinary weekends into special family bonding time"
+      }
+    },
+    "benefits": [
+      "Create memorable family moments",
+      "Bridge generational gaps through music",
+      "Encourage family interaction and communication",
+      "Discover new music together",
+      "Build lasting traditions and memories",
+      "Perfect for all ages and musical knowledge levels"
+    ]
   },
   "not_found": {
     "title": "Page Not Found",

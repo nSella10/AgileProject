@@ -99,21 +99,40 @@ const CommunityPage = () => {
                 <p className="text-gray-600 mb-4">{challenge.description}</p>
                 <div
                   className={`flex justify-between items-center text-sm text-gray-500 ${
-                    isRTL ? "flex-row-reverse" : ""
+                    isRTL ? "" : ""
                   }`}
                 >
-                  <span>{challenge.participants}</span>
-                  <span
-                    className={`px-2 py-1 rounded text-xs ${
-                      challenge.difficulty === "קל"
-                        ? "bg-green-100 text-green-600"
-                        : challenge.difficulty === "בינוני"
-                        ? "bg-yellow-100 text-yellow-600"
-                        : "bg-red-100 text-red-600"
-                    }`}
-                  >
-                    {challenge.difficulty}
-                  </span>
+                  {isRTL ? (
+                    <>
+                      <span>{challenge.participants}</span>
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          challenge.difficulty === "קל"
+                            ? "bg-green-100 text-green-600"
+                            : challenge.difficulty === "בינוני"
+                            ? "bg-yellow-100 text-yellow-600"
+                            : "bg-red-100 text-red-600"
+                        }`}
+                      >
+                        {challenge.difficulty}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{challenge.participants}</span>
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          challenge.difficulty === "קל"
+                            ? "bg-green-100 text-green-600"
+                            : challenge.difficulty === "בינוני"
+                            ? "bg-yellow-100 text-yellow-600"
+                            : "bg-red-100 text-red-600"
+                        }`}
+                      >
+                        {challenge.difficulty}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
@@ -138,34 +157,49 @@ const CommunityPage = () => {
               </button>
             </div>
           </div>
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto" dir={isRTL ? "rtl" : "ltr"}>
             {topPlayers.map((player, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between bg-white p-4 rounded-lg mb-2"
+                className={`flex items-center justify-between bg-white p-4 rounded-lg mb-2 ${
+                  isRTL ? "text-right" : "text-left"
+                }`}
               >
-                <div
-                  className={`flex items-center ${
-                    isRTL ? "flex-row-reverse" : ""
-                  }`}
-                >
-                  <span
-                    className={`text-2xl font-bold text-purple-600 ${
-                      isRTL ? "ml-4" : "mr-4"
-                    }`}
-                  >
-                    #{player.rank}
-                  </span>
-                  <div>
-                    <div className="font-bold">{player.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {player.country}
+                {isRTL ? (
+                  <>
+                    <div className="flex items-center">
+                      <span className="text-2xl font-bold text-purple-600 ml-4">
+                        #{player.rank}
+                      </span>
+                      <div className="text-right">
+                        <div className="font-bold">{player.name}</div>
+                        <div className="text-sm text-gray-500">
+                          {player.country}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div className="text-lg font-bold text-gray-800">
-                  {player.score}
-                </div>
+                    <div className="text-lg font-bold text-gray-800">
+                      {player.score}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center">
+                      <span className="text-2xl font-bold text-purple-600 mr-4">
+                        #{player.rank}
+                      </span>
+                      <div>
+                        <div className="font-bold">{player.name}</div>
+                        <div className="text-sm text-gray-500">
+                          {player.country}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-lg font-bold text-gray-800">
+                      {player.score}
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -240,11 +274,20 @@ const CommunityPage = () => {
           <p className="text-center text-gray-600 mb-8">
             {t("community.community_guidelines.description")}
           </p>
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto" dir={isRTL ? "rtl" : "ltr"}>
             <ul className="space-y-3">
               {communityRules.map((rule, idx) => (
-                <li key={idx} className="flex items-start">
-                  <span className="w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                <li
+                  key={idx}
+                  className={`flex items-start ${
+                    isRTL ? "text-right" : "text-left"
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0 ${
+                      isRTL ? "ml-3" : "mr-3"
+                    }`}
+                  ></span>
                   <span className="text-gray-700">{rule}</span>
                 </li>
               ))}

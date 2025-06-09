@@ -176,16 +176,23 @@ const BlogPage = () => {
             {t("blog.newsletter.description")}
           </p>
           <div
-            className={`flex flex-col md:flex-row max-w-md mx-auto gap-3 ${
-              isRTL ? "md:flex-row-reverse" : ""
-            }`}
+            className="flex flex-col md:flex-row gap-3 max-w-md mx-auto"
+            style={{
+              flexDirection: isRTL ? "column" : "column",
+              "@media (min-width: 768px)": {
+                flexDirection: isRTL ? "row-reverse" : "row",
+              },
+            }}
           >
             <input
               type="email"
               placeholder={t("blog.newsletter.placeholder")}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className={`flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                isRTL ? "text-right" : "text-left"
+              }`}
+              dir={isRTL ? "rtl" : "ltr"}
             />
-            <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+            <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap">
               {t("blog.newsletter.subscribe")}
             </button>
           </div>

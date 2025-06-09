@@ -247,37 +247,22 @@ const Homepage = () => {
               ].map((card) => (
                 <div
                   key={card.title}
-                  className={`relative rounded-2xl bg-gradient-to-br ${card.color} text-white p-8 shadow-lg hover:shadow-xl transition-shadow duration-300`}
+                  className={`relative rounded-2xl bg-gradient-to-br ${card.color} text-white p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col min-h-[320px]`}
                   dir={isRTL ? "rtl" : "ltr"}
                 >
-                  <div className={isRTL ? "text-right" : "text-center"}>
-                    {isRTL ? (
-                      // Hebrew RTL: Icon on right, title on left
-                      <div className="flex items-center justify-end mb-6">
-                        <h3 className="text-xl lg:text-2xl font-bold mr-4">
-                          {card.title}
-                        </h3>
-                        <div className="text-5xl">{card.icon}</div>
-                      </div>
-                    ) : (
-                      // English LTR: Icon centered, title below
-                      <>
-                        <div className="text-5xl mb-6 text-center">
-                          {card.icon}
-                        </div>
-                        <h3 className="text-xl lg:text-2xl font-bold mb-4 text-center">
-                          {card.title}
-                        </h3>
-                      </>
-                    )}
-                    <p
-                      className={`text-base opacity-95 mb-8 leading-relaxed ${
-                        isRTL ? "text-right" : "text-center"
-                      }`}
-                    >
+                  <div className="text-center flex flex-col flex-1">
+                    {/* Icon centered at top for both Hebrew and English */}
+                    <div className="text-5xl mb-6 text-center">{card.icon}</div>
+                    {/* Title centered below icon for both Hebrew and English */}
+                    <h3 className="text-xl lg:text-2xl font-bold mb-4 text-center">
+                      {card.title}
+                    </h3>
+                    {/* Description centered for both Hebrew and English */}
+                    <p className="text-base opacity-95 mb-8 leading-relaxed text-center flex-1">
                       {card.description}
                     </p>
-                    <div className={isRTL ? "text-right" : "text-center"}>
+                    {/* Button centered for both Hebrew and English */}
+                    <div className="text-center mt-auto">
                       <button
                         className="bg-white bg-opacity-20 backdrop-blur-sm text-white border border-white border-opacity-30 rounded-xl px-8 py-3 font-semibold hover:bg-opacity-30 transition-colors duration-200"
                         onClick={() => handleCardButtonClick(card.btn)}

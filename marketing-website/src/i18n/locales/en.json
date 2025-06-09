@@ -173,7 +173,82 @@
   "pricing": {
     "title": "Pricing Plans",
     "subtitle": "Choose the perfect plan for your needs",
-    "content": "Flexible pricing options for everyone"
+    "content": "Flexible pricing options for everyone",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "save_percent": "Save 17%",
+    "most_popular": "Most Popular",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "Perfect for trying out Guessify!",
+        "features": [
+          "Up to 3 games per month",
+          "Maximum 10 players per game",
+          "Basic access to song library",
+          "Standard support",
+          "Basic analytics"
+        ],
+        "button": "Get Started"
+      },
+      "educator": {
+        "name": "Educator",
+        "description": "Ideal for teachers and small classrooms",
+        "features": [
+          "Unlimited games",
+          "Up to 50 players per game",
+          "Full access to song library",
+          "Priority support",
+          "Advanced analytics",
+          "Custom game templates",
+          "Student progress tracking",
+          "Classroom management tools"
+        ],
+        "button": "Start Free Trial"
+      },
+      "institution": {
+        "name": "Institution",
+        "description": "For schools and large organizations",
+        "features": [
+          "Everything in Educator",
+          "Unlimited players per game",
+          "Multi-classroom management",
+          "Advanced reporting",
+          "Custom branding",
+          "API access",
+          "Dedicated account manager",
+          "Training and onboarding",
+          "Single Sign-On (SSO)"
+        ],
+        "button": "Contact Sales"
+      }
+    },
+    "enterprise": {
+      "title": "Need something custom?",
+      "description": "For large organizations, school districts, or organizations with specific needs, we offer custom solutions tailored to your requirements.",
+      "button": "Contact Enterprise Sales"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "questions": [
+        {
+          "question": "Can I change my plan at any time?",
+          "answer": "Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle."
+        },
+        {
+          "question": "Is there a free trial available?",
+          "answer": "Yes, we offer a 14-day free trial for all paid plans. No credit card required to get started."
+        },
+        {
+          "question": "What payment methods do you accept?",
+          "answer": "We accept all major credit cards, PayPal, and bank transfers for institutional customers."
+        },
+        {
+          "question": "Do you offer discounts for nonprofits?",
+          "answer": "Yes, we offer special pricing for recognized educational institutions and nonprofit organizations. Contact us for details."
+        }
+      ]
+    }
   },
   "contact": {
     "title": "Contact Us",

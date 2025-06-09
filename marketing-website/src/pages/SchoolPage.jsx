@@ -20,6 +20,15 @@ const SchoolPage = () => {
   const navigate = useNavigate();
   const isRTL = i18n.language === "he";
 
+  // Handle Create/Register button click - redirect to create app
+  const handleCreateClick = () => {
+    const createAppUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://create.guessifyapp.com"
+        : "http://localhost:3001";
+    window.location.href = createAppUrl;
+  };
+
   const features = [
     {
       icon: FaChalkboardTeacher,
@@ -82,7 +91,7 @@ const SchoolPage = () => {
                 }`}
               >
                 <button
-                  onClick={() => navigate("/register")}
+                  onClick={handleCreateClick}
                   className={`bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 ${
                     isRTL ? "hover:shadow-xl" : "transform hover:scale-105"
                   } shadow-xl`}
@@ -191,7 +200,7 @@ const SchoolPage = () => {
                     {t("school.ready_description")}
                   </p>
                   <button
-                    onClick={() => navigate("/register")}
+                    onClick={handleCreateClick}
                     className={`bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 ${
                       isRTL ? "hover:shadow-lg" : "transform hover:scale-105"
                     } shadow-lg flex items-center ${
@@ -223,7 +232,7 @@ const SchoolPage = () => {
               }`}
             >
               <button
-                onClick={() => navigate("/register")}
+                onClick={handleCreateClick}
                 className={`bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 ${
                   isRTL ? "hover:shadow-lg" : "transform hover:scale-105"
                 }`}

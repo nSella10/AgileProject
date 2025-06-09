@@ -19,6 +19,24 @@ const HomePage2 = () => {
   const navigate = useNavigate();
   const isRTL = i18n.language === "he";
 
+  // Handle Create/Register button click - redirect to create app
+  const handleCreateClick = () => {
+    const createAppUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://create.guessifyapp.com"
+        : "http://localhost:3001";
+    window.location.href = createAppUrl;
+  };
+
+  // Handle Play/Join button click - redirect to play app
+  const handlePlayClick = () => {
+    const playAppUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://play.guessifyapp.com"
+        : "http://localhost:3002";
+    window.location.href = playAppUrl;
+  };
+
   const features = [
     {
       icon: FaUserFriends,
@@ -91,13 +109,13 @@ const HomePage2 = () => {
                 }`}
               >
                 <button
-                  onClick={() => navigate("/register")}
+                  onClick={handleCreateClick}
                   className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl"
                 >
                   {t("home.start_family_fun")}
                 </button>
                 <button
-                  onClick={() => navigate("/join")}
+                  onClick={handlePlayClick}
                   className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300"
                 >
                   {t("home.join_game")}
@@ -229,7 +247,7 @@ const HomePage2 = () => {
                     {t("home.ready_description")}
                   </p>
                   <button
-                    onClick={() => navigate("/register")}
+                    onClick={handleCreateClick}
                     className={`bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center mx-auto ${
                       isRTL ? "space-x-reverse space-x-2" : "space-x-2"
                     }`}
@@ -261,7 +279,7 @@ const HomePage2 = () => {
               <button
                 onClick={() => {
                   window.scrollTo(0, 0);
-                  navigate("/register");
+                  handleCreateClick();
                 }}
                 className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105"
               >
@@ -270,7 +288,7 @@ const HomePage2 = () => {
               <button
                 onClick={() => {
                   window.scrollTo(0, 0);
-                  navigate("/join");
+                  handlePlayClick();
                 }}
                 className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300"
               >

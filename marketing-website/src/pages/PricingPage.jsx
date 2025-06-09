@@ -7,6 +7,11 @@ const PricingPage = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "he";
 
+  const getPriceUnit = () => {
+    if (i18n.language === "he") return isAnnual ? "שנה" : "לחודש";
+    return isAnnual ? "/year" : "/month";
+  };
+
   const plans = [
     {
       name: t("pricing.plans.free.name"),
@@ -61,11 +66,7 @@ const PricingPage = () => {
               isRTL ? "flex-row-reverse" : ""
             }`}
           >
-            <span
-              className={`${
-                !isAnnual ? "text-white" : "text-blue-200"
-              } flex items-center`}
-            >
+            <span className={`${!isAnnual ? "text-white" : "text-blue-200"}`}>
               {t("pricing.monthly")}
             </span>
 
@@ -88,12 +89,12 @@ const PricingPage = () => {
               />
             </button>
 
-            <span
-              className={`${
-                isAnnual ? "text-white" : "text-blue-200"
-              } flex items-center`}
-            >
-              <span>{t("pricing.annual")}</span>
+            <span className={`${isAnnual ? "text-white" : "text-blue-200"}`}>
+              {isAnnual
+                ? i18n.language === "he"
+                  ? "שנה"
+                  : t("pricing.annual")
+                : t("pricing.annual")}
               <span
                 className={`${
                   isRTL ? "mr-2" : "ml-2"
@@ -109,17 +110,16 @@ const PricingPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Pricing Cards */}
         <div
-          className={`grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 ${
-            isRTL ? "rtl" : ""
-          }`}
+          className={`grid grid-cols-1 md:grid-cols-3 gap-8 mb-16`}
           dir={isRTL ? "rtl" : "ltr"}
         >
           {plans.map((plan, idx) => (
             <div
               key={idx}
-              className={`relative bg-white rounded-lg shadow-lg p-8 ${
-                plan.popular ? "ring-2 ring-blue-500 transform scale-105" : ""
+              className={`relative bg-white rounded-lg shadow-lg p-8 flex flex-col h-full ${
+                plan.popular ? "ring-2 ring-blue-500" : ""
               }`}
+              dir={isRTL ? "rtl" : "ltr"}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -129,35 +129,31 @@ const PricingPage = () => {
                 </div>
               )}
 
-              <div className="text-center mb-6">
+              <div className={`mb-6 ${isRTL ? "text-right" : "text-center"}`}>
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                 <p className="text-gray-600 mb-4">{plan.description}</p>
                 <div className="mb-4">
                   <span className="text-4xl font-bold">
                     ${isAnnual ? plan.price.annual : plan.price.monthly}
                   </span>
-                  <span className="text-gray-500">
-                    {plan.price.monthly === 0
-                      ? ""
-                      : isAnnual
-                      ? "/year"
-                      : "/month"}
+                  <span className="text-gray-500 ml-2">
+                    {plan.price.monthly === 0 ? "" : getPriceUnit()}
                   </span>
                 </div>
               </div>
 
-              <ul className="space-y-3 mb-8">
+              <ul className={`space-y-3 mb-8 flex-grow`}>
                 {plan.features.map((feature, featureIdx) => (
                   <li
                     key={featureIdx}
-                    className={`flex items-center ${
-                      isRTL ? "flex-row-reverse" : ""
+                    className={`flex items-start ${
+                      isRTL ? "flex-row text-right justify-start" : "flex-row"
                     }`}
                   >
                     <svg
-                      className={`w-5 h-5 text-green-500 ${
-                        isRTL ? "ml-3" : "mr-3"
-                      }`}
+                      className={`w-5 h-5 text-green-500 mt-1 ${
+                        isRTL ? "mr-2" : "mr-2"
+                      } flex-shrink-0`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -167,13 +163,18 @@ const PricingPage = () => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span className="text-gray-700">{feature}</span>
+                    <span
+                      className="text-gray-700"
+                      style={isRTL ? { flex: 1 } : {}}
+                    >
+                      {feature}
+                    </span>
                   </li>
                 ))}
               </ul>
 
               <button
-                className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${plan.buttonStyle}`}
+                className={`w-full h-12 px-4 rounded-lg font-medium transition-colors mt-auto ${plan.buttonStyle}`}
               >
                 {plan.buttonText}
               </button>
@@ -192,7 +193,7 @@ const PricingPage = () => {
           <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
             {t("pricing.enterprise.description")}
           </p>
-          <button className="bg-gray-800 text-white px-8 py-3 rounded-lg hover:bg-gray-900 transition-colors">
+          <button className="bg-gray-800 text-white px-8 h-12 rounded-lg hover:bg-gray-900 transition-colors">
             {t("pricing.enterprise.button")}
           </button>
         </div>

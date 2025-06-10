@@ -19,6 +19,7 @@ This is the marketing website for Guessify - a static React application containi
 ## 🏃‍♂️ Getting Started
 
 ### Prerequisites
+
 - Node.js 16+
 - npm or yarn
 
@@ -37,6 +38,7 @@ The app will run on `http://localhost:3000`
 ## 🌐 Deployment
 
 In production, this will be deployed to the main domain:
+
 - **Production:** `https://guessifyapp.com`
 - **Development:** `http://localhost:3000`
 
@@ -54,5 +56,8 @@ src/
 ## 🔗 Navigation
 
 The navbar contains two main action buttons:
+
 - **Create** - Redirects to create app (localhost:3001 in dev)
 - **Play** - Redirects to play app (localhost:3002 in dev)
+
+<!-- Trigger deployment after commit revert -->

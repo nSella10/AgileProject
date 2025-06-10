@@ -20,12 +20,13 @@ import CommunityPage from "./pages/CommunityPage";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFoundPage from "./pages/NotFoundPage";
 
+// This is a nice component
+
 function App() {
   const { i18n } = useTranslation();
   const isRTL = i18n.language === "he";
 
   useEffect(() => {
-    // Update the <html> tag attributes
     document.documentElement.lang = i18n.language;
     document.documentElement.dir = isRTL ? "rtl" : "ltr";
   }, [i18n.language]);

@@ -252,8 +252,69 @@
   },
   "contact": {
     "title": "Contact Us",
-    "subtitle": "Get in touch with our team",
-    "content": "We'd love to hear from you"
+    "subtitle": "Get in touch with our team. Send us a message and we'll get back to you as soon as possible.",
+    "content": "We'd love to hear from you",
+    "form": {
+      "title": "Send us a message",
+      "name": "Name",
+      "email": "Email",
+      "category": "Category",
+      "subject": "Subject",
+      "message": "Message",
+      "placeholder": "Tell us how we can help you...",
+      "submit": "Send Message",
+      "success": "Thank you for your message! We'll get back to you soon.",
+      "categories": {
+        "general": "General Inquiry",
+        "support": "Technical Support",
+        "sales": "Sales Question",
+        "partnership": "Partnership",
+        "feedback": "Feedback"
+      }
+    },
+    "methods": {
+      "title": "Other ways to contact us",
+      "email_support": {
+        "title": "Email Support",
+        "description": "Get help with technical issues",
+        "response": "Usually responds within 24 hours"
+      },
+      "sales": {
+        "title": "Sales Inquiries",
+        "description": "Questions about pricing and plans",
+        "response": "Usually responds within 4 hours"
+      },
+      "partnerships": {
+        "title": "Partnerships",
+        "description": "Collaboration opportunities",
+        "response": "Usually responds within 48 hours"
+      },
+      "press": {
+        "title": "Press & Media",
+        "description": "Media inquiries and press releases",
+        "response": "Usually responds within 24 hours"
+      }
+    },
+    "offices": {
+      "title": "Our Offices",
+      "tel_aviv": {
+        "city": "Tel Aviv",
+        "address": "123 Rothschild Blvd, Tel Aviv, Israel",
+        "phone": "+972-3-123-4567",
+        "hours": "Sunday - Thursday: 9:00 - 18:00"
+      },
+      "new_york": {
+        "city": "New York",
+        "address": "456 Broadway, New York, NY 10013",
+        "phone": "+1-212-123-4567",
+        "hours": "Monday - Friday: 9:00 - 18:00 EST"
+      }
+    },
+    "faq_section": {
+      "title": "Looking for quick answers?",
+      "description": "Check out our help center for frequently asked questions and detailed guides.",
+      "button": "Visit Help Center"
+    }
   },
   "blog": {
     "title": "Guessify! Blog",

@@ -1,5 +1,6 @@
 // src/pages/CreateGamePage.jsx
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 import { useNavigate } from "react-router-dom";
 import { useCreateGameWithState } from "../hooks/useGames";
@@ -10,6 +11,7 @@ import {
   FaLock,
   FaGlobe,
   FaArrowLeft,
+  FaArrowRight,
   FaRocket,
   FaStar,
   FaHeadphones,
@@ -29,6 +31,8 @@ const CreateGamePage = () => {
 
   const navigate = useNavigate();
   const { createGame, isLoading } = useCreateGameWithState();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "he";
 
   // טיפול בבחירת שירים
   const handleSongSelect = (songData, isRemoval = false) => {
@@ -55,7 +59,7 @@ const CreateGamePage = () => {
     setError("");
 
     if (!title || selectedSongs.length === 0) {
-      setError("Please provide a title and select at least one song.");
+      setError(t("create_game.validation_title_songs"));
       return;
     }
 
@@ -91,11 +95,11 @@ const CreateGamePage = () => {
 
     try {
       await createGame(gameData);
-      toast.success("🎉 Game created successfully!");
+      toast.success(t("create_game.game_created_success"));
       navigate("/mygames");
     } catch (err) {
-      setError(err?.message || "Failed to create game.");
-      toast.error("Failed to create game. Please try again.");
+      setError(err?.message || t("create_game.game_creation_failed"));
+      toast.error(t("create_game.game_creation_failed"));
     }
   };
 
@@ -108,21 +112,22 @@ const CreateGamePage = () => {
           <div className="relative max-w-7xl mx-auto px-4">
             <button
               onClick={() => navigate("/dashboard")}
-              className="flex items-center gap-2 text-purple-100 hover:text-white mb-6 transition-colors"
+              className={`flex items-center gap-2 text-purple-100 hover:text-white mb-6 transition-colors ${
+                isRTL ? "flex-row-reverse" : ""
+              }`}
             >
-              <FaArrowLeft />
-              <span>Back to Dashboard</span>
+              {isRTL ? <FaArrowRight /> : <FaArrowLeft />}
+              <span>{t("create_game.back_to_dashboard")}</span>
             </button>
             <div className="text-center">
               <div className="mb-4">
                 <span className="text-5xl">🎵</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
-                Create Your Music Game
+                {t("create_game.title")}
               </h1>
               <p className="text-xl text-purple-100 max-w-2xl mx-auto">
-                Design an amazing music quiz experience that will challenge and
-                entertain your players
+                {t("create_game.subtitle")}
               </p>
             </div>
           </div>
@@ -137,8 +142,12 @@ const CreateGamePage = () => {
                 <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
                   1
                 </div>
-                <span className="ml-3 text-purple-600 font-semibold">
-                  Game Details
+                <span
+                  className={`${
+                    isRTL ? "mr-3" : "ml-3"
+                  } text-purple-600 font-semibold`}
+                >
+                  {t("create_game.step_game_details")}
                 </span>
               </div>
               <div className="w-16 h-1 bg-purple-200 rounded"></div>
@@ -146,8 +155,12 @@ const CreateGamePage = () => {
                 <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
                   2
                 </div>
-                <span className="ml-3 text-purple-600 font-semibold">
-                  Add Songs
+                <span
+                  className={`${
+                    isRTL ? "mr-3" : "ml-3"
+                  } text-purple-600 font-semibold`}
+                >
+                  {t("create_game.step_add_songs")}
                 </span>
               </div>
               <div className="w-16 h-1 bg-purple-200 rounded"></div>
@@ -155,8 +168,12 @@ const CreateGamePage = () => {
                 <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
                   3
                 </div>
-                <span className="ml-3 text-purple-600 font-semibold">
-                  Launch
+                <span
+                  className={`${
+                    isRTL ? "mr-3" : "ml-3"
+                  } text-purple-600 font-semibold`}
+                >
+                  {t("create_game.step_launch")}
                 </span>
               </div>
             </div>
@@ -176,41 +193,41 @@ const CreateGamePage = () => {
                   <FaMusic className="text-purple-600 text-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  Game Details
+                  {t("create_game.step_game_details")}
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
                   <label className="block text-gray-700 font-semibold mb-3">
-                    Game Title *
+                    {t("create_game.game_title_required")}
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter an exciting game title..."
+                    placeholder={t("create_game.game_title_placeholder")}
                     className="w-full px-4 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-lg"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
                   />
                   <p className="text-sm text-gray-500 mt-2">
-                    Choose a catchy title that will attract players
+                    {t("create_game.game_title_help")}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-gray-700 font-semibold mb-3">
-                    Description (Optional)
+                    {t("create_game.description")}
                   </label>
                   <textarea
-                    placeholder="Describe your game theme, difficulty, or special features..."
+                    placeholder={t("create_game.description_placeholder")}
                     className="w-full px-4 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all resize-none text-lg"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={4}
                   ></textarea>
                   <p className="text-sm text-gray-500 mt-2">
-                    Help players understand what to expect
+                    {t("create_game.description_help")}
                   </p>
                 </div>
               </div>
@@ -218,10 +235,18 @@ const CreateGamePage = () => {
               {/* Game Settings */}
               <div className="mt-8 space-y-6">
                 {/* Visibility Settings */}
-                <div className="p-6 bg-gray-50 rounded-2xl">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <div
+                  className={`p-6 bg-gray-50 rounded-2xl ${
+                    isRTL ? "text-right" : ""
+                  }`}
+                >
+                  <h3
+                    className={`text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 ${
+                      isRTL ? "flex-row-reverse justify-end" : ""
+                    }`}
+                  >
                     <FaUsers className="text-purple-600" />
-                    Game Visibility
+                    {t("create_game.game_visibility")}
                   </h3>
                   <div className="flex items-center gap-6">
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -235,11 +260,11 @@ const CreateGamePage = () => {
                       <div className="flex items-center gap-2">
                         <FaGlobe className="text-green-600" />
                         <span className="font-medium text-gray-700">
-                          Public
+                          {t("create_game.public")}
                         </span>
                       </div>
                       <span className="text-sm text-gray-500">
-                        Anyone can join
+                        {t("create_game.anyone_can_join")}
                       </span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -253,18 +278,28 @@ const CreateGamePage = () => {
                       <div className="flex items-center gap-2">
                         <FaLock className="text-orange-600" />
                         <span className="font-medium text-gray-700">
-                          Private
+                          {t("create_game.private")}
                         </span>
                       </div>
-                      <span className="text-sm text-gray-500">Invite only</span>
+                      <span className="text-sm text-gray-500">
+                        {t("create_game.invite_only")}
+                      </span>
                     </label>
                   </div>
                 </div>
 
                 {/* Guess Time Limit */}
-                <div className="p-6 bg-blue-50 rounded-2xl">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    ⏱️ Guess Time Limit
+                <div
+                  className={`p-6 bg-blue-50 rounded-2xl ${
+                    isRTL ? "text-right" : ""
+                  }`}
+                >
+                  <h3
+                    className={`text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 ${
+                      isRTL ? "flex-row-reverse justify-end" : ""
+                    }`}
+                  >
+                    ⏱️ {t("create_game.guess_time_limit")}
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -276,10 +311,10 @@ const CreateGamePage = () => {
                         className="w-5 h-5 text-blue-600"
                       />
                       <span className="font-medium text-gray-700">
-                        15 seconds
+                        {t("create_game.15_seconds")}
                       </span>
                       <span className="text-sm text-gray-500">
-                        Quick & exciting
+                        {t("create_game.quick_exciting")}
                       </span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -291,9 +326,11 @@ const CreateGamePage = () => {
                         className="w-5 h-5 text-blue-600"
                       />
                       <span className="font-medium text-gray-700">
-                        30 seconds
+                        {t("create_game.30_seconds")}
                       </span>
-                      <span className="text-sm text-gray-500">Balanced</span>
+                      <span className="text-sm text-gray-500">
+                        {t("create_game.balanced")}
+                      </span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
@@ -304,9 +341,11 @@ const CreateGamePage = () => {
                         className="w-5 h-5 text-blue-600"
                       />
                       <span className="font-medium text-gray-700">
-                        45 seconds
+                        {t("create_game.45_seconds")}
                       </span>
-                      <span className="text-sm text-gray-500">Extended</span>
+                      <span className="text-sm text-gray-500">
+                        {t("create_game.extended")}
+                      </span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
@@ -317,20 +356,30 @@ const CreateGamePage = () => {
                         className="w-5 h-5 text-blue-600"
                       />
                       <span className="font-medium text-gray-700">
-                        60 seconds
+                        {t("create_game.60_seconds")}
                       </span>
-                      <span className="text-sm text-gray-500">Relaxed</span>
+                      <span className="text-sm text-gray-500">
+                        {t("create_game.relaxed")}
+                      </span>
                     </label>
                   </div>
                   <p className="text-sm text-gray-600 mt-3">
-                    How long should players have to guess each song?
+                    {t("create_game.time_limit_help")}
                   </p>
                 </div>
 
                 {/* Guess Input Method */}
-                <div className="p-6 bg-green-50 rounded-2xl">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    ✏️ Guess Input Method
+                <div
+                  className={`p-6 bg-green-50 rounded-2xl ${
+                    isRTL ? "text-right" : ""
+                  }`}
+                >
+                  <h3
+                    className={`text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 ${
+                      isRTL ? "flex-row-reverse justify-end" : ""
+                    }`}
+                  >
+                    ✏️ {t("create_game.guess_input_method")}
                   </h3>
                   <div className="space-y-4">
                     <label className="flex items-start gap-3 cursor-pointer">
@@ -343,10 +392,10 @@ const CreateGamePage = () => {
                       />
                       <div>
                         <span className="font-medium text-gray-700 block">
-                          Free Text Input
+                          {t("create_game.free_text_input")}
                         </span>
                         <span className="text-sm text-gray-500">
-                          Players can type their guess freely in a text field
+                          {t("create_game.free_text_description")}
                         </span>
                       </div>
                     </label>
@@ -360,17 +409,16 @@ const CreateGamePage = () => {
                       />
                       <div>
                         <span className="font-medium text-gray-700 block">
-                          Letter Clicking
+                          {t("create_game.letter_clicking")}
                         </span>
                         <span className="text-sm text-gray-500">
-                          Players click on letters to fill in dashes
-                          representing the song name
+                          {t("create_game.letter_click_description")}
                         </span>
                       </div>
                     </label>
                   </div>
                   <p className="text-sm text-gray-600 mt-3">
-                    Choose how players will input their guesses.
+                    {t("create_game.input_method_help")}
                   </p>
                 </div>
               </div>
@@ -382,11 +430,14 @@ const CreateGamePage = () => {
                 <div className="bg-blue-100 p-3 rounded-2xl">
                   <FaHeadphones className="text-blue-600 text-xl" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Add Songs</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {t("create_game.add_songs")}
+                </h2>
                 {selectedSongs.length > 0 && (
                   <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                    {selectedSongs.length} song
-                    {selectedSongs.length !== 1 ? "s" : ""} selected
+                    {t("create_game.songs_selected", {
+                      count: selectedSongs.length,
+                    })}
                   </span>
                 )}
               </div>
@@ -399,10 +450,10 @@ const CreateGamePage = () => {
               {selectedSongs.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   <FaMusic className="text-4xl mx-auto mb-4 opacity-50" />
-                  <p className="text-lg">No songs selected yet</p>
-                  <p className="text-sm">
-                    Search and add songs to create your game
+                  <p className="text-lg">
+                    {t("create_game.no_songs_selected")}
                   </p>
+                  <p className="text-sm">{t("create_game.search_add_songs")}</p>
                 </div>
               )}
             </div>
@@ -414,22 +465,28 @@ const CreateGamePage = () => {
                 onClick={() => navigate("/dashboard")}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg"
               >
-                Cancel
+                {t("create_game.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isLoading || !title || selectedSongs.length === 0}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 disabled:cursor-not-allowed"
+                className={`flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 disabled:cursor-not-allowed ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Creating game & fetching lyrics...
+                    <div
+                      className={`animate-spin rounded-full h-5 w-5 border-b-2 border-white ${
+                        isRTL ? "ml-2" : "mr-2"
+                      }`}
+                    ></div>
+                    {t("create_game.creating_game")}
                   </>
                 ) : (
                   <>
                     <FaRocket />
-                    Create Game
+                    {t("create_game.create_game")}
                   </>
                 )}
               </button>
@@ -441,17 +498,15 @@ const CreateGamePage = () => {
                 <FaStar className="text-purple-600 text-xl mt-1" />
                 <div>
                   <h3 className="font-semibold text-purple-800 mb-2">
-                    Pro Tips for Great Games
+                    {t("create_game.pro_tips")}
                   </h3>
                   <ul className="text-sm text-purple-700 space-y-1">
-                    <li>• Mix popular and lesser-known songs for variety</li>
-                    <li>• Choose songs from different genres and eras</li>
-                    <li>• Drag songs to reorder them as you like</li>
-                    <li>• Aim for 5-10 songs for optimal game length</li>
-                    <li>
-                      • We automatically fetch song lyrics for better gameplay
-                    </li>
-                    <li>• Test your game with friends before sharing</li>
+                    <li>{t("create_game.tip_mix_songs")}</li>
+                    <li>{t("create_game.tip_different_genres")}</li>
+                    <li>{t("create_game.tip_drag_reorder")}</li>
+                    <li>{t("create_game.tip_optimal_length")}</li>
+                    <li>{t("create_game.tip_auto_lyrics")}</li>
+                    <li>{t("create_game.tip_test_game")}</li>
                   </ul>
                 </div>
               </div>

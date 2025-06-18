@@ -1,6 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const WaitingScreen = ({ playerEmoji, username }) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "he";
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center px-4 relative overflow-hidden">
       {/* Background decorations */}
@@ -40,7 +43,7 @@ const WaitingScreen = ({ playerEmoji, username }) => {
 
           {/* Welcome Message */}
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-            Welcome,
+            {t("waiting.welcome")}
           </h1>
           <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text mb-6">
             {username}!
@@ -50,17 +53,17 @@ const WaitingScreen = ({ playerEmoji, username }) => {
           <div className="bg-blue-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-blue-400 border-opacity-30 mb-6">
             <div className="text-2xl mb-2">✅</div>
             <p className="text-white font-semibold text-lg">
-              You're in the game!
+              {t("waiting.connected")}
             </p>
             <p className="text-blue-200 text-sm mt-2">
-              Check if your nickname appears on the host's screen
+              {t("waiting.waiting_for_game")}
             </p>
           </div>
 
           {/* Loading Animation */}
           <div className="space-y-4">
             <div className="text-purple-200 font-medium">
-              Waiting for the host to start the game...
+              {t("waiting.get_ready")}
             </div>
             <div className="flex justify-center space-x-2">
               <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce"></div>
@@ -79,11 +82,19 @@ const WaitingScreen = ({ playerEmoji, username }) => {
         {/* Tips */}
         <div className="mt-8 max-w-md mx-auto">
           <div className="bg-white bg-opacity-5 backdrop-blur-sm rounded-2xl p-6 border border-white border-opacity-10">
-            <h3 className="text-white font-semibold mb-3 flex items-center justify-center">
-              <span className="mr-2">💡</span>
+            <h3
+              className={`text-white font-semibold mb-3 flex items-center justify-center ${
+                isRTL ? "flex-row-reverse" : ""
+              }`}
+            >
+              <span className={isRTL ? "ml-2" : "mr-2"}>💡</span>
               Game Tips
             </h3>
-            <div className="space-y-2 text-purple-200 text-sm">
+            <div
+              className={`space-y-2 text-purple-200 text-sm ${
+                isRTL ? "text-right" : "text-left"
+              }`}
+            >
               <p>🎧 Make sure your volume is up</p>
               <p>⚡ Be ready to guess quickly</p>
               <p>🏆 Have fun and good luck!</p>

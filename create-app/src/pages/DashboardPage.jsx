@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 import { Link } from "react-router-dom";
 import {
@@ -13,6 +14,9 @@ import {
 } from "react-icons/fa";
 
 const DashboardPage = () => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "he";
+
   return (
     <PageLayout>
       {/* Hero Section */}
@@ -25,24 +29,41 @@ const DashboardPage = () => {
               <span className="text-6xl">🎵</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
-              Welcome to Your Music Studio
+              {t("dashboard.welcome_back")}
             </h1>
             <p className="text-xl md:text-2xl text-purple-100 max-w-3xl mx-auto leading-relaxed">
-              Create amazing music games, track performance, and bring people
-              together through the power of music
+              {t("dashboard.ready_to_create")}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+              <div
+                className={`flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 <FaStar className="text-yellow-300" />
-                <span className="text-sm font-medium">Premium Experience</span>
+                <span className="text-sm font-medium">
+                  {t("dashboard.premium_experience")}
+                </span>
               </div>
-              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+              <div
+                className={`flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 <FaUsers className="text-blue-300" />
-                <span className="text-sm font-medium">Multiplayer Ready</span>
+                <span className="text-sm font-medium">
+                  {t("dashboard.multiplayer_ready")}
+                </span>
               </div>
-              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+              <div
+                className={`flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 <FaMusic className="text-green-300" />
-                <span className="text-sm font-medium">Unlimited Songs</span>
+                <span className="text-sm font-medium">
+                  {t("dashboard.unlimited_songs")}
+                </span>
               </div>
             </div>
           </div>
@@ -55,7 +76,7 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">
-                    Total Games
+                    {t("dashboard.total_games")}
                   </p>
                   <p className="text-3xl font-bold text-gray-800">12</p>
                 </div>
@@ -68,7 +89,7 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">
-                    Players Reached
+                    {t("dashboard.total_players")}
                   </p>
                   <p className="text-3xl font-bold text-gray-800">248</p>
                 </div>
@@ -81,7 +102,7 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">
-                    Success Rate
+                    {t("dashboard.avg_score")}
                   </p>
                   <p className="text-3xl font-bold text-gray-800">94%</p>
                 </div>
@@ -96,7 +117,7 @@ const DashboardPage = () => {
         {/* Main Actions */}
         <div className="max-w-7xl mx-auto px-4 pb-16">
           <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">
-            What would you like to do today?
+            {t("dashboard.what_would_you_like")}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -111,15 +132,24 @@ const DashboardPage = () => {
                   <FaPlus className="text-white text-2xl" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                  Create New Game
+                  {t("dashboard.create_new_game")}
                 </h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Start a new music quiz adventure. Add your favorite songs and
-                  challenge your friends!
+                  {t("dashboard.create_game_description")}
                 </p>
-                <div className="flex items-center text-purple-600 font-semibold group-hover:text-purple-700">
-                  <span>Get Started</span>
-                  <FaArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
+                <div
+                  className={`flex items-center text-purple-600 font-semibold group-hover:text-purple-700 ${
+                    isRTL ? "flex-row-reverse justify-end gap-3" : "gap-2"
+                  }`}
+                >
+                  <span>{t("dashboard.get_started")}</span>
+                  <FaArrowRight
+                    className={`${
+                      isRTL
+                        ? "transform group-hover:-translate-x-1 rotate-180"
+                        : "transform group-hover:translate-x-1"
+                    } transition-transform`}
+                  />
                 </div>
               </div>
             </Link>
@@ -135,15 +165,24 @@ const DashboardPage = () => {
                   <FaGamepad className="text-white text-2xl" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                  My Games
+                  {t("dashboard.view_my_games")}
                 </h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Manage your existing games, edit details, and launch exciting
-                  music sessions.
+                  {t("dashboard.my_games_description")}
                 </p>
-                <div className="flex items-center text-blue-600 font-semibold group-hover:text-blue-700">
-                  <span>View Games</span>
-                  <FaArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
+                <div
+                  className={`flex items-center text-blue-600 font-semibold group-hover:text-blue-700 ${
+                    isRTL ? "flex-row-reverse justify-end gap-3" : "gap-2"
+                  }`}
+                >
+                  <span>{t("dashboard.view_games")}</span>
+                  <FaArrowRight
+                    className={`${
+                      isRTL
+                        ? "transform group-hover:-translate-x-1 rotate-180"
+                        : "transform group-hover:translate-x-1"
+                    } transition-transform`}
+                  />
                 </div>
               </div>
             </Link>
@@ -159,15 +198,24 @@ const DashboardPage = () => {
                   <FaChartLine className="text-white text-2xl" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                  Analytics
+                  {t("dashboard.view_analytics")}
                 </h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Track performance, analyze player engagement, and optimize
-                  your games.
+                  {t("dashboard.analytics_description")}
                 </p>
-                <div className="flex items-center text-green-600 font-semibold group-hover:text-green-700">
-                  <span>View Analytics</span>
-                  <FaArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
+                <div
+                  className={`flex items-center text-green-600 font-semibold group-hover:text-green-700 ${
+                    isRTL ? "flex-row-reverse justify-end gap-3" : "gap-2"
+                  }`}
+                >
+                  <span>{t("dashboard.view_analytics")}</span>
+                  <FaArrowRight
+                    className={`${
+                      isRTL
+                        ? "transform group-hover:-translate-x-1 rotate-180"
+                        : "transform group-hover:translate-x-1"
+                    } transition-transform`}
+                  />
                 </div>
               </div>
             </Link>

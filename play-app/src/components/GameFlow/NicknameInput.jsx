@@ -1,6 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const NicknameInput = ({ roomCode, username, error, setUsername, onJoin }) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "he";
   const handleSubmit = (e) => {
     e.preventDefault();
     if (username && username.trim()) {
@@ -24,17 +27,24 @@ const NicknameInput = ({ roomCode, username, error, setUsername, onJoin }) => {
             <div className="space-y-6">
               {/* Username Input */}
               <div>
-                <label className="block text-white font-semibold mb-3 text-lg">
-                  👤 Your Nickname
+                <label
+                  className={`block text-white font-semibold mb-3 text-lg ${
+                    isRTL ? "text-right" : "text-left"
+                  }`}
+                >
+                  {t("nickname.title")}
                 </label>
                 <input
-                  className="w-full p-4 rounded-2xl bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 text-white placeholder-purple-200 text-lg font-medium focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-opacity-50 transition-all duration-200"
+                  className={`w-full p-4 rounded-2xl bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 text-white placeholder-purple-200 text-lg font-medium focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-opacity-50 transition-all duration-200 ${
+                    isRTL ? "text-right" : "text-left"
+                  }`}
                   type="text"
-                  placeholder="Enter your nickname"
+                  placeholder={t("nickname.placeholder")}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   maxLength={20}
                   autoFocus
+                  dir={isRTL ? "rtl" : "ltr"}
                 />
               </div>
 
@@ -44,7 +54,7 @@ const NicknameInput = ({ roomCode, username, error, setUsername, onJoin }) => {
                 className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-8 rounded-2xl font-bold text-xl hover:from-green-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 shadow-2xl hover:shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 disabled={!username || !username.trim()}
               >
-                🎮 Start Playing
+                {t("nickname.start_playing")}
               </button>
 
               {/* Error Message */}

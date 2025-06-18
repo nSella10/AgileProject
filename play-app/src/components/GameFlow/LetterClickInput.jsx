@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 const LetterClickInput = ({
   songTitle,
@@ -9,6 +10,8 @@ const LetterClickInput = ({
   isWaiting,
   isGameOver,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "he";
   const [selectedLetters, setSelectedLetters] = useState([]);
   const [availableLetters, setAvailableLetters] = useState([]);
   const [songDashes, setSongDashes] = useState([]);
@@ -249,7 +252,7 @@ const LetterClickInput = ({
       {/* אותיות זמינות */}
       <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-4 border border-white border-opacity-30">
         <h4 className="text-white font-semibold mb-3 text-center text-sm">
-          Choose Letters:
+          {t("letter_click.click_letters")}
         </h4>
         <div className="grid grid-cols-8 sm:grid-cols-10 gap-2" dir="rtl">
           {availableLetters.map((letterObj, index) => (
@@ -278,7 +281,7 @@ const LetterClickInput = ({
       </div>
 
       {/* כפתורי פעולה */}
-      <div className="flex gap-3">
+      <div className={`flex gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
         <button
           onClick={handleReset}
           disabled={
@@ -289,7 +292,7 @@ const LetterClickInput = ({
           }
           className="bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold px-4 py-3 rounded-2xl transition-all duration-300 text-base"
         >
-          🔄 Reset
+          🔄 {t("letter_click.clear")}
         </button>
 
         <button
@@ -298,7 +301,7 @@ const LetterClickInput = ({
           className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-2xl transition-all duration-300 text-base flex items-center justify-center gap-2"
         >
           <span className="text-lg">🚀</span>
-          Submit
+          {t("letter_click.submit")}
           <span className="text-lg">🎯</span>
         </button>
 
@@ -310,14 +313,18 @@ const LetterClickInput = ({
             className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold px-4 py-3 rounded-2xl transition-all duration-300 text-base flex items-center justify-center gap-2"
           >
             <span className="text-lg">⏭️</span>
-            Skip
+            {t("game_play.skip")}
           </button>
         )}
       </div>
 
       {/* הודעת עזרה */}
       {!isGuessComplete && !hasGuessed && (
-        <div className="text-center text-purple-200 text-sm space-y-1">
+        <div
+          className={`text-center text-purple-200 text-sm space-y-1 ${
+            isRTL ? "text-right" : "text-left"
+          }`}
+        >
           <div>Click on letters to fill in the song name</div>
           <div className="text-xs">
             💡 Or type the artist name or lyrics in chat!

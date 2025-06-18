@@ -156,7 +156,7 @@ const LyricsInputModal = ({
             </div>
 
             {/* Buttons */}
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end space-x-3 rtl:space-x-reverse">
               <button
                 type="button"
                 onClick={handleClose}

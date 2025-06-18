@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { getSocket } from "../socket";
 import GameCodeInput from "../components/GameFlow/GameCodeInput";
@@ -8,6 +9,9 @@ import GamePlayScreen from "../components/GameFlow/GamePlayScreen";
 import RejoinGameModal from "../components/RejoinGameModal";
 
 const JoinGamePage = () => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "he";
+
   console.log("🎯 JoinGamePage component is being rendered/initialized");
 
   const [roomCode, setRoomCode] = useState("");
@@ -618,7 +622,7 @@ const JoinGamePage = () => {
 
     socket.on("gameStarting", () => {
       setGameStarted(true);
-      setStatusMsg("🎬 Game is starting!");
+      setStatusMsg(t("game_play.game_starting"));
     });
 
     // מאזין לקבלת פרטי המשחק
@@ -630,7 +634,7 @@ const JoinGamePage = () => {
     socket.on(
       "nextRound",
       ({ roundNumber, songNumber, totalSongs, duration, currentSong }) => {
-        setStatusMsg(`🎵 Round ${roundNumber} - Song is playing...`);
+        setStatusMsg(t("game_play.round_song_playing", { roundNumber }));
         setHasGuessedThisRound(false);
         setIsWaitingBetweenRounds(false);
         setRoundFailedForUser(false);
@@ -661,7 +665,7 @@ const JoinGamePage = () => {
           console.log(
             "⚠️ Fallback: timerStarted not received, starting timer manually"
           );
-          setStatusMsg(`🕵️ Listen and guess!`);
+          setStatusMsg(t("game_play.listen_and_guess"));
           setIsAudioPlaying(false);
           setTimeLeft(15); // ברירת מחדל של 15 שניות
           setMaxTime(15);
@@ -701,7 +705,7 @@ const JoinGamePage = () => {
         console.log("✅ Cancelled fallback timer - received real timerStarted");
       }
 
-      setStatusMsg(`🕵️ Listen and guess!`);
+      setStatusMsg(t("game_play.listen_and_guess"));
       setIsAudioPlaying(false); // השיר הפסיק להתנגן, עכשיו אפשר לנחש
 
       const now = Date.now();
@@ -768,7 +772,7 @@ const JoinGamePage = () => {
     );
 
     socket.on("roundSucceeded", () => {
-      setStatusMsg("🎉 Someone got it! Waiting for next song...");
+      setStatusMsg(t("game_play.someone_got_it"));
       setHasGuessedThisRound(true);
       setIsWaitingBetweenRounds(true);
       setRoundFailedForUser(false);
@@ -788,7 +792,7 @@ const JoinGamePage = () => {
     });
 
     socket.on("roundFailed", () => {
-      setStatusMsg("❌ No one guessed it. Waiting for host...");
+      setStatusMsg(t("game_play.no_one_guessed"));
       setHasGuessedThisRound(true);
       setIsWaitingBetweenRounds(true);
       setRoundFailedForUser(true);
@@ -808,7 +812,7 @@ const JoinGamePage = () => {
     });
 
     socket.on("gameOver", () => {
-      setStatusMsg("🏁 Game over! Thanks for playing.");
+      setStatusMsg(t("game_play.game_over_thanks"));
       setIsGameOver(true);
     });
 
@@ -842,19 +846,19 @@ const JoinGamePage = () => {
 
         if (isRoundActive) {
           // יש סיבוב פעיל - השחקן יכול להצטרף מיד לסיבוב הנוכחי
-          setStatusMsg("🔄 Reconnected! You can answer the current song!");
+          setStatusMsg(t("game_play.reconnected_current_song"));
           setIsWaitingBetweenRounds(false);
           setHasGuessedThisRound(false); // אפשר לשחקן לענות על השיר הנוכחי
           setSubmitted(false);
           setIsAudioPlaying(false); // האודיו כבר נגמר
         } else {
           // אין סיבוב פעיל - השחקן יכול להצטרף מיד
-          setStatusMsg("🔄 Reconnected! Ready for the next round!");
+          setStatusMsg(t("game_play.reconnected_next_round"));
           setIsWaitingBetweenRounds(true);
           setHasGuessedThisRound(false);
         }
 
-        toast.success("Successfully reconnected to the game!");
+        toast.success(t("game_play.reconnected_success"));
       }
     );
 
@@ -891,7 +895,9 @@ const JoinGamePage = () => {
 
       // הצגת הודעה אחת בלבד
       toast.dismiss(); // סגירת כל ההודעות הקיימות
-      toast.info(`Game paused - ${disconnectedPlayer} disconnected`);
+      toast.info(
+        t("game_play.game_paused_player", { player: disconnectedPlayer })
+      );
     });
 
     // טיפול בחידוש המשחק
@@ -924,7 +930,7 @@ const JoinGamePage = () => {
       setHasGuessedThisRound(false);
       setSubmitted(false);
 
-      toast.success("Game resumed!");
+      toast.success(t("game_play.game_resumed"));
     });
 
     return () => {
@@ -1013,7 +1019,7 @@ const JoinGamePage = () => {
   // פונקציה למעבר משלב הכנסת קוד למשחק לשלב הכנסת nickname
   const handleGameCodeNext = () => {
     if (!roomCode || roomCode.length !== 5) {
-      setError("Please enter a valid 5-digit game code.");
+      setError(t("game_code.invalid_code"));
       return;
     }
     setError(""); // נקה שגיאות קודמות
@@ -1022,7 +1028,7 @@ const JoinGamePage = () => {
 
   const handleJoin = () => {
     if (!roomCode || !username) {
-      setError("Please enter both a room code and a nickname.");
+      setError(t("errors.missing_code_nickname"));
       return;
     }
 
@@ -1039,9 +1045,7 @@ const JoinGamePage = () => {
         const gameData = JSON.parse(lastGameSession);
         // בדיקה אם זה אותו משחק שהמארגן החליט לא לחכות לו
         if (gameData.roomCode === roomCode && gameData.username === username) {
-          setError(
-            "The game organizer decided to continue without you. You cannot rejoin this game."
-          );
+          setError(t("errors.organizer_continued_without_you"));
           return;
         }
       } catch (error) {

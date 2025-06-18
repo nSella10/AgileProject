@@ -37,7 +37,7 @@ const LanguageToggle = ({ className = "" }) => {
       onClick={toggleLanguage}
       className={`flex items-center px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl ${
         isHebrew
-          ? "space-x-reverse space-x-2"
+          ? "space-x-reverse space-x-3"
           : "space-x-2 transform hover:scale-105"
       } ${className}`}
       title={isHebrew ? "Switch to English" : "עבור לעברית"}

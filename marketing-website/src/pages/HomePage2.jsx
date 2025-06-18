@@ -25,7 +25,8 @@ const HomePage2 = () => {
       process.env.NODE_ENV === "production"
         ? "https://create.guessifyapp.com"
         : "http://localhost:3001";
-    window.location.href = createAppUrl;
+    const langParam = i18n.language === "he" ? "?lang=he" : "?lang=eng";
+    window.location.href = createAppUrl + langParam;
   };
 
   // Handle Play/Join button click - redirect to play app
@@ -104,19 +105,19 @@ const HomePage2 = () => {
                 {t("home.subtitle")}
               </p>
               <div
-                className={`flex flex-col sm:flex-row gap-4 justify-center ${
+                className={`flex flex-col sm:flex-row gap-6 justify-center ${
                   isRTL ? "sm:flex-row-reverse" : ""
                 }`}
               >
                 <button
                   onClick={handleCreateClick}
-                  className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl"
+                  className="bg-white text-green-600 hover:bg-green-50 px-12 py-5 rounded-2xl font-bold text-xl md:text-2xl transition-all duration-300 transform hover:scale-105 shadow-xl min-w-[260px]"
                 >
                   {t("home.start_family_fun")}
                 </button>
                 <button
                   onClick={handlePlayClick}
-                  className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300"
+                  className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-12 py-5 rounded-2xl font-bold text-xl md:text-2xl transition-all duration-300 min-w-[260px]"
                 >
                   {t("home.join_game")}
                 </button>

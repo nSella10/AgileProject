@@ -1,10 +1,7 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { getSocket } from "../../socket";
 
 const GameCodeInput = ({ roomCode, error, setRoomCode, onNext }) => {
-  const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === "he";
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState("");
 
@@ -59,7 +56,7 @@ const GameCodeInput = ({ roomCode, error, setRoomCode, onNext }) => {
     setTimeout(() => {
       if (isValidating) {
         setIsValidating(false);
-        setValidationError(t("game_code.connection_timeout"));
+        setValidationError("Connection timeout. Please try again.");
         socket.off("roomValidationResult", handleValidationResult);
       }
     }, 5000);
@@ -92,21 +89,15 @@ const GameCodeInput = ({ roomCode, error, setRoomCode, onNext }) => {
             <div className="space-y-6">
               {/* Game Code Input */}
               <div>
-                <label
-                  className={`block text-white font-semibold mb-3 text-lg ${
-                    isRTL ? "text-right" : "text-left"
-                  }`}
-                >
-                  {t("game_code.title")}
+                <label className="block text-white font-semibold mb-3 text-lg">
+                  🎮 Game Code
                 </label>
                 <input
-                  className={`w-full p-4 rounded-2xl bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 text-white placeholder-purple-200 text-lg font-medium focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-opacity-50 transition-all duration-200 text-center tracking-widest ${
-                    isRTL ? "text-center" : "text-center"
-                  }`}
+                  className="w-full p-4 rounded-2xl bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 text-white placeholder-purple-200 text-lg font-medium focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-opacity-50 transition-all duration-200 text-center tracking-widest"
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  placeholder={t("game_code.placeholder")}
+                  placeholder="00000"
                   value={roomCode}
                   onChange={(e) => {
                     // מאפשר רק מספרים
@@ -115,7 +106,6 @@ const GameCodeInput = ({ roomCode, error, setRoomCode, onNext }) => {
                   }}
                   maxLength={5}
                   autoFocus
-                  dir="ltr"
                 />
               </div>
 
@@ -127,17 +117,11 @@ const GameCodeInput = ({ roomCode, error, setRoomCode, onNext }) => {
               >
                 {isValidating ? (
                   <>
-                    <span
-                      className={`animate-spin inline-block ${
-                        isRTL ? "ml-2" : "mr-2"
-                      }`}
-                    >
-                      ⏳
-                    </span>
-                    {t("game_code.checking")}
+                    <span className="animate-spin inline-block mr-2">⏳</span>
+                    Checking...
                   </>
                 ) : (
-                  t("game_code.join_game")
+                  "🚀 Join Game"
                 )}
               </button>
 

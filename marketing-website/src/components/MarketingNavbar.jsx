@@ -76,8 +76,7 @@ const MarketingNavbar = () => {
       process.env.NODE_ENV === "production"
         ? "https://create.guessifyapp.com"
         : "http://localhost:3001";
-    const langParam = i18n.language === "he" ? "?lang=he" : "?lang=eng";
-    window.location.href = createAppUrl + langParam;
+    window.location.href = createAppUrl;
   };
 
   // Handle Play button click - redirect to play app
@@ -106,7 +105,7 @@ const MarketingNavbar = () => {
           <Link
             to="/"
             className={`flex items-center group ${
-              isRTL ? "space-x-reverse space-x-3" : "space-x-2"
+              isRTL ? "space-x-reverse space-x-2" : "space-x-2"
             }`}
           >
             <div className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:via-pink-700 group-hover:to-indigo-700 transition-all duration-300">
@@ -128,7 +127,7 @@ const MarketingNavbar = () => {
                   key={item.path}
                   to={item.path}
                   className={`flex items-center px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                    isRTL ? "space-x-reverse space-x-3" : "space-x-2"
+                    isRTL ? "space-x-reverse space-x-2" : "space-x-2"
                   } ${
                     isActive
                       ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
@@ -159,7 +158,7 @@ const MarketingNavbar = () => {
             <button
               onClick={handleCreateClick}
               className={`flex items-center ${
-                isRTL ? "space-x-reverse space-x-3" : "space-x-2"
+                isRTL ? "space-x-reverse space-x-2" : "space-x-2"
               } bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl ${
                 isRTL ? "" : "transform hover:scale-105"
               }`}
@@ -206,7 +205,7 @@ const MarketingNavbar = () => {
                     key={item.path}
                     to={item.path}
                     className={`flex items-center py-3 px-4 rounded-xl font-medium transition-all duration-300 ${
-                      isRTL ? "space-x-reverse space-x-4" : "space-x-3"
+                      isRTL ? "space-x-reverse space-x-3" : "space-x-3"
                     } ${
                       isActive
                         ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
@@ -234,7 +233,7 @@ const MarketingNavbar = () => {
               <button
                 onClick={handleCreateClick}
                 className={`w-full flex items-center justify-center py-3 px-4 rounded-xl font-medium transition-all duration-300 shadow-lg ${
-                  isRTL ? "space-x-reverse space-x-3" : "space-x-2"
+                  isRTL ? "space-x-reverse space-x-2" : "space-x-2"
                 } bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white`}
               >
                 <FaSignInAlt />

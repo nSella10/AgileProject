@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useLoginMutation } from "../slices/usersApiSlice";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../slices/authSlice";
@@ -14,8 +13,6 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const fromCreate = location.state?.fromCreate;
-  const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === "he";
 
   const [login, { isLoading }] = useLoginMutation();
 
@@ -28,7 +25,7 @@ const LoginPage = () => {
       dispatch(setCredentials(res));
       fromCreate ? navigate("/create") : navigate("/dashboard");
     } catch (err) {
-      setErrorMessage(err?.data?.message || t("login.login_failed"));
+      setErrorMessage(err?.data?.message || "Login failed");
     }
   };
 
@@ -43,62 +40,44 @@ const LoginPage = () => {
 
       <div className="relative w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         {/* Left side - Welcome back content */}
-        <div
-          className={`text-white space-y-6 text-center ${
-            isRTL ? "lg:text-right" : "lg:text-left"
-          }`}
-        >
+        <div className="text-white space-y-6 text-center lg:text-left">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-              {t("login.welcome_back_emoji")}
+              Welcome Back 🎶
             </h1>
-            <p className="text-xl text-purple-100">{t("login.subtitle")}</p>
+            <p className="text-xl text-purple-100">
+              Ready to create amazing music experiences? Sign in to continue
+              your musical journey.
+            </p>
           </div>
 
           <div className="space-y-4">
-            <div
-              className={`flex items-center ${
-                isRTL ? "space-x-reverse" : ""
-              } space-x-3 justify-center ${
-                isRTL ? "lg:justify-end" : "lg:justify-start"
-              }`}
-            >
+            <div className="flex items-center space-x-3 justify-center lg:justify-start">
               <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold">🎮</span>
               </div>
-              <span className="text-lg">{t("login.access_saved_games")}</span>
+              <span className="text-lg">Access your saved games</span>
             </div>
-            <div
-              className={`flex items-center ${
-                isRTL ? "space-x-reverse" : ""
-              } space-x-3 justify-center ${
-                isRTL ? "lg:justify-end" : "lg:justify-start"
-              }`}
-            >
+            <div className="flex items-center space-x-3 justify-center lg:justify-start">
               <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold">📊</span>
               </div>
-              <span className="text-lg">{t("login.view_analytics")}</span>
+              <span className="text-lg">View your game analytics</span>
             </div>
-            <div
-              className={`flex items-center ${
-                isRTL ? "space-x-reverse space-x-4" : "space-x-3"
-              } justify-center ${
-                isRTL ? "lg:justify-end" : "lg:justify-start"
-              }`}
-            >
+            <div className="flex items-center space-x-3 justify-center lg:justify-start">
               <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold">🚀</span>
               </div>
-              <span className="text-lg">
-                {t("login.create_games_instantly")}
-              </span>
+              <span className="text-lg">Create new games instantly</span>
             </div>
           </div>
 
           <div className="hidden lg:block">
             <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6">
-              <p className="text-sm italic">{t("login.teacher_review")}</p>
+              <p className="text-sm italic">
+                "Guessify! makes it so easy to engage my students. They love the
+                interactive music games!" - Teacher Review
+              </p>
             </div>
           </div>
         </div>
@@ -110,32 +89,24 @@ const LoginPage = () => {
               <span className="text-3xl">🎵</span>
             </div>
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
-              {t("login.welcome_back")}
+              Welcome Back
             </h2>
-            <p className="text-gray-600">{t("login.sign_in_to_account")}</p>
+            <p className="text-gray-600">Sign in to your account</p>
           </div>
 
           {fromCreate && (
             <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm">
-              <div
-                className={`flex items-center ${
-                  isRTL ? "flex-row-reverse" : ""
-                }`}
-              >
-                <span className={`${isRTL ? "ml-2" : "mr-2"}`}>ℹ️</span>
-                {t("login.login_required")}
+              <div className="flex items-center">
+                <span className="mr-2">ℹ️</span>
+                You must be logged in to create a game.
               </div>
             </div>
           )}
 
           {errorMessage && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              <div
-                className={`flex items-center ${
-                  isRTL ? "flex-row-reverse" : ""
-                }`}
-              >
-                <span className={`${isRTL ? "ml-2" : "mr-2"}`}>⚠️</span>
+              <div className="flex items-center">
+                <span className="mr-2">⚠️</span>
                 {errorMessage}
               </div>
             </div>
@@ -147,7 +118,7 @@ const LoginPage = () => {
                 htmlFor="email"
                 className="block text-gray-700 font-medium mb-2"
               >
-                {t("login.email_address")}
+                Email Address
               </label>
               <input
                 type="email"
@@ -156,7 +127,7 @@ const LoginPage = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder={t("login.email_placeholder")}
+                placeholder="your.email@example.com"
               />
             </div>
 
@@ -165,7 +136,7 @@ const LoginPage = () => {
                 htmlFor="password"
                 className="block text-gray-700 font-medium mb-2"
               >
-                {t("login.password")}
+                Password
               </label>
               <input
                 type="password"
@@ -174,7 +145,7 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder={t("login.password_placeholder")}
+                placeholder="Enter your password"
               />
             </div>
 
@@ -185,17 +156,13 @@ const LoginPage = () => {
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div
-                    className={`animate-spin rounded-full h-5 w-5 border-b-2 border-white ${
-                      isRTL ? "ml-2" : "mr-2"
-                    }`}
-                  ></div>
-                  {t("login.signing_in")}
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Signing you in...
                 </div>
               ) : (
                 <div className="flex items-center justify-center">
-                  <span className={`${isRTL ? "ml-2" : "mr-2"}`}>🎵</span>
-                  {t("login.sign_in")}
+                  <span className="mr-2">🎵</span>
+                  Sign In
                 </div>
               )}
             </button>
@@ -203,12 +170,12 @@ const LoginPage = () => {
 
           <div className="text-center mt-6 pt-6 border-t border-gray-200">
             <p className="text-gray-600">
-              {t("login.no_account")}{" "}
+              Don't have an account?{" "}
               <a
                 href="/register"
                 className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
               >
-                {t("login.create_account")}
+                Create one here →
               </a>
             </p>
           </div>

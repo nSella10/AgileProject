@@ -1,6 +1,5 @@
 // src/pages/EditGamePage.jsx
 import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGameWithState, useUpdateGameWithState } from "../hooks/useGames";
@@ -12,7 +11,6 @@ import {
   FaLock,
   FaGlobe,
   FaArrowLeft,
-  FaArrowRight,
   FaSave,
   FaStar,
   FaHeadphones,
@@ -21,8 +19,6 @@ import {
 const EditGamePage = () => {
   const { gameId } = useParams();
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === "he";
 
   const {
     game,
@@ -95,7 +91,7 @@ const EditGamePage = () => {
     setError("");
 
     if (!title || selectedSongs.length === 0) {
-      setError(t("edit_game.validation_title_songs"));
+      setError("Please provide a title and select at least one song.");
       return;
     }
 
@@ -134,11 +130,11 @@ const EditGamePage = () => {
 
     try {
       await updateGame(gameData);
-      toast.success(t("edit_game.game_updated_success"));
+      toast.success("Game updated successfully!");
       navigate("/mygames");
     } catch (err) {
-      setError(err?.message || t("edit_game.game_update_failed"));
-      toast.error(t("edit_game.game_update_failed"));
+      setError(err?.message || "Failed to update game.");
+      toast.error("Failed to update game.");
     }
   };
 
@@ -148,7 +144,7 @@ const EditGamePage = () => {
       <PageLayout>
         <div className="flex flex-col items-center justify-center py-20">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mb-4"></div>
-          <p className="text-gray-600 text-lg">{t("edit_game.loading_game")}</p>
+          <p className="text-gray-600 text-lg">Loading game...</p>
         </div>
       </PageLayout>
     );
@@ -162,13 +158,13 @@ const EditGamePage = () => {
           <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
             <div className="text-4xl mb-4">❌</div>
             <p className="text-red-600 text-lg font-semibold mb-4">
-              {gameError?.data?.message || t("edit_game.failed_to_load")}
+              {gameError?.data?.message || "Failed to load game."}
             </p>
             <button
               onClick={() => navigate("/mygames")}
               className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300"
             >
-              {t("edit_game.back_to_my_games")}
+              Back to My Games
             </button>
           </div>
         </div>
@@ -185,22 +181,21 @@ const EditGamePage = () => {
           <div className="relative max-w-7xl mx-auto px-4">
             <button
               onClick={() => navigate("/mygames")}
-              className={`flex items-center gap-2 text-purple-100 hover:text-white mb-6 transition-colors ${
-                isRTL ? "flex-row-reverse" : ""
-              }`}
+              className="flex items-center gap-2 text-purple-100 hover:text-white mb-6 transition-colors"
             >
-              {isRTL ? <FaArrowRight /> : <FaArrowLeft />}
-              <span>{t("edit_game.back_to_my_games")}</span>
+              <FaArrowLeft />
+              <span>Back to My Games</span>
             </button>
             <div className="text-center">
               <div className="mb-4">
                 <span className="text-5xl">✏️</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
-                {t("edit_game.title")}
+                Edit Your Music Game
               </h1>
               <p className="text-xl text-purple-100 max-w-2xl mx-auto">
-                {t("edit_game.subtitle")}
+                Update your game details, modify songs, and perfect your music
+                quiz experience
               </p>
             </div>
           </div>
@@ -210,21 +205,13 @@ const EditGamePage = () => {
         <div className="max-w-5xl mx-auto px-4 py-12">
           {/* Progress Steps */}
           <div className="mb-12">
-            <div
-              className={`flex items-center justify-center ${
-                isRTL ? "space-x-reverse space-x-8" : "space-x-8"
-              }`}
-            >
+            <div className="flex items-center justify-center space-x-8">
               <div className="flex items-center">
                 <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
                   1
                 </div>
-                <span
-                  className={`${
-                    isRTL ? "mr-3" : "ml-3"
-                  } text-purple-600 font-semibold`}
-                >
-                  {t("edit_game.step_game_details")}
+                <span className="ml-3 text-purple-600 font-semibold">
+                  Game Details
                 </span>
               </div>
               <div className="w-16 h-1 bg-purple-200 rounded"></div>
@@ -232,12 +219,8 @@ const EditGamePage = () => {
                 <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
                   2
                 </div>
-                <span
-                  className={`${
-                    isRTL ? "mr-3" : "ml-3"
-                  } text-purple-600 font-semibold`}
-                >
-                  {t("edit_game.step_update_songs")}
+                <span className="ml-3 text-purple-600 font-semibold">
+                  Update Songs
                 </span>
               </div>
               <div className="w-16 h-1 bg-purple-200 rounded"></div>
@@ -245,12 +228,8 @@ const EditGamePage = () => {
                 <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
                   3
                 </div>
-                <span
-                  className={`${
-                    isRTL ? "mr-3" : "ml-3"
-                  } text-purple-600 font-semibold`}
-                >
-                  {t("edit_game.step_save_changes")}
+                <span className="ml-3 text-purple-600 font-semibold">
+                  Save Changes
                 </span>
               </div>
             </div>
@@ -270,41 +249,41 @@ const EditGamePage = () => {
                   <FaMusic className="text-purple-600 text-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {t("create_game.step_game_details")}
+                  Game Details
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
                   <label className="block text-gray-700 font-semibold mb-3">
-                    {t("create_game.game_title_required")}
+                    Game Title *
                   </label>
                   <input
                     type="text"
-                    placeholder={t("create_game.game_title_placeholder")}
+                    placeholder="Enter an exciting game title..."
                     className="w-full px-4 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-lg"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
                   />
                   <p className="text-sm text-gray-500 mt-2">
-                    {t("create_game.game_title_help")}
+                    Choose a catchy title that will attract players
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-gray-700 font-semibold mb-3">
-                    {t("create_game.description")}
+                    Description (Optional)
                   </label>
                   <textarea
-                    placeholder={t("create_game.description_placeholder")}
+                    placeholder="Describe your game theme, difficulty, or special features..."
                     className="w-full px-4 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all resize-none text-lg"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={4}
                   ></textarea>
                   <p className="text-sm text-gray-500 mt-2">
-                    {t("create_game.description_help")}
+                    Help players understand what to expect
                   </p>
                 </div>
               </div>
@@ -312,18 +291,10 @@ const EditGamePage = () => {
               {/* Game Settings */}
               <div className="mt-8 space-y-6">
                 {/* Visibility Settings */}
-                <div
-                  className={`p-6 bg-gray-50 rounded-2xl ${
-                    isRTL ? "text-right" : ""
-                  }`}
-                >
-                  <h3
-                    className={`text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 ${
-                      isRTL ? "flex-row-reverse justify-end" : ""
-                    }`}
-                  >
+                <div className="p-6 bg-gray-50 rounded-2xl">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <FaUsers className="text-purple-600" />
-                    {t("create_game.game_visibility")}
+                    Game Visibility
                   </h3>
                   <div className="flex items-center gap-6">
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -337,11 +308,11 @@ const EditGamePage = () => {
                       <div className="flex items-center gap-2">
                         <FaGlobe className="text-green-600" />
                         <span className="font-medium text-gray-700">
-                          {t("create_game.public")}
+                          Public
                         </span>
                       </div>
                       <span className="text-sm text-gray-500">
-                        {t("create_game.anyone_can_join")}
+                        Anyone can join
                       </span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -355,28 +326,18 @@ const EditGamePage = () => {
                       <div className="flex items-center gap-2">
                         <FaLock className="text-orange-600" />
                         <span className="font-medium text-gray-700">
-                          {t("create_game.private")}
+                          Private
                         </span>
                       </div>
-                      <span className="text-sm text-gray-500">
-                        {t("create_game.invite_only")}
-                      </span>
+                      <span className="text-sm text-gray-500">Invite only</span>
                     </label>
                   </div>
                 </div>
 
                 {/* Guess Time Limit */}
-                <div
-                  className={`p-6 bg-blue-50 rounded-2xl ${
-                    isRTL ? "text-right" : ""
-                  }`}
-                >
-                  <h3
-                    className={`text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 ${
-                      isRTL ? "flex-row-reverse justify-end" : ""
-                    }`}
-                  >
-                    ⏱️ {t("create_game.guess_time_limit")}
+                <div className="p-6 bg-blue-50 rounded-2xl">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    ⏱️ Guess Time Limit
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -388,10 +349,10 @@ const EditGamePage = () => {
                         className="w-5 h-5 text-blue-600"
                       />
                       <span className="font-medium text-gray-700">
-                        {t("create_game.15_seconds")}
+                        15 seconds
                       </span>
                       <span className="text-sm text-gray-500">
-                        {t("create_game.quick_exciting")}
+                        Quick & exciting
                       </span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -403,11 +364,9 @@ const EditGamePage = () => {
                         className="w-5 h-5 text-blue-600"
                       />
                       <span className="font-medium text-gray-700">
-                        {t("create_game.30_seconds")}
+                        30 seconds
                       </span>
-                      <span className="text-sm text-gray-500">
-                        {t("create_game.balanced")}
-                      </span>
+                      <span className="text-sm text-gray-500">Balanced</span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
@@ -418,11 +377,9 @@ const EditGamePage = () => {
                         className="w-5 h-5 text-blue-600"
                       />
                       <span className="font-medium text-gray-700">
-                        {t("create_game.45_seconds")}
+                        45 seconds
                       </span>
-                      <span className="text-sm text-gray-500">
-                        {t("create_game.extended")}
-                      </span>
+                      <span className="text-sm text-gray-500">Extended</span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
                       <input
@@ -433,30 +390,20 @@ const EditGamePage = () => {
                         className="w-5 h-5 text-blue-600"
                       />
                       <span className="font-medium text-gray-700">
-                        {t("create_game.60_seconds")}
+                        60 seconds
                       </span>
-                      <span className="text-sm text-gray-500">
-                        {t("create_game.relaxed")}
-                      </span>
+                      <span className="text-sm text-gray-500">Relaxed</span>
                     </label>
                   </div>
                   <p className="text-sm text-gray-600 mt-3">
-                    {t("create_game.time_limit_help")}
+                    How long should players have to guess each song?
                   </p>
                 </div>
 
                 {/* Guess Input Method */}
-                <div
-                  className={`p-6 bg-green-50 rounded-2xl ${
-                    isRTL ? "text-right" : ""
-                  }`}
-                >
-                  <h3
-                    className={`text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 ${
-                      isRTL ? "flex-row-reverse justify-end" : ""
-                    }`}
-                  >
-                    ✏️ {t("create_game.guess_input_method")}
+                <div className="p-6 bg-green-50 rounded-2xl">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    ✏️ Guess Input Method
                   </h3>
                   <div className="space-y-4">
                     <label className="flex items-start gap-3 cursor-pointer">
@@ -469,10 +416,10 @@ const EditGamePage = () => {
                       />
                       <div>
                         <span className="font-medium text-gray-700 block">
-                          {t("create_game.free_text_input")}
+                          Free Text Input
                         </span>
                         <span className="text-sm text-gray-500">
-                          {t("create_game.free_text_description")}
+                          Players can type their guess freely in a text field
                         </span>
                       </div>
                     </label>
@@ -486,16 +433,17 @@ const EditGamePage = () => {
                       />
                       <div>
                         <span className="font-medium text-gray-700 block">
-                          {t("create_game.letter_clicking")}
+                          Letter Clicking
                         </span>
                         <span className="text-sm text-gray-500">
-                          {t("create_game.letter_click_description")}
+                          Players click on letters to fill in dashes
+                          representing the song name
                         </span>
                       </div>
                     </label>
                   </div>
                   <p className="text-sm text-gray-600 mt-3">
-                    {t("create_game.input_method_help")}
+                    Choose how players will input their guesses.
                   </p>
                 </div>
               </div>
@@ -508,13 +456,12 @@ const EditGamePage = () => {
                   <FaHeadphones className="text-blue-600 text-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {t("create_game.add_songs")}
+                  Update Songs
                 </h2>
                 {selectedSongs.length > 0 && (
                   <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                    {t("create_game.songs_selected", {
-                      count: selectedSongs.length,
-                    })}
+                    {selectedSongs.length} song
+                    {selectedSongs.length !== 1 ? "s" : ""} selected
                   </span>
                 )}
               </div>
@@ -527,10 +474,8 @@ const EditGamePage = () => {
               {selectedSongs.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   <FaMusic className="text-4xl mx-auto mb-4 opacity-50" />
-                  <p className="text-lg">
-                    {t("create_game.no_songs_selected")}
-                  </p>
-                  <p className="text-sm">{t("create_game.search_add_songs")}</p>
+                  <p className="text-lg">No songs selected</p>
+                  <p className="text-sm">Add songs to update your game</p>
                 </div>
               )}
             </div>
@@ -542,28 +487,22 @@ const EditGamePage = () => {
                 onClick={() => navigate("/mygames")}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg"
               >
-                {t("create_game.cancel")}
+                Cancel
               </button>
               <button
                 type="submit"
                 disabled={updateLoading || !title || selectedSongs.length === 0}
-                className={`flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 disabled:cursor-not-allowed ${
-                  isRTL ? "flex-row-reverse" : ""
-                }`}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-lg flex items-center justify-center gap-3 disabled:cursor-not-allowed"
               >
                 {updateLoading ? (
                   <>
-                    <div
-                      className={`animate-spin rounded-full h-5 w-5 border-b-2 border-white ${
-                        isRTL ? "ml-2" : "mr-2"
-                      }`}
-                    ></div>
-                    {t("edit_game.updating_game")}
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Updating...
                   </>
                 ) : (
                   <>
                     <FaSave />
-                    {t("edit_game.save_changes")}
+                    Update Game
                   </>
                 )}
               </button>
@@ -575,15 +514,14 @@ const EditGamePage = () => {
                 <FaStar className="text-purple-600 text-xl mt-1" />
                 <div>
                   <h3 className="font-semibold text-purple-800 mb-2">
-                    {t("create_game.pro_tips")}
+                    Pro Tips for Great Games
                   </h3>
                   <ul className="text-sm text-purple-700 space-y-1">
-                    <li>{t("create_game.tip_mix_songs")}</li>
-                    <li>{t("create_game.tip_different_genres")}</li>
-                    <li>{t("create_game.tip_drag_reorder")}</li>
-                    <li>{t("create_game.tip_optimal_length")}</li>
-                    <li>{t("create_game.tip_auto_lyrics")}</li>
-                    <li>{t("create_game.tip_test_game")}</li>
+                    <li>• Mix popular and lesser-known songs for variety</li>
+                    <li>• Choose songs from different genres and eras</li>
+                    <li>• Drag songs to reorder them as you like</li>
+                    <li>• Aim for 5-10 songs for optimal game length</li>
+                    <li>• Test your game with friends before sharing</li>
                   </ul>
                 </div>
               </div>
@@ -603,10 +541,10 @@ const EditGamePage = () => {
                 <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
               </div>
               <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-                {t("create_game.missing_lyrics_alert")}
+                Missing Lyrics Alert!
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                {t("create_game.missing_lyrics_subtitle")}
+                Some songs need lyrics before you can update your amazing game
               </p>
             </div>
 

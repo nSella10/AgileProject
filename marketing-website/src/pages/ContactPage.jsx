@@ -228,7 +228,7 @@ const ContactPage = () => {
                 >
                   <div
                     className={`flex items-start ${
-                      isRTL ? "space-x-reverse space-x-4" : "space-x-3"
+                      isRTL ? "space-x-reverse space-x-3" : "space-x-3"
                     }`}
                   >
                     <span className="text-2xl">{method.icon}</span>

@@ -1,6 +1,5 @@
 // src/pages/AnalyticsPage.jsx
 import React from "react";
-import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 import { useNavigate } from "react-router-dom";
 import { useAnalyticsWithState } from "../hooks/useGames";
@@ -12,7 +11,6 @@ import {
   FaGlobe,
   FaLock,
   FaArrowLeft,
-  FaArrowRight,
   FaTrophy,
   FaClock,
   FaFire,
@@ -21,8 +19,6 @@ import {
 const AnalyticsPage = () => {
   const navigate = useNavigate();
   const { analytics, isLoading, error } = useAnalyticsWithState();
-  const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === "he";
 
   if (isLoading) {
     return (
@@ -30,7 +26,7 @@ const AnalyticsPage = () => {
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">{t("common.loading")}</p>
+            <p className="text-gray-600 text-lg">Loading analytics...</p>
           </div>
         </div>
       </PageLayout>
@@ -44,13 +40,13 @@ const AnalyticsPage = () => {
           <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center max-w-md">
             <div className="text-4xl mb-4">❌</div>
             <p className="text-red-600 text-lg font-semibold mb-4">
-              {t("common.error")}
+              Failed to load analytics
             </p>
             <button
               onClick={() => navigate("/dashboard")}
               className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300"
             >
-              {t("common.back")}
+              Back to Dashboard
             </button>
           </div>
         </div>
@@ -65,7 +61,7 @@ const AnalyticsPage = () => {
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">{t("common.loading")}</p>
+            <p className="text-gray-600 text-lg">Loading analytics...</p>
           </div>
         </div>
       </PageLayout>
@@ -89,22 +85,20 @@ const AnalyticsPage = () => {
           <div className="relative max-w-7xl mx-auto px-4">
             <button
               onClick={() => navigate("/dashboard")}
-              className={`flex items-center gap-2 text-purple-100 hover:text-white mb-6 transition-colors ${
-                isRTL ? "flex-row-reverse" : ""
-              }`}
+              className="flex items-center gap-2 text-purple-100 hover:text-white mb-6 transition-colors"
             >
-              {isRTL ? <FaArrowRight /> : <FaArrowLeft />}
-              <span>{t("common.back")}</span>
+              <FaArrowLeft />
+              <span>Back to Dashboard</span>
             </button>
             <div className="text-center">
               <div className="mb-4">
                 <span className="text-5xl">📊</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
-                {t("analytics.title")}
+                Analytics Dashboard
               </h1>
               <p className="text-xl text-purple-100 max-w-2xl mx-auto">
-                {t("analytics.subtitle")}
+                Track your music game performance and player engagement
               </p>
             </div>
           </div>
@@ -118,7 +112,7 @@ const AnalyticsPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">
-                    {t("analytics.total_games")}
+                    Total Games
                   </p>
                   <p className="text-3xl font-bold text-gray-800">
                     {overview.totalGames || 0}
@@ -134,7 +128,7 @@ const AnalyticsPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">
-                    {t("analytics.total_songs")}
+                    Total Songs
                   </p>
                   <p className="text-3xl font-bold text-gray-800">
                     {overview.totalSongs || 0}
@@ -150,7 +144,7 @@ const AnalyticsPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">
-                    {t("analytics.avg_songs_per_game")}
+                    Avg Songs/Game
                   </p>
                   <p className="text-3xl font-bold text-gray-800">
                     {overview.avgSongsPerGame || 0}
@@ -166,14 +160,12 @@ const AnalyticsPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">
-                    {t("analytics.recent_games")}
+                    Recent Games
                   </p>
                   <p className="text-3xl font-bold text-gray-800">
                     {overview.recentGamesCount || 0}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {t("analytics.last_30_days")}
-                  </p>
+                  <p className="text-xs text-gray-500">Last 30 days</p>
                 </div>
                 <div className="bg-orange-100 p-3 rounded-2xl">
                   <FaClock className="text-orange-600 text-xl" />
@@ -190,7 +182,7 @@ const AnalyticsPage = () => {
                   <FaUsers className="text-indigo-600 text-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {t("analytics.game_visibility")}
+                  Game Visibility
                 </h2>
               </div>
 
@@ -199,7 +191,7 @@ const AnalyticsPage = () => {
                   <div className="flex items-center gap-3">
                     <FaGlobe className="text-green-600" />
                     <span className="font-medium text-gray-700">
-                      {t("analytics.public_games")}
+                      Public Games
                     </span>
                   </div>
                   <span className="text-2xl font-bold text-green-600">
@@ -211,7 +203,7 @@ const AnalyticsPage = () => {
                   <div className="flex items-center gap-3">
                     <FaLock className="text-orange-600" />
                     <span className="font-medium text-gray-700">
-                      {t("analytics.private_games")}
+                      Private Games
                     </span>
                   </div>
                   <span className="text-2xl font-bold text-orange-600">
@@ -229,7 +221,7 @@ const AnalyticsPage = () => {
                     <FaTrophy className="text-yellow-600 text-xl" />
                   </div>
                   <h2 className="text-2xl font-bold text-gray-800">
-                    {t("analytics.most_popular_game")}
+                    Most Popular Game
                   </h2>
                 </div>
 
@@ -240,7 +232,7 @@ const AnalyticsPage = () => {
                   <div className="flex items-center justify-center gap-4 text-sm text-gray-600 mb-4">
                     <span className="flex items-center gap-1">
                       <FaMusic />
-                      {mostPopularGame.songCount} {t("analytics.songs")}
+                      {mostPopularGame.songCount} songs
                     </span>
                     <span className="flex items-center gap-1">
                       {mostPopularGame.isPublic ? (
@@ -248,13 +240,11 @@ const AnalyticsPage = () => {
                       ) : (
                         <FaLock className="text-orange-600" />
                       )}
-                      {mostPopularGame.isPublic
-                        ? t("analytics.public")
-                        : t("analytics.private")}
+                      {mostPopularGame.isPublic ? "Public" : "Private"}
                     </span>
                   </div>
                   <p className="text-xs text-gray-500">
-                    {t("analytics.created")}{" "}
+                    Created{" "}
                     {new Date(mostPopularGame.createdAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -270,7 +260,7 @@ const AnalyticsPage = () => {
                   <FaFire className="text-pink-600 text-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {t("analytics.genre_distribution")}
+                  Genre Distribution
                 </h2>
               </div>
 
@@ -284,9 +274,7 @@ const AnalyticsPage = () => {
                     <p className="text-2xl font-bold text-purple-600">
                       {genre.count}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {t("analytics.songs")}
-                    </p>
+                    <p className="text-xs text-gray-500">songs</p>
                   </div>
                 ))}
               </div>
@@ -301,7 +289,7 @@ const AnalyticsPage = () => {
                   <FaClock className="text-emerald-600 text-xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {t("analytics.recent_activity")}
+                  Recent Activity
                 </h2>
               </div>
 
@@ -316,10 +304,8 @@ const AnalyticsPage = () => {
                         {game.title}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {game.songCount} {t("analytics.songs")} •{" "}
-                        {game.isPublic
-                          ? t("analytics.public")
-                          : t("analytics.private")}
+                        {game.songCount} songs •{" "}
+                        {game.isPublic ? "Public" : "Private"}
                       </p>
                     </div>
                     <div className="text-right">
@@ -338,16 +324,17 @@ const AnalyticsPage = () => {
             <div className="bg-white rounded-3xl p-12 shadow-xl border border-gray-100 text-center">
               <div className="text-6xl mb-6">📊</div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                {t("analytics.no_data_yet")}
+                No Data Yet
               </h3>
               <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                {t("analytics.no_data_description")}
+                Create your first music game to start seeing analytics and
+                insights about your games.
               </p>
               <button
                 onClick={() => navigate("/create")}
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300"
               >
-                {t("analytics.create_first_game")}
+                Create Your First Game
               </button>
             </div>
           )}

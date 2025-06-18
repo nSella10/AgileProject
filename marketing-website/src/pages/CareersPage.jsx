@@ -61,7 +61,7 @@ const CareersPage = () => {
               <div
                 key={idx}
                 className={`flex items-start p-6 bg-white rounded-lg shadow-sm ${
-                  isRTL ? "space-x-reverse space-x-5 text-right" : "space-x-4"
+                  isRTL ? "space-x-reverse space-x-4 text-right" : "space-x-4"
                 }`}
               >
                 <span className={`text-3xl ${isRTL ? "order-2" : ""}`}>

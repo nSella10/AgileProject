@@ -26,8 +26,7 @@ const SchoolPage = () => {
       process.env.NODE_ENV === "production"
         ? "https://create.guessifyapp.com"
         : "http://localhost:3001";
-    const langParam = i18n.language === "he" ? "?lang=he" : "?lang=eng";
-    window.location.href = createAppUrl + langParam;
+    window.location.href = createAppUrl;
   };
 
   const features = [

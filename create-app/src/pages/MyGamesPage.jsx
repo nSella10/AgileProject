@@ -1,6 +1,5 @@
 // src/pages/MyGames.jsx
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useGamesWithState, useDeleteGameWithState } from "../hooks/useGames";
 import PageLayout from "../components/PageLayout";
 import {
@@ -20,8 +19,6 @@ const MyGames = () => {
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [gameToDelete, setGameToDelete] = useState(null);
-  const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === "he";
 
   const handleDeleteClick = (game) => {
     setGameToDelete(game);
@@ -31,11 +28,11 @@ const MyGames = () => {
   const handleDeleteConfirm = async () => {
     try {
       await deleteGame(gameToDelete._id);
-      toast.success(t("my_games.game_deleted"));
+      toast.success("Game deleted successfully!");
       setShowDeleteModal(false);
       setGameToDelete(null);
     } catch (error) {
-      toast.error(t("my_games.delete_failed"));
+      toast.error("Failed to delete game");
     }
   };
 
@@ -57,35 +54,31 @@ const MyGames = () => {
             <div className="text-center">
               <div className="text-6xl mb-4">🗑️</div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                {t("my_games.confirm_delete")}
+                Delete Game?
               </h3>
               <p className="text-gray-600 mb-2">
-                {t("my_games.confirm_delete")}
+                Are you sure you want to delete
               </p>
               <p className="text-lg font-semibold text-red-600 mb-6">
                 "{gameToDelete?.title}"?
               </p>
               <p className="text-sm text-gray-500 mb-8">
-                {t("my_games.delete_warning")}
+                This action cannot be undone.
               </p>
               <div className="flex gap-4">
                 <button
                   onClick={handleDeleteCancel}
-                  className={`flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 ${
-                    isRTL ? "flex-row-reverse" : ""
-                  }`}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <FaTimes />
-                  {t("my_games.cancel")}
+                  Cancel
                 </button>
                 <button
                   onClick={handleDeleteConfirm}
-                  className={`flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 ${
-                    isRTL ? "flex-row-reverse" : ""
-                  }`}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <FaCheck />
-                  {t("my_games.delete_game")}
+                  Delete
                 </button>
               </div>
             </div>
@@ -98,10 +91,11 @@ const MyGames = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-              🎵 {t("my_games.title")}
+              🎵 My Music Games
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              {t("my_games.subtitle")}
+              Manage your music games, edit details, and launch exciting
+              sessions
             </p>
           </div>
 
@@ -109,7 +103,7 @@ const MyGames = () => {
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mb-4"></div>
-              <p className="text-gray-600 text-lg">{t("common.loading")}</p>
+              <p className="text-gray-600 text-lg">Loading your games...</p>
             </div>
           )}
 
@@ -128,16 +122,17 @@ const MyGames = () => {
             <div className="bg-white rounded-3xl p-12 text-center shadow-lg border border-gray-100">
               <div className="text-8xl mb-6">🎵</div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                {t("my_games.no_games")}
+                No Games Yet
               </h3>
               <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                {t("my_games.start_creating")}
+                You haven't created any music games yet. Start creating your
+                first game to get the party started!
               </p>
               <button
                 onClick={() => navigate("/create")}
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
-                {t("my_games.create_first_game")}
+                Create Your First Game
               </button>
             </div>
           )}
@@ -162,9 +157,7 @@ const MyGames = () => {
                           : "bg-purple-100 text-purple-800"
                       }`}
                     >
-                      {game.isPublic
-                        ? `🌍 ${t("my_games.public_game")}`
-                        : `🔒 ${t("my_games.private_game")}`}
+                      {game.isPublic ? "🌍 Public" : "🔒 Private"}
                     </span>
                   </div>
 
@@ -177,7 +170,7 @@ const MyGames = () => {
                   <div className="flex items-center gap-2 mb-8 text-purple-600">
                     <FaHeadphones className="text-lg" />
                     <span className="font-semibold">
-                      {t("my_games.songs_count", { count: game.songs.length })}
+                      {game.songs.length} song{game.songs.length !== 1 && "s"}
                     </span>
                   </div>
 
@@ -185,30 +178,24 @@ const MyGames = () => {
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleEditClick(game._id)}
-                      className={`flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 text-sm ${
-                        isRTL ? "flex-row-reverse" : ""
-                      }`}
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 text-sm"
                     >
                       <FaEdit />
-                      {t("my_games.edit")}
+                      Edit
                     </button>
                     <button
                       onClick={() => handleDeleteClick(game)}
-                      className={`flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 text-sm ${
-                        isRTL ? "flex-row-reverse" : ""
-                      }`}
+                      className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 text-sm"
                     >
                       <FaTrashAlt />
-                      {t("my_games.delete")}
+                      Delete
                     </button>
                     <button
                       onClick={() => navigate(`/launch/${game._id}`)}
-                      className={`flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 text-sm ${
-                        isRTL ? "flex-row-reverse" : ""
-                      }`}
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 text-sm"
                     >
                       <FaPlay />
-                      {t("my_games.launch")}
+                      Play
                     </button>
                   </div>
                 </div>

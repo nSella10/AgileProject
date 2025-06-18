@@ -5,7 +5,6 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { useTranslation } from "react-i18next";
 import {
   FaPlay,
   FaPause,
@@ -55,7 +54,6 @@ const SortableSongItem = React.memo(
     onEditLyrics,
     onFetchLyrics,
     isFetchingLyrics,
-    isRTL,
   }) => {
     const [isEditingTitle, setIsEditingTitle] = React.useState(false);
     const [isEditingArtist, setIsEditingArtist] = React.useState(false);
@@ -130,7 +128,7 @@ const SortableSongItem = React.memo(
         <img
           src={song.artworkUrl}
           alt={song.title}
-          className={`w-10 h-10 rounded-md ${isRTL ? "ml-3" : "mr-3"}`}
+          className="w-10 h-10 rounded-md mr-3"
         />
         <div className="flex-1">
           {isEditingTitle ? (
@@ -318,8 +316,6 @@ const SortableSongItem = React.memo(
 SortableSongItem.displayName = "SortableSongItem";
 
 const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
-  const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === "he";
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -1005,7 +1001,7 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
     <div className="relative">
       <div className="mb-4">
         <label className="block text-gray-700 font-semibold mb-2">
-          {t("create_game.search_songs")}
+          Search Songs
         </label>
         <div className="relative">
           <input
@@ -1115,9 +1111,7 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
                   <img
                     src={song.artworkUrl60}
                     alt={song.trackName}
-                    className={`w-12 h-12 rounded-md ${
-                      isRTL ? "ml-3" : "mr-3"
-                    }`}
+                    className="w-12 h-12 rounded-md mr-3"
                   />
 
                   {/* פרטי השיר */}
@@ -1243,7 +1237,6 @@ const SongSearchInput = ({ onSongSelect, selectedSongs = [] }) => {
                     isFetchingLyrics={
                       fetchingLyricsFor === `${song.title} - ${song.artist}`
                     }
-                    isRTL={isRTL}
                   />
                 ))}
               </div>

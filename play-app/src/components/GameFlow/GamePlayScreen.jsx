@@ -1,5 +1,4 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
 import LetterClickInput from "./LetterClickInput";
 
 const GamePlayScreen = ({
@@ -25,9 +24,6 @@ const GamePlayScreen = ({
   isGamePaused = false, // האם המשחק מושהה
   pauseReason = "", // סיבת ההשהיה
 }) => {
-  const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === "he";
-
   console.log("🎮 GamePlayScreen props:", {
     timeLeft,
     maxTime,
@@ -42,29 +38,13 @@ const GamePlayScreen = ({
   const getAnswerTypeDisplay = (answerType) => {
     switch (answerType) {
       case "songTitle":
-        return {
-          emoji: "🎵",
-          text: t("game_play.song_name"),
-          color: "text-yellow-300",
-        };
+        return { emoji: "🎵", text: "Song Name", color: "text-yellow-300" };
       case "artist":
-        return {
-          emoji: "🎤",
-          text: t("game_play.artist_name"),
-          color: "text-orange-300",
-        };
+        return { emoji: "🎤", text: "Artist Name", color: "text-orange-300" };
       case "lyrics":
-        return {
-          emoji: "📝",
-          text: t("game_play.song_lyrics"),
-          color: "text-red-300",
-        };
+        return { emoji: "📝", text: "Song Lyrics", color: "text-red-300" };
       default:
-        return {
-          emoji: "🎯",
-          text: t("game_play.correct_answer"),
-          color: "text-green-300",
-        };
+        return { emoji: "🎯", text: "Correct Answer", color: "text-green-300" };
     }
   };
 
@@ -104,36 +84,28 @@ const GamePlayScreen = ({
           {/* Song Progress Header */}
           <div className="flex items-center justify-center mb-4">
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
-              🎵{" "}
-              {t("game_play.song_number", {
-                current: songNumber,
-                total: totalSongs,
-              })}
+              🎵 SONG {songNumber} OF {totalSongs}
             </div>
           </div>
 
           {/* Main Title */}
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-3 leading-tight">
-            🎧 {t("game_play.guess_the_song")}
+            🎧 Guess the Song!
           </h1>
 
           {/* Scoring Info */}
           <div className="bg-gradient-to-r from-yellow-500 to-orange-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-3 border border-yellow-400 border-opacity-30 mb-4">
-            <div
-              className={`text-white text-sm space-y-1 ${
-                isRTL ? "text-right" : "text-left"
-              }`}
-            >
+            <div className="text-white text-sm space-y-1">
               <div className="flex justify-between items-center">
-                <span>🎵 {t("game_play.song_name_points")}</span>
+                <span>🎵 Song Name:</span>
                 <span className="font-bold text-yellow-200">1000 pts</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>🎤 {t("game_play.artist_name_points")}</span>
+                <span>🎤 Artist Name:</span>
                 <span className="font-bold text-orange-200">600 pts</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>📝 {t("game_play.song_lyrics_points")}</span>
+                <span>📝 Song Lyrics:</span>
                 <span className="font-bold text-red-200">300 pts</span>
               </div>
             </div>
@@ -144,13 +116,9 @@ const GamePlayScreen = ({
             <div className="bg-gradient-to-r from-green-500 to-emerald-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-4 border border-green-400 border-opacity-30 mb-4">
               <div className="text-center space-y-2">
                 <div className="text-green-200 text-lg font-bold">
-                  {t("game_play.correct_answer_title")}
+                  🎉 Correct Answer!
                 </div>
-                <div
-                  className={`flex items-center justify-center ${
-                    isRTL ? "space-x-reverse space-x-2" : "space-x-2"
-                  }`}
-                >
+                <div className="flex items-center justify-center space-x-2">
                   <span
                     className={`text-2xl ${
                       getAnswerTypeDisplay(answerDetails.answerType).emoji
@@ -167,15 +135,13 @@ const GamePlayScreen = ({
                   </span>
                 </div>
                 <div className="text-white text-sm">
-                  {t("game_play.you_guessed")}{" "}
+                  You guessed:{" "}
                   <span className="font-bold text-green-200">
                     "{answerDetails.matchedText}"
                   </span>
                 </div>
                 <div className="text-yellow-300 text-xl font-bold">
-                  {t("game_play.points_earned", {
-                    points: answerDetails.score,
-                  })}
+                  +{answerDetails.score} points!
                 </div>
               </div>
             </div>
@@ -238,14 +204,12 @@ const GamePlayScreen = ({
                     <div className="text-2xl font-bold text-white">
                       {timeLeft}
                     </div>
-                    <div className="text-xs text-purple-200">
-                      {t("game_play.seconds")}
-                    </div>
+                    <div className="text-xs text-purple-200">seconds</div>
                   </div>
                 </div>
               </div>
               <div className="mt-2 text-purple-200 text-xs animate-pulse">
-                {t("game_play.time_is_ticking")}
+                ⏰ Time is ticking!
               </div>
             </div>
           )}
@@ -254,37 +218,29 @@ const GamePlayScreen = ({
           {isGameOver ? (
             <div className="bg-green-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-green-400 border-opacity-30">
               <div className="text-4xl mb-4">🎉</div>
-              <p className="text-2xl text-white font-bold">
-                {t("game_play.game_over")}
-              </p>
-              <p className="text-green-200 mt-2">
-                {t("game_play.thanks_for_playing")}
-              </p>
+              <p className="text-2xl text-white font-bold">Game Over!</p>
+              <p className="text-green-200 mt-2">Thanks for playing!</p>
             </div>
           ) : hasGuessed ? (
             <div className="space-y-4">
               <div className="bg-blue-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-blue-400 border-opacity-30">
                 <div className="text-4xl mb-4">🚀</div>
                 <p className="text-white font-medium text-lg">
-                  {t("game_play.guess_submitted")}
+                  Guess submitted!
                 </p>
               </div>
 
               {guessResult === "correct" && (
                 <div className="bg-green-500 bg-opacity-30 backdrop-blur-sm rounded-2xl p-4 border border-green-400 border-opacity-50 animate-pulse">
                   <div className="text-3xl mb-2">✅</div>
-                  <p className="text-green-200 font-bold text-xl">
-                    {t("game_play.correct")}
-                  </p>
+                  <p className="text-green-200 font-bold text-xl">Correct!</p>
                 </div>
               )}
 
               {guessResult === "wrong" && (
                 <div className="bg-red-500 bg-opacity-30 backdrop-blur-sm rounded-2xl p-4 border border-red-400 border-opacity-50">
                   <div className="text-3xl mb-2">❌</div>
-                  <p className="text-red-200 font-bold text-xl">
-                    {t("game_play.incorrect")}
-                  </p>
+                  <p className="text-red-200 font-bold text-xl">Incorrect</p>
                 </div>
               )}
 
@@ -292,7 +248,7 @@ const GamePlayScreen = ({
                 <div className="bg-gray-500 bg-opacity-30 backdrop-blur-sm rounded-2xl p-4 border border-gray-400 border-opacity-50">
                   <div className="text-3xl mb-2">⏭️</div>
                   <p className="text-gray-200 font-bold text-xl">
-                    {t("game_play.song_skipped")}
+                    Song Skipped
                   </p>
                 </div>
               )}
@@ -301,9 +257,7 @@ const GamePlayScreen = ({
             // מצב השהיה - עדיפות עליונה
             <div className="bg-orange-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 border border-orange-400 border-opacity-30">
               <div className="text-4xl mb-4 animate-pulse">⏸️</div>
-              <p className="text-white font-bold text-xl mb-2">
-                {t("game_play.game_paused")}
-              </p>
+              <p className="text-white font-bold text-xl mb-2">Game Paused</p>
               <p className="text-orange-200 text-base">{pauseReason}</p>
               <div className="mt-4 flex justify-center space-x-2">
                 <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
@@ -322,10 +276,10 @@ const GamePlayScreen = ({
               <div className="text-4xl mb-4 animate-spin">⏳</div>
               <p className="text-white font-medium text-lg">
                 {roundFailedForUser
-                  ? t("game_play.no_one_guessed")
+                  ? "❌ No one guessed it. Waiting for host..."
                   : statusMsg.includes("next song - you'll join")
-                  ? t("game_play.rejoined_during_round")
-                  : t("game_play.waiting_next_song")}
+                  ? "🔄 You rejoined during an active round - you'll participate from the next song!"
+                  : "⏳ Waiting for the next song..."}
               </p>
             </div>
           ) : isAudioPlaying && !hasGuessed && !isGamePaused ? (
@@ -334,10 +288,10 @@ const GamePlayScreen = ({
             <div className="bg-blue-500 bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 border border-blue-400 border-opacity-30">
               <div className="text-6xl mb-6 animate-pulse">🎵</div>
               <p className="text-white font-bold text-2xl mb-4">
-                {t("game_play.listen_carefully")}
+                Listen Carefully!
               </p>
               <p className="text-blue-200 text-lg">
-                {t("game_play.song_is_playing")}
+                🔊 The song is playing... Pay attention to every note!
               </p>
               <div className="mt-6 flex justify-center space-x-4">
                 <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce"></div>
@@ -369,37 +323,25 @@ const GamePlayScreen = ({
                   {/* Free Text Input */}
                   <div className="relative">
                     <input
-                      className={`w-full bg-white bg-opacity-20 backdrop-blur-sm border-2 border-white border-opacity-30 rounded-2xl px-6 py-3 text-white text-lg placeholder-purple-200 focus:outline-none focus:border-purple-400 focus:bg-opacity-30 transition-all duration-300 ${
-                        isRTL ? "text-right" : "text-left"
-                      }`}
+                      className="w-full bg-white bg-opacity-20 backdrop-blur-sm border-2 border-white border-opacity-30 rounded-2xl px-6 py-3 text-white text-lg placeholder-purple-200 focus:outline-none focus:border-purple-400 focus:bg-opacity-30 transition-all duration-300"
                       type="text"
                       value={guess}
                       onChange={(e) => onGuessChange(e.target.value)}
-                      placeholder={t("game_play.placeholder")}
-                      dir={isRTL ? "rtl" : "ltr"}
+                      placeholder="Song name, artist, or lyrics..."
                     />
-                    <div
-                      className={`absolute ${
-                        isRTL ? "left-4" : "right-4"
-                      } top-1/2 transform -translate-y-1/2 text-purple-300`}
-                    >
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-purple-300">
                       🎵
                     </div>
                   </div>
 
                   {/* Hint Text */}
-                  <div
-                    className={`text-center text-purple-200 text-sm ${
-                      isRTL ? "text-right" : "text-left"
-                    }`}
-                  >
-                    {t("game_play.hint_text")}
+                  <div className="text-center text-purple-200 text-sm">
+                    💡 You can guess the song name, artist name, or lyrics from
+                    the song
                   </div>
 
                   {/* Action Buttons */}
-                  <div
-                    className={`flex gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-                  >
+                  <div className="flex gap-3">
                     {/* Submit Button */}
                     <button
                       onClick={onSubmitGuess}
@@ -407,7 +349,7 @@ const GamePlayScreen = ({
                       className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-2xl transition-all duration-300 text-base flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
                       <span className="text-lg">🚀</span>
-                      {t("game_play.submit")}
+                      Submit
                       <span className="text-lg">🎯</span>
                     </button>
 
@@ -418,7 +360,7 @@ const GamePlayScreen = ({
                         className="bg-gray-600 hover:bg-gray-700 text-white font-bold px-4 py-3 rounded-2xl transition-all duration-300 text-base flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
                       >
                         <span className="text-lg">⏭️</span>
-                        {t("game_play.skip")}
+                        Skip
                       </button>
                     )}
                   </div>

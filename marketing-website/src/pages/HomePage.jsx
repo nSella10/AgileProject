@@ -144,14 +144,14 @@ const Homepage = () => {
                 {t("homepage.hero.subtitle")}
               </p>
               <div
-                className={`flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 ${
+                className={`flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 ${
                   isRTL ? "sm:flex-row-reverse" : ""
                 }`}
                 dir={isRTL ? "rtl" : "ltr"}
               >
                 <button
                   onClick={handleCreateClick}
-                  className={`bg-gradient-to-r from-pink-500 to-purple-600 text-white px-12 py-5 rounded-full font-bold text-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-2xl hover:shadow-pink-500/25 text-center ${
+                  className={`bg-gradient-to-r from-pink-500 to-purple-600 text-white px-16 py-6 rounded-full font-bold text-2xl md:text-3xl hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-2xl hover:shadow-pink-500/25 text-center min-w-[280px] ${
                     isRTL ? "" : "transform hover:scale-105"
                   }`}
                   dir={isRTL ? "rtl" : "ltr"}
@@ -160,7 +160,7 @@ const Homepage = () => {
                 </button>
                 <button
                   onClick={handlePlayClick}
-                  className={`bg-white bg-opacity-20 backdrop-blur-sm text-white border-2 border-white border-opacity-30 px-12 py-5 rounded-full font-bold text-xl hover:bg-opacity-30 transition-all duration-200 text-center ${
+                  className={`bg-white bg-opacity-20 backdrop-blur-sm text-white border-2 border-white border-opacity-30 px-16 py-6 rounded-full font-bold text-2xl md:text-3xl hover:bg-opacity-30 transition-all duration-200 text-center min-w-[280px] ${
                     isRTL ? "" : "transform hover:scale-105"
                   }`}
                   dir={isRTL ? "rtl" : "ltr"}
